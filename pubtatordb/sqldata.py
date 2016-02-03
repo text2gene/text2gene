@@ -45,9 +45,8 @@ class SQLData(object):
         self._db_name = kwargs.get('name', None) or DEFAULT_NAME
 
     def connect(self):
-        return MySQLdb.getNewConnection(username=self._db_user, 
-                password=self._db_pass, host=self._db_host, db=self._db_name,
-		charset='utf8', use_unicode=True)
+        return mdb.connect(host=self._db_host, user=self._db_user,
+                           passwd=self._db_pass, db=self._db_name)
 
     def cursor(self, execute_sql=None):
         conn = self.connect()
@@ -121,9 +120,9 @@ class SQLData(object):
     def execute(self, sql):
         log.debug('SQL.execute ' + sql)
         log.debug('#######')
-        queryobj = MySQLdb.getNewQuery(self.connect(), commitOnEnd=True)
-        queryobj.Query(sql)
-        return queryobj
+
+        cursor = self.cursor()
+        return cursor.execute(sql)
 
     def ping(self):
         """
