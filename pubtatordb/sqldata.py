@@ -59,10 +59,11 @@ class SQLData(object):
 
     def fetchall(self, select_sql):
         try:
-            return self.execute(select_sql).record
-        #except mdb.Error, e:
-        #    log.warn(e)
-        #    return None
+            cursor = self.execute(select_sql)
+            return cursor.fetchall()
+        except mdb.Error as error:
+            print(error)
+            return None
         except TypeError:
             # no results
             return None
@@ -107,22 +108,23 @@ class SQLData(object):
             values.append(v)
 
         sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(values)) 
-        queryobj = self.execute(sql)
+        cursor = self.execute(sql)
         # retrieve and return the row id of the insert. returns 0 if insert failed.
-        return queryobj.lastInsertID
+        # will this work?  dunno yet
+        return cursor.lastInsertID
 
     def drop_table(self, tablename):
         return self.execute(' drop table if exists ' + tablename)
 
     def truncate(self, tablename):
-        return self.execute(" truncate " + tablename)
+        return self.execute(' truncate ' + tablename)
 
     def execute(self, sql):
+        ''' Executes supplied sql. Returns cursor object. '''
         log.debug('SQL.execute ' + sql)
         log.debug('#######')
 
-        cursor = self.cursor()
-        return cursor.execute(sql)
+        return self.cursor(sql)
 
     def ping(self):
         """
@@ -133,7 +135,7 @@ class SQLData(object):
             return self.schema_info()
 
         except mdb.Error as error:
-            log.error("DB connection is dead %d: %s" % (error.args[0], error.args[1]))
+            log.error('DB connection is dead %d: %s' % (error.args[0], error.args[1]))
             return False
 
     def schema_info(self):
