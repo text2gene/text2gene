@@ -124,7 +124,7 @@ class SQLData(object):
         log.debug('SQL.execute ' + sql)
         log.debug('#######')
 
-        return self.cursor(sql)
+        return self.cursor(sql)[1]
 
     def ping(self):
         """
