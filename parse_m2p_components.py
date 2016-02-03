@@ -20,7 +20,7 @@ row_tmpl = {'Mentions': '', 'PMID': None, 'Components': '',
 
 for row in table:
     print('')
-    components = row['components'].split('|')
+    components = row['Components'].split('|')
 
     new_row = row.copy()
     new_row['protein'] = bool(components[0])
