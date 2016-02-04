@@ -1,5 +1,8 @@
+import json
+
 from pubtatordb import sqldata
 
+# Data looks like this:
 """
  {'Components': 'p|SUB|T|415|N', 'Mentions': 'Thr415Asn', 'PMID': 10072423},
  {'Components': '|DEL|202_203|AG',
@@ -16,15 +19,23 @@ table = db.fetchall('select * from mutation2pubtator')
 
 new_rows = []
 row_tmpl = {'Mentions': '', 'PMID': None, 'Components': '',
-            'protein': False, 'mutation_type': '', 'ref': '', 'pos': '', 'alt': '' }
+            'edit_type': False, 'seq_type': '', 'ref': '', 'pos': '', 'alt': '' }
+
+open('m2p.dump', 'w').write(json.dumps(table))
 
 for row in table:
     print('')
-    components = row['Components'].split('|')
+    if row['Components']:
+        components = row['Components'].split('|')
+    else:
+        components = ['','','','','',]
+
+    if len(components) < 5:
+        continue
 
     new_row = row.copy()
-    new_row['protein'] = bool(components[0])
-    new_row['mutation_type'] = components[1]
+    new_row['seq_type'] = components[0]
+    new_row['edit_type'] = components[1]
     new_row['ref'] = components[2]
     new_row['pos'] = components[3]
     new_row['alt'] = components[4]
