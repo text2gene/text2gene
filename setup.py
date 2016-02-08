@@ -12,11 +12,16 @@ setup(
     maintainer_email = 'naomi@nthmost.com',
     license = 'Apache 2.0',
     packages = find_packages(),
+    setup_requires = ['numpy'],
     install_requires = [
         'setuptools',
         # 'mysqlclient',  # py3k only
         'pysqlpool',      # py2k only
         'pytz',
         'pyrfc3339',
+        'numpy',
+        'biopython',
+        'uta',
+        'hgvs',
         ],
     )
