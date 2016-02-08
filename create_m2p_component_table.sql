@@ -1,4 +1,4 @@
-CREATE TABLE m2p_components (
+CREATE TABLE if not exists m2p_components (
   PMID int(10) unsigned DEFAULT NULL,
   Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   Mentions text COLLATE utf8_unicode_ci NOT NULL,
