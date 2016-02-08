@@ -1,10 +1,7 @@
-from __future__ import absolute_import
-
 from pyrfc3339 import parse
 
 import MySQLdb as mdb
 import MySQLdb.cursors as cursors
-import PySQLPool
 
 import logging
 
@@ -23,6 +20,11 @@ DEFAULT_NAME = DATABASE['name']
 
 
 SQLDATE_FMT = '%Y-%m-%d %H:%M:%S'
+
+def EscapeString(value):
+    #value = value.encode('unicode-escape').replace('"', '\\"')
+    value = value.replace('"', '\\"')
+    return '"{}"'.format(value)
 
 def SQLdatetime(pydatetime_or_string):
     if hasattr(pydatetime_or_string, 'strftime'):
@@ -43,8 +45,8 @@ class SQLData(object):
         self._db_name = kwargs.get('name', None) or DEFAULT_NAME
 
     def connect(self):
-        return PySQLPool.getNewConnection(username=self._db_user, 
-                password=self._db_pass, host=self._db_host, db=self._db_name)
+        return mdb.connect(host=self._db_host, user=self._db_user,
+                           passwd=self._db_pass, db=self._db_name)
 
     def cursor(self, execute_sql=None):
         conn = self.connect()
@@ -57,10 +59,11 @@ class SQLData(object):
 
     def fetchall(self, select_sql):
         try:
-            return self.execute(select_sql).record
-        #except mdb.Error, e:
-        #    log.warn(e)
-        #    return None
+            cursor = self.execute(select_sql)
+            return cursor.fetchall()
+        except mdb.Error as error:
+            print(error)
+            return None
         except TypeError:
             # no results
             return None
@@ -98,29 +101,30 @@ class SQLData(object):
             if hasattr(v, 'strftime'):
                 v = '"%s"' % v.strftime(SQLDATE_FMT)
             elif hasattr(v, 'lower'):
-                v = '"%s"' % mdb.escape_string(v)
+                v = '%s' % EscapeString(v)
             else:
                 v = str(v)
 
             values.append(v)
 
         sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(values)) 
-        queryobj = self.execute(sql)
+        cursor = self.execute(sql)
         # retrieve and return the row id of the insert. returns 0 if insert failed.
-        return queryobj.lastInsertID
+        # will this work?  dunno yet
+        return cursor.lastInsertID
 
     def drop_table(self, tablename):
         return self.execute(' drop table if exists ' + tablename)
 
     def truncate(self, tablename):
-        return self.execute(" truncate " + tablename)
+        return self.execute(' truncate ' + tablename)
 
     def execute(self, sql):
+        ''' Executes supplied sql. Returns cursor object. '''
         log.debug('SQL.execute ' + sql)
         log.debug('#######')
-        queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        queryobj.Query(sql)
-        return queryobj
+
+        return self.cursor(sql)[1]
 
     def ping(self):
         """
@@ -130,8 +134,8 @@ class SQLData(object):
         try:
             return self.schema_info()
 
-        except mdb.Error, e:
-            log.error("DB connection is dead %d: %s" % (e.args[0], e.args[1]))
+        except mdb.Error as error:
+            log.error('DB connection is dead %d: %s' % (error.args[0], error.args[1]))
             return False
 
     def schema_info(self):

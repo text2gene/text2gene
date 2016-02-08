@@ -1,2 +1,4 @@
-This Project Runs on PYTHON 3.5 
+This Project is stuck on python 2.7 until its dependencies (specifically
+uta and hgvs) start supporting python 3.
+
 

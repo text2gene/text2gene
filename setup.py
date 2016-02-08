@@ -14,7 +14,8 @@ setup(
     packages = find_packages(),
     install_requires = [
         'setuptools',
-        'mysqlclient',
+        # 'mysqlclient',  # py3k only
+        'pysqlpool',      # py2k only
         'pytz',
         'pyrfc3339',
         ],
