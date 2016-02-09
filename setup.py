@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 from setuptools.command.build_ext import build_ext as _build_ext
 
 class build_ext(_build_ext):
+    # http://stackoverflow.com/questions/21605927/why-doesnt-setup-requires-work-properly-for-numpy/21621493
     def finalize_options(self):
         _build_ext.finalize_options(self)
         # Prevent numpy from thinking it is still in its setup process:
