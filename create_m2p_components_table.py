@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import json
+import math
 
 from pubtatordb import SQLData
 
@@ -45,15 +46,38 @@ def create_new_row(row):
     return 1
 
 
+
+# CREATE TABLE! (Automatically drops if it already exists.)
+#os.popen('mysql -u medgen -pmedgen PubTator < create_m2p_component_table.sql')
+
+db.drop_table(TABLENAME)
+
+db.execute('''CREATE TABLE m2p_components (
+  PMID int(10) unsigned DEFAULT NULL,
+  Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  Mentions text COLLATE utf8_unicode_ci NOT NULL,
+  SeqType varchar(255) default NULL,
+  EditType varchar(255) default NULL,
+  Ref varchar(255) default NULL,
+  Pos varchar(255) default NULL,
+  Alt varchar(255) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''')
+
+print('Created m2p_components table in PubTator database.  Adding rows...')
+print('')
+
 new_rows = []
 
 table = json.loads(open('m2p.json', 'r').read())
+progress_tick = int(round(math.log(len(table))))
 
 total_sub = 0
 total = 0
 for row in table:
     total += 1
     total_sub += create_new_row(row)
+    if total % progress_tick == 0:
+        print('TICK')
 
 print('Total SUB rows:', total_sub)
 print('Other types:', total - total_sub)
