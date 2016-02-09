@@ -58,8 +58,8 @@ class SQLData(object):
     def fetchall(self, select_sql):
         try:
             return self.execute(select_sql).record
-        #except mdb.Error, e:
-        #    log.warn(e)
+        #except mdb.Error as err:
+        #    log.warn(err)
         #    return None
         except TypeError:
             # no results
@@ -130,8 +130,8 @@ class SQLData(object):
         try:
             return self.schema_info()
 
-        except mdb.Error, e:
-            log.error("DB connection is dead %d: %s" % (e.args[0], e.args[1]))
+        except mdb.Error as err:
+            log.error("DB connection is dead %d: %s" % (err.args[0], err.args[1]))
             return False
 
     def schema_info(self):
