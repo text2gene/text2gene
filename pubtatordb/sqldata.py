@@ -81,28 +81,67 @@ class SQLData(object):
             things.add(str(row[col]))
         return things
 
-    def insert(self, tablename, field_value_dict):
-        '''
-        :param: tablename: name of table to receive new row
-        :param: field_value_dict: map of field=value
-        :return: row_id (integer) (returns 0 if insert failed)
-        '''
-        fields = []
-        values = []
+    def _get_fields_and_values(self, field_value_dict, None_as_null=True):
+        """ Return a tuple containing (fields, values) in which the keys 
+        of the dictionary become a list of field names, and the values of
+        of the dictionary become a list of pre-quoted, mysql-escaped values.
 
-        for k,v in field_value_dict.items():
-            if v==None:
+        python datetime objects will be converted to SQL datetime strings.
+
+        :param new_data: list of field:value dictionaries
+        :param None_as_null: (bool)
+        :returns: (list, list) containing (fields, values)
+        """
+        for key, val in field_value_dict.items():
+            if val==None and not None_as_null:
                 continue
-            fields.append(k)
+            fields.append(key)
             # surround strings and datetimes with quotation marks
-            if hasattr(v, 'strftime'):
-                v = '"%s"' % v.strftime(SQLDATE_FMT)
-            elif hasattr(v, 'lower'):
-                v = '"%s"' % mdb.escape_string(v)
+            if hasattr(val, 'strftime'):
+                val = '"%s"' % val.strftime(SQLDATE_FMT)
+            elif hasattr(val, 'lower'):
+                val = '"%s"' % mdb.escape_string(val)
+            elif val is None:
+                val = 'NULL'
             else:
-                v = str(v)
+                val = str(val)
 
             values.append(v)
+        return fields, values
+
+    def batch_insert(self, tablename, new_data):
+        """ Insert new_data (list of dicts with identical schemas) into 
+        indicated tablename.  
+
+        Warning: supplied data MUST have identical data structure!
+
+        :param tablename: name of table to receive new rows
+        :param new_data: list of field:value dictionaries
+        """
+        # suss out the schema of the dictionaries.
+        fields = new_data[0].keys()
+
+        # store each set of values in a list
+        all_values = []
+
+        for item in new_data:
+            _, values = self._get_fields_and_values(field_value_dict)
+            all_values.append('(%s)' % ','.join(values))
+
+        sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(all_values)
+        print(sql)
+
+        queryobj = self.execute(sql)
+        # # retrieve and return the row id of the insert. returns 0 if insert failed.
+        # return queryobj.lastInsertID      # unclear what this would do. return a list?
+
+    def insert(self, tablename, field_value_dict):
+        """
+        :param tablename: name of table to receive new row
+        :param field_value_dict: map of field=value
+        :return row_id: (integer) (returns 0 if insert failed)
+        """
+        fields, values = self._get_fields_and_values(field_value_dict)
 
         sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(values)) 
         queryobj = self.execute(sql)
