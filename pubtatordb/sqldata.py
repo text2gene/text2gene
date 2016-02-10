@@ -135,13 +135,18 @@ class SQLData(object):
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
         # return queryobj.lastInsertID      # unclear what this would do. return a list?
 
-    def insert(self, tablename, field_value_dict):
-        """
+    def insert(self, tablename, field_value_dict, None_as_null=False):
+        """ Insert field_value_dict into indicated tablename.
+
+        By default, fields with None values will *not* be added to the INSERT operation.
+        Supply None_as_null=True to change this behavior.
+         
         :param tablename: name of table to receive new row
         :param field_value_dict: map of field=value
+        :param None_as_null: (bool) whether to insert None values as NULL [default: False]
         :return row_id: (integer) (returns 0 if insert failed)
         """
-        fields, values = self._get_fields_and_values(field_value_dict)
+        fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null)
 
         sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(values)) 
         queryobj = self.execute(sql)
