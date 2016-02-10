@@ -3,6 +3,7 @@ from __future__ import print_function
 import json
 import math
 import re
+import sys
 
 from pubtatordb import SQLData
 
@@ -83,7 +84,8 @@ for row in table:
     if create_new_row(row):
         total += 1
         if total % progress_tick == 0:
-            print('.', end='', flush=True)
+            sys.stdout.write('.')
+            sys.stdout.flush()
     else:
         broken += 1
 
