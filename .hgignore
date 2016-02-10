@@ -16,3 +16,4 @@ findit/
 .tox/
 .cache/
 __pycache__
+numpy-*
