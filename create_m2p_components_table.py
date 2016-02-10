@@ -63,9 +63,10 @@ db.ping()
 # DROP EXISTING TABLES! 
 # CREATE NEW TABLES!  One each for SUB, DEL, and INS.
 for key in component_patterns:
-    db.drop_table(TABLENAME_TEMPLATE % key)
+    tname = TABLENAME_TEMPLATE % key
+    db.drop_table(tname)
     create_component_table(key)
-    print('@@@ Created m2p_components table in PubTator database.')
+    print('@@@ Created %s table in PubTator database.' % tname)
     print('')
 
 print('@@@ Finished creating tables. Populating!')
