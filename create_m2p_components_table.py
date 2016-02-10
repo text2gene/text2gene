@@ -6,11 +6,14 @@ import re
 
 from pubtatordb import SQLData
 
-re_DEL = re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$')
-re_INS = re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$')
-re_SUB = re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$')
+TABLENAME_TEMPLATE = 'm2p_%s'
 
-re_dbSNP = re.compile('^rs\d+$')
+component_patterns = { 'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+    'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+    'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+    'rs': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+}
+
 
 # Data looks like this:
 """
@@ -24,81 +27,42 @@ re_dbSNP = re.compile('^rs\d+$')
 
 db = SQLData()
 
+def create_component_table(edit_type):
+    db.execute('''CREATE TABLE m2p_%s (
+      PMID int(10) unsigned DEFAULT NULL,
+      Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+      Mentions text COLLATE utf8_unicode_ci NOT NULL,
+      SeqType varchar(255) default NULL,
+      EditType varchar(255) default NULL,
+      Ref varchar(255) default NULL,
+      Pos varchar(255) default NULL,
+      Alt varchar(255) default NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''' % edit_type)
+
+
+
+def parse_components(components):
+    for name, re_patt in list(component_patterns.items()):
+        match = re_patt.search(components)
+        if match:
+            return match.groupdict()
 
 def create_new_row(row):
-    """
-    Using existing mutation2pubtator row, create a new row in the new
-    m2p_components table by parsing apart the `Components` column.
-
-    :param row: dictionary representing m2p row
-    """
-    if row['Components']:
-        components = row['Components'].split('|')
-    else:
-        components = ['','','','','',]
-
-    if len(components) < 5:
-        # it must not be a SUBstitution type. Try to parse out the mutation type.
-        
-
-        # it might be an rs#. We don't handle these right now.
-        
-        return 0
-
     new_row = row.copy()
-    new_row['SeqType'] = components[0]   # p, c, g, or blank
-    new_row['EditType'] = components[1]  # SUB or DEL or INS
-    new_row['Ref'] = components[2]
-    new_row['Pos'] = components[3]
-    new_row['Alt'] = components[4]
-
-    result = db.insert('m2p_components', row)
-    print(result)
-    return 1
-
+    component_dict = parse_components(row['Components'])
+    new_row.update(component_dict)
+    db.insert('m2p_'+new_row['EditType'], new_row)
 
 
 # DROP EXISTING TABLES! 
-db.drop_table(TABLENAME)
-
 # CREATE NEW TABLES!  One each for SUB, DEL, and INS.
+for key in component_patterns:
+    db.drop_table(TABLENAME_TEMPLATE % key)
+    create_component_table(key)
+    print('Created m2p_components table in PubTator database.  Adding rows...')
+    print('')
 
-db.execute('''CREATE TABLE m2p_SUB (
-  PMID int(10) unsigned DEFAULT NULL,
-  Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  Mentions text COLLATE utf8_unicode_ci NOT NULL,
-  SeqType varchar(255) default NULL,
-  EditType varchar(255) default NULL,
-  Ref varchar(255) default NULL,
-  Pos varchar(255) default NULL,
-  Alt varchar(255) default NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''')
-
-db.execute('''CREATE TABLE m2p_DEL (
-  PMID int(10) unsigned DEFAULT NULL,
-  Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  Mentions text COLLATE utf8_unicode_ci NOT NULL,
-  SeqType varchar(255) default NULL,
-  EditType varchar(255) default NULL,
-  Ref varchar(255) default NULL,
-  Pos varchar(255) default NULL,
-  Alt varchar(255) default NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''')
-
-db.execute('''CREATE TABLE m2p_INS (
-  PMID int(10) unsigned DEFAULT NULL,
-  Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  Mentions text COLLATE utf8_unicode_ci NOT NULL,
-  SeqType varchar(255) default NULL,
-  EditType varchar(255) default NULL,
-  Ref varchar(255) default NULL,
-  Pos varchar(255) default NULL,
-  Alt varchar(255) default NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''')
-
-
-
-print('Created m2p_components table in PubTator database.  Adding rows...')
+print('...Finished creating tables. Populating!')
 print('')
 
 new_rows = []
