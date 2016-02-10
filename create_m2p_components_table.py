@@ -52,7 +52,6 @@ def create_new_row(row):
         component_dict = parse_components(row['Components'])
         new_row.update(component_dict)
     except Exception as error:
-        print(error)
         return False
 
     db.insert('m2p_'+new_row['EditType'], new_row)
