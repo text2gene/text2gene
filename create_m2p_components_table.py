@@ -3,6 +3,7 @@ from __future__ import print_function
 import json
 import math
 import re
+import sys
 
 from pubtatordb import SQLData
 
@@ -13,7 +14,6 @@ component_patterns = { 'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|
     'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'rs': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
 }
-
 
 # Data looks like this:
 """
@@ -40,7 +40,6 @@ def create_component_table(edit_type):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''' % edit_type)
 
 
-
 def parse_components(components):
     for name, re_patt in list(component_patterns.items()):
         match = re_patt.search(components)
@@ -49,20 +48,29 @@ def parse_components(components):
 
 def create_new_row(row):
     new_row = row.copy()
-    component_dict = parse_components(row['Components'])
-    new_row.update(component_dict)
-    db.insert('m2p_'+new_row['EditType'], new_row)
+    try:
+        component_dict = parse_components(row['Components'])
+        new_row.update(component_dict)
+    except Exception as error:
+        print(error)
+        return False
 
+    db.insert('m2p_'+new_row['EditType'], new_row)
+    return True
+
+
+# Hello, are you there MySQL? It's me, python.
+db.ping()
 
 # DROP EXISTING TABLES! 
 # CREATE NEW TABLES!  One each for SUB, DEL, and INS.
 for key in component_patterns:
     db.drop_table(TABLENAME_TEMPLATE % key)
     create_component_table(key)
-    print('Created m2p_components table in PubTator database.  Adding rows...')
+    print('@@@ Created m2p_components table in PubTator database.')
     print('')
 
-print('...Finished creating tables. Populating!')
+print('@@@ Finished creating tables. Populating!')
 print('')
 
 new_rows = []
@@ -70,16 +78,18 @@ new_rows = []
 table = json.loads(open('m2p.json', 'r').read())
 progress_tick = int(round(math.log(len(table))))
 
-total_sub = 0
+broken = 0
 total = 0
 for row in table:
-    total += 1
-    total_sub += create_new_row(row)
-    if total % progress_tick == 0:
-        print('TICK')
+    if create_new_row(row):
+        total += 1
+        if total % progress_tick == 0:
+            sys.stdout.write('.')
+    else:
+        broken += 1
 
-print('Total SUB rows:', total_sub)
-print('Other types:', total - total_sub)
+print('Total inserted in new tables:', total)
+print('Unparseable:', broken)
 print('----------------')
-print('Processed:', total)
+print('Processed:', total + broken)
 
