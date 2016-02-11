@@ -169,7 +169,7 @@ def main():
     print('')
 
     # create a dictionary with one empty list per component pattern in a new_rows hash
-    new_rows = dict((component_patterns.keys(), [[] for key in component_patterns.keys()]))
+    new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
 
     table = json.loads(open('m2p.json', 'r').read())
     progress_tick = int(round(math.log(len(table))))
