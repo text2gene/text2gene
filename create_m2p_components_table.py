@@ -87,6 +87,24 @@ def create_new_row(db, row):
     return True
 
 
+def get_new_row(row):
+    """
+    :param row: dictionary containing m2p row
+    :returns: new_row (dict) with values for new table or None if components unparseable.
+    """
+    new_row = row.copy()
+    try:
+        component_dict = parse_components(row['Components'])
+        new_row.update(component_dict)
+        return new_row
+    except Exception as error:
+        print('')
+        print(row)
+        print(error)
+        print('')
+        return None
+
+
 def setup_db():
     """ Set up connection to MySQL. Drop existing tables in PubTator DB relating to
     mutation2pubtator components. (Re)make these tables.  Return SQLData object.
@@ -116,7 +134,7 @@ def setup_db():
     return db
 
 
-def main():
+def main_one_row_at_a_time():
     db = setup_db()
 
     print('@@@ Finished creating tables. Populating!')
@@ -142,6 +160,47 @@ def main():
     print('Unparseable:', broken)
     print('----------------')
     print('Processed:', total + broken)
+
+
+def main():
+    db = setup_db()
+
+    print('@@@ Finished creating tables. Populating!')
+    print('')
+
+    # create one empty list per component pattern in a new_rows hash
+    new_rows = dict(component_patterns.keys(), [[] for key in component_patterns.keys()])
+
+    table = json.loads(open('m2p.json', 'r').read())
+    progress_tick = int(round(math.log(len(table))))
+
+    broken = 0
+    total = 0
+    for row in table:
+        new_row = get_new_row(row)
+        if new_row:
+            total += 1
+            if total % progress_tick == 0:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+            new_rows[new_row['EditType']].append(new_row)
+
+        else:
+            broken += 1
+
+    total_added = 0
+    for edit_type, rows in list(new_rows.items()):
+        tname = TABLENAME_TEMPLATE % edit_type
+        print('@@@ Adding %i rows to %s table' % (len(rows), tname))
+        db.batch_insert(tname, rows)
+        total_added += len(rows)
+
+    print('Total inserted in new tables:', total_added)
+    print('Unparseable:', broken)
+    print('----------------')
+    print('Processed:', total + broken)
+
+    assert total_added == total
 
 
 if __name__ == '__main__':
