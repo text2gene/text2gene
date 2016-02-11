@@ -92,6 +92,9 @@ class SQLData(object):
         :param None_as_null: (bool)
         :returns: (list, list) containing (fields, values)
         """
+        fields = []
+        values = []
+
         for key, val in field_value_dict.items():
             if val==None and not None_as_null:
                 continue
