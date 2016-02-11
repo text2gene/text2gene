@@ -56,7 +56,7 @@ def create_rs_table(db):
       Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
       Mentions text COLLATE utf8_unicode_ci NOT NULL,
       EditType varchar(255) default NULL,
-      RS varchar(255) default NULL,
+      RS varchar(255) default NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
 
 
