@@ -9,6 +9,9 @@ from pubtatordb import SQLData
 
 TABLENAME_TEMPLATE = 'm2p_%s'
 
+# limit of rows to collect, for testing purposes. Set to None to turn off testing.
+ROW_LIMIT = 10
+
 component_patterns = {
     'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
@@ -212,6 +215,9 @@ def main():
     for edit_type, rows in list(new_rows.items()):
         tname = TABLENAME_TEMPLATE % edit_type
         print('@@@ Adding %i rows to %s table' % (len(rows), tname))
+
+        if ROW_LIMIT:
+            rows = rows[:ROW_LIMIT]
         db.batch_insert(tname, rows)
         total_added += len(rows)
 
