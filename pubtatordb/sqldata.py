@@ -127,7 +127,7 @@ class SQLData(object):
         # store each set of values in a list
         all_values = []
 
-        for item in new_data:
+        for field_value_dict in new_data:
             _, values = self._get_fields_and_values(field_value_dict)
             all_values.append('(%s)' % ','.join(values))
 
