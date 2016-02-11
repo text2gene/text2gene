@@ -131,7 +131,7 @@ class SQLData(object):
             _, values = self._get_fields_and_values(field_value_dict)
             all_values.append('(%s)' % ','.join(values))
 
-        sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(all_values))
+        sql = 'insert into %s (%s) values %s;' % (tablename, ','.join(fields), ','.join(all_values))
         print(sql)
 
         queryobj = self.execute(sql)

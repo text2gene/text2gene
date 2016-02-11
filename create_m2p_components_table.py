@@ -9,13 +9,15 @@ from pubtatordb import SQLData
 
 TABLENAME_TEMPLATE = 'm2p_%s'
 
+# http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/tmVar.html
+
 # limit of rows to collect, for testing purposes. Set to None to turn off testing.
 ROW_LIMIT = 10
 
 component_patterns = {
     'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
-    'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
-    'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+    'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
+    'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Ref>.*?)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
     'rs': re.compile('^(?P<SeqType>rs)<?P<RS>.*?'),
 }
 
