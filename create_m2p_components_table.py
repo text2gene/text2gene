@@ -26,6 +26,12 @@ component_patterns = {
 {"PMID": 10760203, "Mentions": "RS2000", "Components": "rs2000"},
 """
 
+FH_UNHANDLED = open('m2p_unhandled.dump', 'w')
+def write_unhandled_row(row):
+    FH_UNHANDLED.write(json.dumps(row) + '\n')
+    FH_UNHANDLED.flush()
+
+
 def create_component_table(db, edit_type):
     """Creates an m2p_<EditType> table depending on the supplied `edit_type`
 
@@ -69,6 +75,9 @@ def parse_components(components):
     if components.startswith('rs'):
         return {'RS': components, 'EditType': 'rs'}
 
+    else:
+        return None
+
 
 def create_new_row(db, row):
     """
@@ -79,8 +88,15 @@ def create_new_row(db, row):
     new_row = row.copy()
     try:
         component_dict = parse_components(row['Components'])
-        new_row.update(component_dict)
+        if component_dict:
+            new_row.update(component_dict)
+        else:
+            write_unhandled_row(row)
+            return False
     except Exception as error:
+        print()
+        print('> Error parsing row with components=%s: %r' % (row['Components'], error))
+        print()
         return False
 
     db.insert('m2p_'+new_row['EditType'], new_row)
@@ -95,13 +111,17 @@ def get_new_row(row):
     new_row = row.copy()
     try:
         component_dict = parse_components(row['Components'])
+        if component_dict:
+            new_row.update(component_dict)
+        else:
+            write_unhandled_row(row)
+            return None
         new_row.update(component_dict)
         return new_row
     except Exception as error:
-        print('')
-        print(row)
-        print(error)
-        print('')
+        print()
+        print('> Error parsing row with components=%s: %r' % (row['Components'], error))
+        print()
         return None
 
 
