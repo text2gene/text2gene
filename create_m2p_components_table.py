@@ -9,7 +9,8 @@ from pubtatordb import SQLData
 
 TABLENAME_TEMPLATE = 'm2p_%s'
 
-component_patterns = { 'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
+component_patterns = {
+    'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'rs': re.compile('^(?P<SeqType>rs)<?P<RS>.*?'),
@@ -17,12 +18,12 @@ component_patterns = { 'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|
 
 # Data looks like this:
 """
- {'Components': 'p|SUB|T|415|N', 'Mentions': 'Thr415Asn', 'PMID': 10072423},
- {'Components': '|DEL|202_203|AG','Mentions': '202-203delAG','PMID': 10072423},
- {'Components': '|DEL|255|A', 'Mentions': '255delA', 'PMID': 10072423},
- {'Components': '|INS|321_322|GT','Mentions': '321-322insGT','PMID': 10072423},
- {"PMID": 10371079, "Mentions": "A3243G", "Components": "|SUB|A|3243|G"}, 
- {"PMID": 10760203, "Mentions": "RS2000", "Components": "rs2000"},
+{'Components': 'p|SUB|T|415|N', 'Mentions': 'Thr415Asn', 'PMID': 10072423},
+{'Components': '|DEL|202_203|AG','Mentions': '202-203delAG','PMID': 10072423},
+{'Components': '|DEL|255|A', 'Mentions': '255delA', 'PMID': 10072423},
+{'Components': '|INS|321_322|GT','Mentions': '321-322insGT','PMID': 10072423},
+{"PMID": 10371079, "Mentions": "A3243G", "Components": "|SUB|A|3243|G"}, 
+{"PMID": 10760203, "Mentions": "RS2000", "Components": "rs2000"},
 """
 
 def create_component_table(db, edit_type):
@@ -66,7 +67,7 @@ def parse_components(components):
             return match.groupdict()
 
     if components.startswith('rs'):
-        return { 'RS': components, 'EditType': 'rs' }
+        return {'RS': components, 'EditType': 'rs'}
 
 
 def create_new_row(db, row):
@@ -75,7 +76,6 @@ def create_new_row(db, row):
     :param row: dictionary containing mutation2pubtator row
     :returns: bool (True if row creation worked, False otherwise)
     """
-
     new_row = row.copy()
     try:
         component_dict = parse_components(row['Components'])
@@ -103,14 +103,21 @@ def setup_db():
     for key in component_patterns:
         tname = TABLENAME_TEMPLATE % key
         db.drop_table(tname)
-        create_component_table(db, key)
+        if key == 'rs':
+            create_rs_table(db)
+        else:
+            create_component_table(db, key)
+
         print('@@@ Created %s table in PubTator database.' % tname)
         print('')
+
+    # CREATE NEW TABLE 
 
     return db
 
 
 def main():
+    db = setup_db()
 
     print('@@@ Finished creating tables. Populating!')
     print('')
@@ -137,8 +144,6 @@ def main():
     print('Processed:', total + broken)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
-
-
 
