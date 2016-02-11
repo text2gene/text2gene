@@ -43,7 +43,7 @@ def create_component_table(db, edit_type):
       Ref varchar(255) default NULL,
       Pos varchar(255) default NULL,
       Alt varchar(255) default NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''' % edit_type)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''' % edit_type)
 
 
 def create_rs_table(db):
@@ -57,7 +57,7 @@ def create_rs_table(db):
       Mentions text COLLATE utf8_unicode_ci NOT NULL,
       EditType varchar(255) default NULL,
       RS varchar(255) default NULL,
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;''')
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
 
 
 def parse_components(components):
