@@ -109,7 +109,7 @@ class SQLData(object):
             else:
                 val = str(val)
 
-            values.append(v)
+            values.append(val)
         return fields, values
 
     def batch_insert(self, tablename, new_data):
