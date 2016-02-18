@@ -34,5 +34,6 @@ setup(
         'biopython',
         'uta',
         'hgvs',
+        'medgen',
         ],
     )
