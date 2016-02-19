@@ -4,8 +4,6 @@ import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
 
-#from .exceptions import IncompleteEdit
-
 hgvs_parser = hgvs.parser.Parser()
 
 uta = hgvs.dataproviders.uta.connect()
@@ -54,14 +52,15 @@ class HgvsComponents(object):
         (seqtype, edittype, ref, pos, alt)
         """
         seqtype = seqvar.type
+        ref = alt = edittype = pos = None
+
         try:
             ref = seqvar.posedit.edit.ref
+            alt = seqvar.posedit.edit.alt
+            edittype = seqvar.posedit.edit.type.upper()
         except AttributeError:
             # seqvar has incomplete edit information. fail out.
-            raise IncompleteEdit('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
-
-        alt = seqvar.posedit.edit.alt
-        edittype = seqvar.posedit.edit.type.upper()
+            print('Warning: SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
 
         if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
             pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
