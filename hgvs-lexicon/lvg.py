@@ -4,7 +4,7 @@ import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
 
-from .exceptions import IncompleteEdit
+#from .exceptions import IncompleteEdit
 
 hgvs_parser = hgvs.parser.Parser()
 
@@ -15,6 +15,26 @@ mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 def _seqvar_map_func(in_type, out_type):
     func_name = '%s_to_%s' % (in_type, out_type)
     return getattr(mapper, func_name)
+
+
+def variant_to_gene_name(seqvar):
+    """
+    Get HUGO Gene Name (Symbol) for given sequence variant object.
+
+    Input seqvar must be of type 'n', 'c', or 'p'.
+
+    :param variant: hgvs.SequenceVariant
+    :return: string gene name (or None if not available).
+    """
+    if seqvar.type in ['n', 'c', 'p']:
+        tx_identity = uta.get_tx_identity_info(seqvar.ac)
+        if tx_identity is not None:
+            return tx_identity[-1]
+        else:
+            return None
+    else:
+        return None
+
 
 class HgvsComponents(object):
 
@@ -50,9 +70,10 @@ class HgvsComponents(object):
 
         return seqtype, edittype, ref, pos, alt
 
+    def __str__(self):
+        return '%r' % self.__dict__
+
         
-
-
 class HgvsLVG(object):
 
     def __init__(self, hgvs_text):
@@ -71,6 +92,19 @@ class HgvsLVG(object):
 
         if self.variants['g']:
             self.transcripts = self.get_transcripts(self.variants['g'][0])
+
+        # find out the gene name of this variant.
+        self._gene_name = None
+
+    @property
+    def gene_name(self):
+        if self._gene_name is None:
+            if self.variants['c'] != []:
+                chosen_one = self.variants['c'][0]
+            elif self.variants['n'] != []:
+                chosen_one = self.variants['n'][0]
+            self._gene_name = variant_to_gene_name(chosen_one)
+        return self._gene_name
 
     @staticmethod
     def get_transcripts(var_g):
@@ -108,9 +142,11 @@ if __name__=='__main__':
         fxn()
 
     print()
-    print(HgvsLVG.get_components(hgvs_obj.seqvar))
+    print(HgvsComponents(hgvs_obj.seqvar))
     print()
 
     for vartype in list(hgvs_obj.variants.keys()):
         print(hgvs_obj.variants[vartype])
 
+    print()
+    print(hgvs_obj.gene_name)

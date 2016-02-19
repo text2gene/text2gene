@@ -21,7 +21,7 @@ new_rows = []
 row_tmpl = {'Mentions': '', 'PMID': None, 'Components': '',
             'edit_type': False, 'seq_type': '', 'ref': '', 'pos': '', 'alt': '' }
 
-open('m2p.dump', 'w').write(json.dumps(table))
+open('m2p.json', 'w').write(json.dumps(table))
 
 for row in table:
     print('')
@@ -42,6 +42,4 @@ for row in table:
 
     print(new_row)
     new_rows.append(new_row)
-
-from IPython import embed; embed()
 

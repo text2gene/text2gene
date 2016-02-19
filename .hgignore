@@ -17,3 +17,5 @@ findit/
 .cache/
 __pycache__
 numpy-*
+.eggs/
+.idea/
