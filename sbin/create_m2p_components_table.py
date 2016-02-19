@@ -12,7 +12,7 @@ TABLENAME_TEMPLATE = 'm2p_%s'
 # http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/tmVar.html
 
 # limit of rows to collect, for testing purposes. Set to None to turn off testing.
-ROW_LIMIT = 10
+ROW_LIMIT = 100
 
 component_patterns = {
     'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
@@ -197,7 +197,7 @@ def main():
     new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
 
     table = json.loads(open('m2p.json', 'r').read())
-    progress_tick = int(round(math.log(len(table))))
+    #progress_tick = int(round(math.log(len(table))))
 
     broken = 0
     total = 0
@@ -205,22 +205,26 @@ def main():
         new_row = get_new_row(row)
         if new_row:
             total += 1
-            if total % progress_tick == 0:
-                sys.stdout.write('.')
-                sys.stdout.flush()
+            #if total % progress_tick == 0:
+            #    sys.stdout.write('.')
+            #    sys.stdout.flush()
             new_rows[new_row['EditType']].append(new_row)
 
         else:
             broken += 1
 
     total_added = 0
+
     for edit_type, rows in list(new_rows.items()):
         tname = TABLENAME_TEMPLATE % edit_type
         print('@@@ Adding %i rows to %s table' % (len(rows), tname))
 
-        if ROW_LIMIT:
-            rows = rows[:ROW_LIMIT]
-        db.batch_insert(tname, rows)
+        row_index = 0
+        while row_index < len(rows):
+            db.batch_insert(tname, rows[row_index:row_index + ROW_LIMIT])
+            row_index = row_index + ROW_LIMIT
+            print(row_index)
+
         total_added += len(rows)
 
     print('Total inserted in new tables:', total_added)
@@ -228,7 +232,7 @@ def main():
     print('----------------')
     print('Processed:', total + broken)
 
-    assert total_added == total
+    #assert total_added == total
 
 
 if __name__ == '__main__':
