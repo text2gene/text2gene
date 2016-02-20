@@ -7,8 +7,9 @@ from hgvs_lexicon import HgvsLVG, HgvsComponents
 
 pubtator_db = PubtatorDB()
 
-def variant2pubmed(comp, gene_id):
-    sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and pos={comp.pos} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and SeqType='{comp.seqtype}'".format(comp=comp, gene_id=gene_id)
+def anythingelse(comp, gene_id):
+    #sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos={comp.pos} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and SeqType='{comp.seqtype}'".format(comp=comp, gene_id=gene_id)
+    sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos={comp.pos}".format(comp=comp, gene_id=gene_id)
     print(sql)
     return pubtator_db.fetchall(sql)
 
@@ -37,8 +38,9 @@ if __name__=='__main__':
             if seqtype == 'p':
                 print('Skipping p seqtype for now')
                 continue
-            result = variant2pubmed(components, gene_id)
-            print(result)
+            results = anythingelse(components, gene_id)
+            for res in results:
+                pmids.add(res['PMID'])
             
     print(pmids)
 
