@@ -23,9 +23,8 @@ setup(
     license = 'Apache 2.0',
     packages = find_packages(),
     cmdclass = {'build_ext': build_ext},
-    setup_requires = ['numpy'],
+    setup_requires = ['setuptools', 'numpy'],
     install_requires = [
-        'setuptools',
         # 'mysqlclient',  # py3k only
         'pysqlpool',      # py2k only
         'pytz',
