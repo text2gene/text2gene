@@ -4,6 +4,8 @@ import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
 
+from .exceptions import RejectedSeqVar
+
 hgvs_parser = hgvs.parser.Parser()
 
 uta = hgvs.dataproviders.uta.connect()
@@ -63,8 +65,11 @@ class HgvsComponents(object):
             print('Warning: SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
 
         if seqtype == 'p':
-            pos = '%s' % seqvar.posedit.pos.start.pos
-            ref = '%s' % seqvar.posedit.pos.start.aa
+            try:
+                pos = '%s' % seqvar.posedit.pos.start.pos
+                ref = '%s' % seqvar.posedit.pos.start.aa
+            except AttributeError:
+                raise RejectedSeqVar('Protein entry incomplete (unusable).')
 
         else:
             if seqvar.posedit.pos.end != seqvar.posedit.pos.start:

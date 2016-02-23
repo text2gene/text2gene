@@ -1,13 +1,21 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from medgen.api import GeneID
+from hgvs.exceptions import HGVSParseError
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents
 
 pubtator_db = PubtatorDB()
 
-def anythingelse(comp, gene_id):
+
+### Suppress warnings from biocommons and IPython
+import warnings
+warnings.simplefilter('ignore')
+###
+
+
+def pubtator_search(comp, gene_id):
     #sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos={comp.pos} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and SeqType='{comp.seqtype}'".format(comp=comp, gene_id=gene_id)
     sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos='{comp.pos}'".format(comp=comp, gene_id=gene_id)
     return pubtator_db.fetchall(sql)
@@ -18,17 +26,11 @@ def pubtator_search_by_protein(comp, gene_id):
     return pubtator_db.fetchall(sql)
 
 
-
-if __name__=='__main__':
-    import sys
-    try:
-        hgvs_text = sys.argv[1]
-    except IndexError:
-        print('Supply hgvs text as argument to this script.')
-        sys.exit()
-
+def process_hgvs_text(hgvs_text):
     print('Parsing and augmenting supplied HGVS string %s...' % hgvs_text)
+
     lex = HgvsLVG(hgvs_text)
+
     print()
     print(lex)
 
@@ -43,12 +45,46 @@ if __name__=='__main__':
             if seqtype == 'p':
                 results = pubtator_search_by_protein(components, gene_id)
             else:
-                results = anythingelse(components, gene_id)
+                results = pubtator_search(components, gene_id)
             for res in results:
                 pmids.add(res['PMID'])
-            
-    print(pmids)
 
+    return pmids
+
+
+def process_one_from_command_line():
+    import sys
+    try:
+        hgvs_text = sys.argv[1]
+    except IndexError:
+        print('Supply hgvs text as argument to this script.')
+        sys.exit()
+
+    try:
+        process_hgvs_text(hgvs_text)
+    except HGVSParseError:
+        print('Cannot parse as HGVS: %s' % hgvs_text) 
+
+
+def process_many_from_command_line():
+    import sys
+    try:
+        textfile = sys.argv[1]
+    except IndexError:
+        print('Supply path to text file with HGVS strings (one per line) as argument to this script.')
+        sys.exit()
+
+    with open(textfile, 'r') as fh:
+        for hgvs_text in fh.read().split('\n'):
+            try:
+                process_hgvs_text(hgvs_text)
+            except HGVSParseError:
+                print('Cannot parse as HGVS: %s' % hgvs_text) 
+
+
+
+if __name__=='__main__':
+    process_many_from_command_line()
 
 
 """
