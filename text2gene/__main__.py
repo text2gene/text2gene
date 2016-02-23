@@ -8,7 +8,7 @@ from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
 
 pubtator_db = PubtatorDB()
 
-SQLDEBUG = False
+SQLDEBUG = True
 
 
 ### Suppress warnings from biocommons and IPython
