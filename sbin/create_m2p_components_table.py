@@ -9,16 +9,39 @@ from pubtatordb import SQLData
 
 TABLENAME_TEMPLATE = 'm2p_%s'
 
-# http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/tmVar.html
-
 # limit of rows to collect, for testing purposes. Set to None to turn off testing.
 ROW_LIMIT = 100
+
+# === Mutation Component Types, with examples and tmVar format statements === #
+# 
+# http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/tutorial/tmVar.html
+#
+# Glossary:
+#           <wild type>: Ref
+#           <mutation position>: Pos
+#           <mutant>: Alt
+#
+# FRAMESHIFT (FS)
+#   tmVar: <Sequence type>|FS|<wild type>|<mutation position>|<mutant>|<frame shift position>
+#   examples: p|FS|I|359|L|III      p|FS|89|R <-- 2 data points, explicitly not handled right now.
+#
+# Insertion+Deletion:
+#   tmVar: <Sequence type>|INDEL|<mutation position>|<mutant>
+#   example: c|INDEL|2153_2155|TCCTGGTTTA
+#
+# Duplication:
+#   tmVar: <Sequence type>|DUP|<mutation position>|<mutant>|<duplication times>
+#   e.g.,   "c.1285-1301dup"    --> "c|DUP|1285_1301||"
+#   e.g.,   "c.1978(TATC)(1-2)" --> "c|DUP|1978|TATC|1-2"
+#
 
 component_patterns = {
     'DEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DEL)\|(?P<Pos>.*?)\|(?P<Ref>.*?)$'),
     'INS': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INS)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
     'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Ref>.*?)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
-    'rs': re.compile('^(?P<SeqType>rs)<?P<RS>.*?'),
+    'FS':  re.compile('^(?P<SeqType>.*?)\|(?P<EditType>FS)\|(?P<Ref>.*?)\|(?P<Pos>.*?)\|(?P<Alt>.*?)\|(?P<FS_Pos>.*?)$'),
+    'INDEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INDEL)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
+    'rs':  re.compile('^(?P<SeqType>rs)<?P<RS>.*?'),
 }
 
 # Data looks like this:
@@ -57,6 +80,27 @@ def create_component_table(db, edit_type):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''' % edit_type)
 
 
+def create_fs_table(db):
+    """Creates an m2p_<EditType> table depending on the supplied `edit_type`
+
+    e.g. edit_type='SUB' -->  m2p_SUB table created in PubTator database.
+
+    :param db: SQLData object already connected to MySQL PubTator database.
+    :param edit_type: str
+    """
+    db.execute('''CREATE TABLE m2p_FS (
+      PMID int(10) unsigned DEFAULT NULL,
+      Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+      Mentions text COLLATE utf8_unicode_ci NOT NULL,
+      SeqType varchar(255) default NULL,
+      EditType varchar(255) default NULL,
+      Ref varchar(255) default NULL,
+      Pos varchar(255) default NULL,
+      Alt varchar(255) default NULL,
+      FS_Pos varchar(255) default NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
+
+
 def create_rs_table(db):
     """Creates an m2p_rs table for storing SNP rs references.
 
@@ -82,30 +126,6 @@ def parse_components(components):
 
     else:
         return None
-
-
-def create_new_row(db, row):
-    """
-    :param db: SQLData object opened to MySQL PubTator database
-    :param row: dictionary containing mutation2pubtator row
-    :returns: bool (True if row creation worked, False otherwise)
-    """
-    new_row = row.copy()
-    try:
-        component_dict = parse_components(row['Components'])
-        if component_dict:
-            new_row.update(component_dict)
-        else:
-            write_unhandled_row(row)
-            return False
-    except Exception as error:
-        print()
-        print('> Error parsing row with components=%s: %r' % (row['Components'], error))
-        print()
-        return False
-
-    db.insert('m2p_'+new_row['EditType'], new_row)
-    return True
 
 
 def get_new_row(row):
@@ -148,6 +168,8 @@ def setup_db():
         db.drop_table(tname)
         if key == 'rs':
             create_rs_table(db)
+        elif key == 'FS':
+            create_fs_table(db)
         else:
             create_component_table(db, key)
 
@@ -157,35 +179,6 @@ def setup_db():
     # CREATE NEW TABLE 
 
     return db
-
-
-def main_one_row_at_a_time():
-    db = setup_db()
-
-    print('@@@ Finished creating tables. Populating!')
-    print('')
-
-    new_rows = []
-
-    table = json.loads(open('m2p.json', 'r').read())
-    progress_tick = int(round(math.log(len(table))))
-
-    broken = 0
-    total = 0
-    for row in table:
-        if create_new_row(db, row):
-            total += 1
-            if total % progress_tick == 0:
-                sys.stdout.write('.')
-                sys.stdout.flush()
-        else:
-            broken += 1
-
-    print('Total inserted in new tables:', total)
-    print('Unparseable:', broken)
-    print('----------------')
-    print('Processed:', total + broken)
-
 
 def main():
     db = setup_db()

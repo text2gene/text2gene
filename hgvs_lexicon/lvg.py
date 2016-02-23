@@ -62,10 +62,15 @@ class HgvsComponents(object):
             # seqvar has incomplete edit information. fail out.
             print('Warning: SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
 
-        if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
-            pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
+        if seqtype == 'p':
+            pos = '%s' % seqvar.posedit.pos.start.pos
+            ref = '%s' % seqvar.posedit.pos.start.aa
+
         else:
-            pos = '%s' % seqvar.posedit.pos.start
+            if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
+                pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
+            else:
+                pos = '%s' % seqvar.posedit.pos.start
 
         return seqtype, edittype, ref, pos, alt
 
