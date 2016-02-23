@@ -194,7 +194,14 @@ def setup_db():
         print('@@@ Created %s table in PubTator database.' % tname)
         print('')
 
-    # CREATE NEW TABLE 
+    # CREATE INDEXES on each component part column.
+    for key in component_patterns:
+        if key != 'rs':
+            db.execute("call create_index('m2p_%s', 'SeqType')" % key)
+            db.execute("call create_index('m2p_%s', 'EditType')" % key)
+            db.execute("call create_index('m2p_%s', 'Ref')" % key)
+            db.execute("call create_index('m2p_%s', 'Pos')" % key)
+            db.execute("call create_index('m2p_%s', 'Alt')" % key)
 
     return db
 
