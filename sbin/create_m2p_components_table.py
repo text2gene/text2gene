@@ -23,7 +23,7 @@ ROW_LIMIT = 100
 #
 # FRAMESHIFT (FS)
 #   tmVar: <Sequence type>|FS|<wild type>|<mutation position>|<mutant>|<frame shift position>
-#   examples: p|FS|I|359|L|III      p|FS|89|R <-- 2 data points, explicitly not handled right now.
+#   examples: p|FS|I|359|L|III      p|FS|89|R <-- very minority case (2 items), explicitly not handled right now.
 #
 # Insertion+Deletion:
 #   tmVar: <Sequence type>|INDEL|<mutation position>|<mutant>
@@ -41,6 +41,7 @@ component_patterns = {
     'SUB': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>SUB)\|(?P<Ref>.*?)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
     'FS':  re.compile('^(?P<SeqType>.*?)\|(?P<EditType>FS)\|(?P<Ref>.*?)\|(?P<Pos>.*?)\|(?P<Alt>.*?)\|(?P<FS_Pos>.*?)$'),
     'INDEL': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>INDEL)\|(?P<Pos>.*?)\|(?P<Alt>.*?)$'),
+    #'DUP': re.compile('^(?P<SeqType>.*?)\|(?P<EditType>DUP)\|(?P<Pos>.*?)\|(?P<Alt>.*?)\|(?P<DupX>.*?)$'),
     'rs':  re.compile('^(?P<SeqType>rs)<?P<RS>.*?'),
 }
 
@@ -80,13 +81,28 @@ def create_component_table(db, edit_type):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''' % edit_type)
 
 
-def create_fs_table(db):
-    """Creates an m2p_<EditType> table depending on the supplied `edit_type`
-
-    e.g. edit_type='SUB' -->  m2p_SUB table created in PubTator database.
+def create_dup_table(db):
+    """Creates an m2p_DUP table with special DupX column (varchar).
 
     :param db: SQLData object already connected to MySQL PubTator database.
-    :param edit_type: str
+    """
+    db.execute('''CREATE TABLE m2p_DUP (
+      PMID int(10) unsigned DEFAULT NULL,
+      Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+      Mentions text COLLATE utf8_unicode_ci NOT NULL,
+      SeqType varchar(255) default NULL,
+      EditType varchar(255) default NULL,
+      Ref varchar(255) default NULL,
+      Pos varchar(255) default NULL,
+      Alt varchar(255) default NULL,
+      DupX varchar(255) default NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
+
+
+def create_fs_table(db):
+    """Creates an m2p_FS table with special FS_Pos column (varchar).
+
+    :param db: SQLData object already connected to MySQL PubTator database.
     """
     db.execute('''CREATE TABLE m2p_FS (
       PMID int(10) unsigned DEFAULT NULL,
@@ -170,6 +186,8 @@ def setup_db():
             create_rs_table(db)
         elif key == 'FS':
             create_fs_table(db)
+        elif key == 'DUP':
+            create_dup_table(db)
         else:
             create_component_table(db, key)
 
