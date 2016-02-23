@@ -53,7 +53,7 @@ class HgvsComponents(object):
         """ return tuple of sequence variant components as 
         (seqtype, edittype, ref, pos, alt)
         """
-        seqtype = seqvar.type
+        seqtype = seqvar.type or 'c'        # assume c if type not extant.
         ref = alt = edittype = pos = None
 
         try:
@@ -140,15 +140,6 @@ if __name__=='__main__':
     hgvs_obj = HgvsLVG(hgvs_text) 
 
     print(hgvs_obj)
-
-    # Turn off IPython deprecation warnings, ugh
-    import warnings
-    def fxn():
-        warnings.warn('deprecated', DeprecationWarning)
-    
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        fxn()
 
     print()
     print(HgvsComponents(hgvs_obj.seqvar))

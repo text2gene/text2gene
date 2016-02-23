@@ -2,6 +2,7 @@
 
 from medgen.api import *
 from pubtatordb import PubtatorDB
+from hgvs_lexicon import HgvsLVG, HgvsComponents
 
 _EOL = '\r\n'
 
