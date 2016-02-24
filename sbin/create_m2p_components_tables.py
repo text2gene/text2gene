@@ -60,6 +60,11 @@ def write_unhandled_row(row):
     FH_UNHANDLED.write(json.dumps(row) + '\n')
     FH_UNHANDLED.flush()
 
+FH_MISSING_POSITION = open('m2p_missing_position.dump', 'w')
+def write_missing_position(row):
+    FH_MISSING_POSITION.write(json.dumps(row) + '\n')
+    FH_MISSING_POSITION.flush()
+
 
 def create_component_table(db, edit_type):
     """Creates an m2p_<EditType> table depending on the supplied `edit_type`
@@ -135,6 +140,13 @@ def parse_components(components):
     for name, re_patt in list(component_patterns.items()):
         match = re_patt.search(components)
         if match:
+            comp_dict = match.groupdict()
+            # verify that this is an entry that actually helps us; remove any 
+            # entry that doesn't have a valid position (Pos).
+            if comp_dict['Pos'].strip() == '':
+                write_missing_position(comp_dict)
+                return None
+
             return match.groupdict()
 
     if components.startswith('rs'):
@@ -147,23 +159,20 @@ def parse_components(components):
 def get_new_row(row):
     """
     :param row: dictionary containing m2p row
-    :returns: new_row (dict) with values for new table or None if components unparseable.
+    :returns: new_row (dict) with values for new table or None if components unuseable/unparseable.
     """
-    new_row = row.copy()
-    try:
-        component_dict = parse_components(row['Components'])
-        if component_dict:
-            new_row.update(component_dict)
-        else:
-            write_unhandled_row(row)
-            return None
-        new_row.update(component_dict)
-        return new_row
-    except Exception as error:
-        print()
-        print('> Error parsing row with components=%s: %r' % (row['Components'], error))
-        print()
+    if row['Components'] is None:
         return None
+
+    new_row = row.copy()
+    component_dict = parse_components(row['Components'])
+    if component_dict:
+        new_row.update(component_dict)
+    else:
+        write_unhandled_row(row)
+        return None
+    new_row.update(component_dict)
+    return new_row
 
 
 def setup_db():
@@ -195,6 +204,7 @@ def setup_db():
         print('')
 
     # CREATE INDEXES on each component part column.
+    print('@@@ Creating indexes on all tables...')
     for key in component_patterns:
         if key != 'rs':
             db.execute("call create_index('m2p_%s', 'SeqType')" % key)
@@ -208,14 +218,14 @@ def setup_db():
 def main():
     db = setup_db()
 
-    print('@@@ Finished creating tables. Populating!')
-    print('')
+    print('@@@ Finished creating tables and indexing.') 
+    print('@@@ Parsing components...')
 
     # create a dictionary with one empty list per component pattern in a new_rows hash
     new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
 
     table = json.loads(open('m2p.json', 'r').read())
-    #progress_tick = int(round(math.log(len(table))))
+    progress_tick = int(round(math.log(len(table)))) * 100
 
     broken = 0
     total = 0
@@ -223,9 +233,9 @@ def main():
         new_row = get_new_row(row)
         if new_row:
             total += 1
-            #if total % progress_tick == 0:
-            #    sys.stdout.write('.')
-            #    sys.stdout.flush()
+            if total % progress_tick == 0:
+                sys.stdout.write('.')
+                sys.stdout.flush()
             new_rows[new_row['EditType']].append(new_row)
 
         else:
@@ -233,22 +243,26 @@ def main():
 
     total_added = 0
 
+    print('\n@@@ Parsing complete -- populating tables!')
+
     for edit_type, rows in list(new_rows.items()):
         tname = TABLENAME_TEMPLATE % edit_type
-        print('@@@ Adding %i rows to %s table' % (len(rows), tname))
+        print('\n@@@ Adding %i rows to %s table' % (len(rows), tname))
 
         row_index = 0
         while row_index < len(rows):
             db.batch_insert(tname, rows[row_index:row_index + ROW_LIMIT])
             row_index = row_index + ROW_LIMIT
-            print(row_index)
 
         total_added += len(rows)
 
+    print('')
+    print('@@@ RESULTS:')
+    print('Total rows processed from mutation2pubtator:', total + broken)
     print('Total inserted in new tables:', total_added)
-    print('Unparseable:', broken)
-    print('----------------')
-    print('Processed:', total + broken)
+    print('Unparseable or Unuseable:', broken)
+    print('')
+    print('@@@ DONE')
 
     #assert total_added == total
 

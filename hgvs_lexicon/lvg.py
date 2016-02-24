@@ -38,6 +38,13 @@ def variant_to_gene_name(seqvar):
 
 class HgvsComponents(object):
 
+    """
+    Special handling when SeqType comes in empty:
+        If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA 
+        If SeqType is none and REF in [u] or ALT in [u] --> then DNA or RNA 
+        If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
+    """
+
     def __init__(self, seqvar=None, **kwargs):
         if seqvar:
             self.seqtype, self.edittype, self.ref, self.pos, self.alt = self.parse(seqvar)
@@ -53,7 +60,12 @@ class HgvsComponents(object):
         """ return tuple of sequence variant components as 
         (seqtype, edittype, ref, pos, alt)
         """
-        seqtype = seqvar.type or 'c'        # assume c if type not extant.
+        if seqvar.type.strip() == '':
+            print('Warning: SequenceVariant has empty seqtype. (%r)' % seqvar)
+            seqtype = 'c'
+        else:
+            seqtype = seqvar.type
+
         ref = alt = edittype = pos = None
 
         try:

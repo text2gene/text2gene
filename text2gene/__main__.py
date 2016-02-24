@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from medgen.api import GeneID
 from hgvs.exceptions import HGVSParseError
+from metapub import FindIt
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
@@ -15,6 +16,20 @@ SQLDEBUG = True
 import warnings
 warnings.simplefilter('ignore')
 ###
+
+def print_article_for_pmid(pmid):
+    try:
+        source = FindIt(pmid, verify=False)
+    except Exception as error:
+        print("Something's wrong with Gilligan's Island... %s" % pmid)    
+        return
+
+    print('----- PMID: %s' % pmid)
+    print(source.pma.title)
+    if source.url:
+        print(source.url)
+    else:
+        print(source.reason)
 
 
 def pubtator_search(comp, gene_id):
@@ -36,6 +51,11 @@ def process_hgvs_text(hgvs_text):
 
     print()
     print('[%s]' % hgvs_text, lex)
+
+    edittype = lex.seqvar.posedit.edit.type.upper()
+    if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
+        print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
+        return None
 
     gene_id = GeneID(lex.gene_name)
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
@@ -72,6 +92,8 @@ def process_one_from_command_line():
         pmids = process_hgvs_text(hgvs_text)
         if pmids:
             print('[%s] PMIDs Found: %r' % (hgvs_text, pmids))
+            for pmid in pmids:
+                print_article_for_pmid(pmid)
         else:
             print('[%s] No PMIDs found.' % hgvs_text)
 
@@ -93,6 +115,8 @@ def process_many_from_command_line():
                 pmids = process_hgvs_text(hgvs_text)
                 if pmids:
                     print('[%s] PMIDs Found: %r' % (hgvs_text, pmids))
+                    for pmid in pmids:
+                        print_article_for_pmid(pmid)
                 else:
                     print('[%s] No PMIDs found.' % hgvs_text)
             except HGVSParseError:

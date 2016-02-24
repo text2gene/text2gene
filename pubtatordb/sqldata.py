@@ -132,11 +132,10 @@ class SQLData(object):
             all_values.append('(%s)' % ','.join(values))
 
         sql = 'insert into %s (%s) values %s;' % (tablename, ','.join(fields), ','.join(all_values))
-        print(sql)
 
         queryobj = self.execute(sql)
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
-        # return queryobj.lastInsertID      # unclear what this would do. return a list?
+        return queryobj.lastInsertID      # unclear what this would do. return a list?
 
     def insert(self, tablename, field_value_dict, None_as_null=False):
         """ Insert field_value_dict into indicated tablename.
