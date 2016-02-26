@@ -1,0 +1,5 @@
+Build samples by running:
+
+`sbin/build_hgvs_samples_from_clinvar.py`
+
+
