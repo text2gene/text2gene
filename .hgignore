@@ -19,3 +19,6 @@ __pycache__
 numpy-*
 .eggs/
 .idea/
+*.dump
+*.json
+data/*.txt
