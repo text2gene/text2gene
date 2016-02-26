@@ -32,6 +32,18 @@ def print_article_for_pmid(pmid):
         print(source.reason)
 
 
+#######################################################################
+# Mutation2Pubtator SeqTypes --> the higher count SeqTypes are higher priority. 
+# Note that many SeqType are null, and therefore need to be implied!
+# Amino Acids List
+# List of the 20 protein (amino acids) 
+# http://www.cryst.bbk.ac.uk/education/AminoAcid/the_twenty.html
+# If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA 
+# If SeqType is none and REF in [u] or ALT in [u] --> then DNA or RNA 
+# If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
+#
+# JIRA: https://text2gene.atlassian.net/browse/T2G-3
+
 def pubtator_search(comp, gene_id):
     #sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos={comp.pos} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and SeqType='{comp.seqtype}'".format(comp=comp, gene_id=gene_id)
     sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos='{comp.pos}'".format(comp=comp, gene_id=gene_id)
