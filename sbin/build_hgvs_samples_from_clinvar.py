@@ -6,7 +6,7 @@ from medgen.api import ClinVarDB
 
 DATADIR = 'data/'
 
-OUTFILE_TMPL = os.path.join(DATADIR, '%s_hgvs_clinvar_samples.txt')
+OUTFILE_TMPL = os.path.join(DATADIR, 'hgvs_%s_clinvar_samples.txt')
 
 cdb = ClinVarDB()
 
@@ -18,6 +18,8 @@ def get_rows_from_clinvar(qual):
 
 
 def write_samples_to_file(prefix, rows):
+    fname = OUTFILE_TMPL % prefix
+    print('@@@ %s: Writing %i samples to %s\n' % (prefix, len(rows), fname))
     fh = open(OUTFILE_TMPL % prefix, 'w')
     for row in rows:
         fh.write(row['hgvs_text'] + '\n')
@@ -35,7 +37,6 @@ samples = {'NM': { 'qual': 'hgvs_text like "NM_%"',
 for prefix in list(samples.keys()):
     rows = get_rows_from_clinvar(samples[prefix]['qual'])
     if rows:
-        print('@@@', prefix, 'returned %i samples' % len(rows))
         write_samples_to_file(prefix, rows)
     else:
         print('@@@', prefix, 'returned ZERO results, which is weird...') 
