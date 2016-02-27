@@ -1,0 +1,38 @@
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+          rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h3 class="text-muted">All GET Routes Defined</h3>
+      </div>
+      <hr/>
+      <div>
+        This is a list of the defined routes on the application. 
+        <ul>
+        {% for rule in get_routes %}
+        <li><a href="{{ rule.rule }}">{{ rule.rule }}</a>
+            {% if rule.defaults %} (defaults: {% for default in rule.defaults %}  {{ default }},{% endfor %}){% endif %}</li>
+        {% endfor %}
+        </ul>
+    <div class="header">
+        <h3 class="text-muted">All POST Routes Defined</h3>
+        <ul>
+        {% for rule in post_routes %}
+        <li>{{ rule.rule }} 
+            {% if rule.arguments %} (parameters: {% for arg in rule.arguments %} {{ arg }},{% endfor %}){% endif %}
+            {% if rule.defaults %} (defaults: {% for default in rule.defaults %}  {{ default }},{% endfor %}){% endif %}</li>
+        {% endfor %}
+        </ul>
+
+      </div>
+      <hr/>    
+      </div>
+    </div>
+  </body>
+</html>
+ 
+

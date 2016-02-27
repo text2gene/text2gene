@@ -51,6 +51,13 @@ def pubtator_search(comp, gene_id):
         print(' ---', sql)
     return pubtator_db.fetchall(sql)
 
+def pubtator_search_by_fs(comp, gene_id):
+    sql = "select distinct M.* from gene2pubtator G, m2p_FS M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos='{comp.pos}'".format(comp=comp, gene_id=gene_id)
+    if SQLDEBUG:
+        print(' ---', sql)
+    return pubtator_db.fetchall(sql)
+
+
 def pubtator_search_by_protein(comp, gene_id):
     sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos = '{comp.pos}' and SeqType='p' and Ref = '{comp.ref}'".format(comp=comp, gene_id=gene_id)
     if SQLDEBUG:

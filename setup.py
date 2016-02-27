@@ -39,5 +39,8 @@ setup(
         'uta',
         'hgvs',
         'medgen',
+        'flask',  # web api
+        'gunicorn',  # web api
+        'fabric',  # web api
         ],
     )
