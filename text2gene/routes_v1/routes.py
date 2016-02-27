@@ -17,11 +17,11 @@ from ..utils import HTTP200, HTTP400
 
 log = logging.getLogger('%s.routes_v1' % PKGNAME)
 
-@routes_v1.route('/%s/echo' % API_INDICATOR)
+@routes_v1.route('/%s/echo/<inp>' % API_INDICATOR)
 def echo(inp=None):
     '''Any input it receives, it prints back to you, but in JSON (ooh)!'''
-    if inp:
+    if inp == '%3Cinp%3E':
         return HTTP200({'action': 'echo', 'input': inp, 'response': inp})
     else:
-        return HTTP400('The echo function takes one input string.')
+        return HTTP200({'action': 'echo', 'input': inp, 'response': 'Change <inp> in url to another input string.'})
     
