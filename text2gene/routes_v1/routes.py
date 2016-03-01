@@ -53,15 +53,3 @@ def lvg(hgvs_text):
         outd['response'] = hgvs_obj.to_dict()
     
     return HTTP200(outd)
-
-
-### DEMO ROUTE(S) for sanity checking below
-
-@routes_v1.route('/%s/echo/<inp>' % API_INDICATOR)
-def echo(inp=None):
-    '''Any input it receives, it prints back to you, but in JSON (ooh)!'''
-    if inp == '%3Cinp%3E':
-        return HTTP200({'action': 'echo', 'input': inp, 'response': 'Change <inp> in url to another input string.'})
-    else:
-        return HTTP200({'action': 'echo', 'input': inp, 'response': inp})
-    
