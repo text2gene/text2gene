@@ -4,20 +4,38 @@ API_INDICATOR = 'v1'
 
 import logging, json, os, sys
 
-import configparser
-
-from flask import Flask, render_template, Response, request
+#from flask import Flask, render_template, Response, request
 from flask import Blueprint
 
 routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
 
+import requests
+
 from hgvs_lexicon import HgvsLVG
+from ..ncbi_variant_reporter import NCBI_Variant_Report
 
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
-#from ..validators import validate_email, validate_pmid
 
 log = logging.getLogger('%s.routes_v1' % PKGNAME)
+
+
+@routes_v1.route('/v1/ncbi/<hgvs_text>')
+def ncbi_variant_reporter(hgvs_text):
+    """ Takes an input hgvs_text and uses NCBI Variant Reporter to retrieve and display
+    data related to this genetic variant.
+
+    :param hgvs_text: str
+    :return: HTTP200 (json) or HTTP400 (json)
+    """
+    outd = {'action': 'ncbi', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if 'hgvs_text' not in hgvs_text:
+        preamble, results_dict = NCBI_Variant_Report(hgvs_text)
+
+        outd['response'] = {'preamble': preamble, 'data': results_dict}
+
+    return HTTP200(outd)
 
 
 @routes_v1.route('/v1/lvg/<hgvs_text>')
@@ -31,7 +49,7 @@ def lvg(hgvs_text):
         try:
             hgvs_obj = HgvsLVG(hgvs_text)
         except Exception as error:
-            return HTTP400(error, 'finding lexical variants for %s' % hgvs_text)
+            return HTTP400(error, 'Error using HgvsLVG to find lexical variants for %s' % hgvs_text)
         outd['response'] = hgvs_obj.to_dict()
     
     return HTTP200(outd)

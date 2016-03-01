@@ -113,6 +113,8 @@ def process_many_from_command_line():
 
     with open(textfile, 'r') as fh:
         for hgvs_text in fh.read().split('\n'):
+            if not hgvs_text.strip():
+                continue
             try:
                 pmids = process_hgvs_text(hgvs_text)
                 if pmids:
