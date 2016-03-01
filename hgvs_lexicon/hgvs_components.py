@@ -1,6 +1,7 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import warnings
+import time
 
 from .exceptions import RejectedSeqVar
 
@@ -26,41 +27,62 @@ amino_acid_map = { 'Ala': 'A',
                    'Val': 'V',
                  }
 
+dna_nucleotides = ['A','C','T','G']
+#rna_nucleotides = ['A','C','U','G']
+
 
 class HgvsComponents(object):
 
     """
-    Special handling when SeqType comes in empty:
-        If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA
-        If SeqType is none and REF in [u] or ALT in [u] --> then RNA
-        If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
+    #######################################################################
+    # Mutation2Pubtator SeqTypes --> the higher count SeqTypes are higher priority.
+    # Note that many SeqType are null, and therefore need to be implied!
+    # Amino Acids List
+    # List of the 20 protein (amino acids)
+    # http://www.cryst.bbk.ac.uk/education/AminoAcid/the_twenty.html
+    # If SeqType is none and REF in [u] or ALT in [u] --> then RNA
+    # If SeqType is none and REF in [t] or ALT in [t] --> then DNA
+    # If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA
+    # If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
+    #
+    # JIRA: https://text2gene.atlassian.net/browse/T2G-3
     """
 
     def __init__(self, seqvar=None, **kwargs):
         if seqvar:
             self.seqtype, self.edittype, self.ref, self.pos, self.alt = self.parse(seqvar)
+            #TODO: get FS_Pos and DupX out of seqvar when applicable.
         else:
-            self.seqtype = kwargs.get('seqtype', None)
-            self.edittype = kwargs.get('edittype', None)
-            self.ref = kwargs.get('ref', None)
-            self.pos = kwargs.get('pos', None)
-            self.alt = kwargs.get('alt', None)
+            # names of keywords match capitalization used in MySQL m2p_* tables in pubtatordb
+            self.seqtype = kwargs.get('SeqType', '').strip()
+            self.edittype = kwargs.get('EditType', '').strip()
+            self.ref = kwargs.get('Ref', '').strip()
+            self.pos = kwargs.get('Pos', '').strip()
+            self.alt = kwargs.get('Alt', '').strip()
+            self.fs_pos = kwargs.get('FS_Pos', '').strip()
+            self.dupx = kwargs.get('DupX', '').strip()
 
-    def infer_seqtype(ref, alt):
-        if ref:
-            ref = ref.lower()
-        if alt:
-            alt = alt.lower()
+        if not self.seqtype:
+            self.seqtype = self._infer_seqtype()
 
-        if 'u' in ref or 'u' in alt:
-            return 'g'
+    def _infer_seqtype(self):
+        refalt = self.ref.upper() + self.alt.upper()
 
-        if ref in ['a','c','t','g'] and alt in ['a','c','t','g']:
-            return 'c'  # or 'g'?
+        if 'u' in refalt:
+            # Definitely RNA: there's no "U" amino acid and no "U" in the DNA nucleotides.
 
-        determinant = ref or alt
-        if determinant in list(amino_acid_map.values()):
-            return 'p'
+            print(self.to_dict())
+            print('!!! @@@ INFERRED RNA!!!')
+            return 'n'
+
+        for char in refalt:
+            if char not in dna_nucleotides:
+                if char in list(amino_acid_map.values()):
+
+                    print(self.to_dict())
+                    print('!!! @@@ INFERRED PROTEIN!!!')
+                    return 'p'
+        return ''
 
     @staticmethod
     def parse(seqvar):
@@ -73,7 +95,7 @@ class HgvsComponents(object):
         else:
             seqtype = seqvar.type
 
-        ref = alt = edittype = pos = None
+        ref = alt = edittype = pos = ''
 
         try:
             ref = seqvar.posedit.edit.ref
@@ -92,14 +114,30 @@ class HgvsComponents(object):
 
         else:
             if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
+                # compose a "range" for
                 pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
             else:
                 pos = '%s' % seqvar.posedit.pos.start
 
-        if seqtype == '':
-            seqtype = self.infer_seqtype(ref, alt)
-
         return seqtype, edittype, ref, pos, alt
+
+    def to_mysql_dict(self):
+        outd = { 'Ref': self.ref,
+                 'Alt': self.alt,
+                 'SeqType': self.seqtype,
+                 'EditType': self.edittype,
+                 'Pos': self.pos,
+                 }
+        if self.edittype == 'FS':
+            outd['FS_Pos'] = self.fs_pos
+
+        if self.edittype == 'DUP':
+            outd['DupX'] = self.dupx
+
+        return outd
+
+    def to_dict(self):
+        return self.__dict__
 
     def __str__(self):
         return '%r' % self.__dict__

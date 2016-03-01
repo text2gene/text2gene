@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 from pyrfc3339 import parse
 
@@ -8,10 +8,10 @@ import PySQLPool
 
 import logging
 
-from .config import DATABASE, DEBUG
+from .config import DATABASE, SQLDEBUG, get_data_log
 
-log = logging.getLogger()
-if DEBUG:
+log = get_data_log('sqldata.log')
+if SQLDEBUG:
     log.setLevel(logging.DEBUG)
 else:
     log.setLevel(logging.ERROR)

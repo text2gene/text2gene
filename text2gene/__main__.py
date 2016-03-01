@@ -38,31 +38,13 @@ def print_article_for_pmid(pmid):
 # Amino Acids List
 # List of the 20 protein (amino acids) 
 # http://www.cryst.bbk.ac.uk/education/AminoAcid/the_twenty.html
-# If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA 
-# If SeqType is none and REF in [u] or ALT in [u] --> then DNA or RNA 
+# If SeqType is none and REF in [u] or ALT in [u] --> then RNA
+# If SeqType is none and REF in [t] or ALT in [t] --> then DNA
+# If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA
 # If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
 #
 # JIRA: https://text2gene.atlassian.net/browse/T2G-3
 
-def pubtator_search(comp, gene_id):
-    #sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos={comp.pos} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and SeqType='{comp.seqtype}'".format(comp=comp, gene_id=gene_id)
-    sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos='{comp.pos}'".format(comp=comp, gene_id=gene_id)
-    if SQLDEBUG:
-        print(' ---', sql)
-    return pubtator_db.fetchall(sql)
-
-def pubtator_search_by_fs(comp, gene_id):
-    sql = "select distinct M.* from gene2pubtator G, m2p_FS M where G.PMID = M.PMID and G.GeneID = {gene_id} and Ref = '{comp.ref}' and Alt = '{comp.alt}' and Pos='{comp.pos}'".format(comp=comp, gene_id=gene_id)
-    if SQLDEBUG:
-        print(' ---', sql)
-    return pubtator_db.fetchall(sql)
-
-
-def pubtator_search_by_protein(comp, gene_id):
-    sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos = '{comp.pos}' and SeqType='p' and Ref = '{comp.ref}'".format(comp=comp, gene_id=gene_id)
-    if SQLDEBUG:
-        print(' ---', sql)
-    return pubtator_db.fetchall(sql)
 
 
 def process_hgvs_text(hgvs_text):
@@ -90,9 +72,10 @@ def process_hgvs_text(hgvs_text):
 
             print('[%s]' % hgvs_text, seqtype, components)
             if seqtype == 'p':
-                results = pubtator_search_by_protein(components, gene_id)
+                results = pubtator_db.search_proteins(components, gene_id)
             else:
-                results = pubtator_search(components, gene_id)
+                results = pubtator_db.search_m2p(components, gene_id)
+
             for res in results:
                 pmids.add(res['PMID'])
 

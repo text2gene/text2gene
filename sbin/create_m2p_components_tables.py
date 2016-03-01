@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
 import json
 import math
@@ -6,6 +6,11 @@ import re
 import sys
 
 from pubtatordb import SQLData
+from hgvs_lexicon import HgvsComponents
+
+from pubtatordb.config import get_data_log
+
+log = get_data_log('sqldata.log')
 
 TABLENAME_TEMPLATE = 'm2p_%s'
 
@@ -147,7 +152,8 @@ def parse_components(components):
                 write_missing_position(comp_dict)
                 return None
 
-            return match.groupdict()
+            components = HgvsComponents(**comp_dict)
+            return components.to_mysql_dict()
 
     if components.startswith('rs'):
         return {'RS': components, 'EditType': 'rs'}
@@ -215,6 +221,43 @@ def setup_db():
 
     return db
 
+
+def main_one_at_a_time():
+    db = setup_db()
+
+    print('@@@ Finished creating tables and indexing.')
+    print('@@@ Parsing components...')
+
+    # create a dictionary with one empty list per component pattern in a new_rows hash
+    new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
+
+    table = json.loads(open('m2p.json', 'r').read())
+    progress_tick = int(round(math.log(len(table)))) * 100
+
+    broken = 0
+    total = 0
+    for row in table:
+        new_row = get_new_row(row)
+        if new_row:
+            total += 1
+            if total % progress_tick == 0:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+
+            db.insert('m2p_' + new_row['EditType'].upper(), new_row)
+
+        else:
+            broken += 1
+
+    print('')
+    print('@@@ RESULTS:')
+    print('Total rows processed from mutation2pubtator:', total + broken)
+    print('Total inserted in new tables:', total)
+    print('Unparseable or Unuseable:', broken)
+    print('')
+    print('@@@ DONE')
+
+
 def main():
     db = setup_db()
 
@@ -264,9 +307,8 @@ def main():
     print('')
     print('@@@ DONE')
 
-    #assert total_added == total
-
 
 if __name__ == '__main__':
+    #main_one_at_a_time()
     main()
 
