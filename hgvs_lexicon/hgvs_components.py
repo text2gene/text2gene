@@ -41,9 +41,8 @@ class HgvsComponents(object):
     # List of the 20 protein (amino acids)
     # http://www.cryst.bbk.ac.uk/education/AminoAcid/the_twenty.html
     # If SeqType is none and REF in [u] or ALT in [u] --> then RNA
-    # If SeqType is none and REF in [t] or ALT in [t] --> then DNA
-    # If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA
     # If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
+    # If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA
     #
     # JIRA: https://text2gene.atlassian.net/browse/T2G-3
     """
@@ -70,18 +69,14 @@ class HgvsComponents(object):
 
         if 'u' in refalt:
             # Definitely RNA: there's no "U" amino acid and no "U" in the DNA nucleotides.
-
-            print(self.to_dict())
-            print('!!! @@@ INFERRED RNA!!!')
             return 'n'
 
         for char in refalt:
             if char not in dna_nucleotides:
                 if char in list(amino_acid_map.values()):
-
-                    print(self.to_dict())
-                    print('!!! @@@ INFERRED PROTEIN!!!')
                     return 'p'
+
+        # it's "probably" DNA, but we can't know for sure.
         return ''
 
     @staticmethod

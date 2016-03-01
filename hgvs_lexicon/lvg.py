@@ -92,7 +92,7 @@ class HgvsLVG(object):
 
     @property
     def gene_name(self):
-        if self._gene_name is None:
+        if self._gene_name is None and self.seqvar.type != 'p':
             if self.variants['c'] != []:
                 chosen_one = self.variants['c'].pop()
             elif self.variants['n'] != []:
