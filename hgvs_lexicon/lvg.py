@@ -61,10 +61,10 @@ class HgvsLVG(object):
             # no backreference to 'c','g','n' possible from a 'p' seqvar
             self.variants['p'] = [self.seqvar]
 
-        elif self.seqvar.type == 'c':
+        if self.variants['c']:
             # attempt to derive all 4 types of SequenceVariants from 'c'.
             for this_type, value in list(self.variants.items()):
-                if value == []:
+                if this_type != 'c':
                     self.variants[this_type].add(_seqvar_map_func(self.seqvar.type, this_type)(self.seqvar))
 
         if self.variants['g']:
@@ -84,21 +84,22 @@ class HgvsLVG(object):
         # if we get transcripts, we can do g_to_c and g_to_n
         if self.transcripts:
             for trans in self.transcripts:
-                self.variants['c'].add(mapper.g_to_c(self.seqvar, trans))
-                self.variants['n'].add(mapper.g_to_n(self.seqvar, trans))
+                for var_g in self.variants['g']:
+                    self.variants['c'].add(mapper.g_to_c(var_g, trans))
+                    self.variants['n'].add(mapper.g_to_n(var_g, trans))
 
         # find out the gene name of this variant.
         self._gene_name = None
 
     @property
     def gene_name(self):
-        if self._gene_name is None and self.seqvar.type != 'p':
-            if self.variants['c'] != []:
-                chosen_one = self.variants['c'].pop()
-            elif self.variants['n'] != []:
-                chosen_one = self.variants['n'].pop()
+        if self._gene_name is None:     # and self.seqvar.type != 'p':
+            if self.variants['c']:
+                chosen_one = list(self.variants['c'])[0]
+            elif self.variants['n']:
+                chosen_one = list(self.variants['n'])[0]
             else:
-                chosen_one = self.variants['p'].pop()
+                chosen_one = list(self.variants['p'])[0]
             self._gene_name = variant_to_gene_name(chosen_one)
         return self._gene_name
 
@@ -107,16 +108,16 @@ class HgvsLVG(object):
         return mapper.relevant_transcripts(var_g)
 
     @staticmethod
-    def get_seqvars_for_transcript(transcript, seqtype):
-        """Given a transcript and desired sequence type (in 'g','c','n','p'),
-        return all SequenceVariant objects that can be retrieved."""
-        pass
-
-    @staticmethod
     def parse(hgvs_text):
         return hgvs_parser.parse_hgvs_variant(hgvs_text)
 
     def to_dict(self, with_gene_name=True):
+        """Returns contents of object as a 2-level dictionary.
+
+        Supply with_gene_name = True [default: True] to return gene_name as well.
+
+        (gene_name is a lazy-loaded magic attribute, and may take a second or two).
+        """
         outd = self.__dict__
 
         if with_gene_name:
