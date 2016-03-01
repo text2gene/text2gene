@@ -2,6 +2,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import requests
 
+from .exceptions import Text2GeneError
+
 ncbi_result_keys = ['Submitted ID',
                      'Submitted Loc',
                      'Cytoband',
