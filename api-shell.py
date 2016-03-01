@@ -4,6 +4,15 @@ from medgen.api import *
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents
 
+import hgvs.dataproviders.uta
+import hgvs.parser
+import hgvs.variantmapper
+
+hgvs_parser = hgvs.parser.Parser()
+uta = hgvs.dataproviders.uta.connect()
+mapper = hgvs.variantmapper.EasyVariantMapper(uta)
+
+
 _EOL = '\r\n'
 
 print _EOL
@@ -18,8 +27,11 @@ print  '              In [1]: whos '
 print
 print '#################################################################'
 
-hgvs_text  = 'NM_001232.3:c.919G>C'
-hgvs_text2 = 'NM_198578.3:c.6055G>A'
+hgvs_text_c1 = 'NM_001232.3:c.919G>C'
+hgvs_text_c2 = 'NM_198578.3:c.6055G>A'
+
+hgvs_text_g1 = 'NC_000001.10:g.100316615_100316616delAG'
+hgvs_text_g2 = 'NC_000001.10:g.100345603G>T' 
 
 import IPython
 IPython.embed()

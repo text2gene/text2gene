@@ -18,12 +18,11 @@ else:
     log.setLevel(logging.INFO)
 ####
     
-log.debug('%s-services config dir: %s' % (PKGNAME, CFGDIR))
-log.debug('%s-services env: %s' % (PKGNAME, ENV))
+log.debug('%s config dir: %s' % (PKGNAME, CFGDIR))
+log.debug('%s env: %s' % (PKGNAME, ENV))
 
 configs = [os.path.join(CFGDIR, x) for x in os.listdir(CFGDIR) if x.find(ENV+'.ini') > -1]
 
 CONFIG = ConfigParser()
 CONFIG.read(configs)
-
 

@@ -3,36 +3,16 @@ from __future__ import absolute_import, print_function, unicode_literals
 import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
+from hgvs.exceptions import HGVSDataNotAvailableError
 
-from .exceptions import RejectedSeqVar
+
+from .hgvs_components import HgvsComponents
 
 hgvs_parser = hgvs.parser.Parser()
 
 uta = hgvs.dataproviders.uta.connect()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 
-
-amino_acid_map = { 'Ala': 'A',
-                   'Arg': 'R',
-                   'Asn': 'N',
-                   'Asp': 'D',
-                   'Cys': 'C',
-                   'Glu': 'E',
-                   'Gln': 'Q',
-                   'Gly': 'G',
-                   'His': 'H',
-                   'Ile': 'I',
-                   'Leu': 'L',
-                   'Lys': 'K',
-                   'Met': 'M',
-                   'Phe': 'F',
-                   'Pro': 'P',
-                   'Ser': 'S',
-                   'Thr': 'T',
-                   'Trp': 'W',
-                   'Tyr': 'Y',
-                   'Val': 'V',
-                 }   
 
 def _seqvar_map_func(in_type, out_type):
     func_name = '%s_to_%s' % (in_type, out_type)
@@ -49,7 +29,11 @@ def variant_to_gene_name(seqvar):
     :return: string gene name (or None if not available).
     """
     if seqvar.type in ['n', 'c', 'p']:
-        tx_identity = uta.get_tx_identity_info(seqvar.ac)
+        try:
+            tx_identity = uta.get_tx_identity_info(seqvar.ac)
+        except HGVSDataNotAvailableError:
+            return None
+
         if tx_identity is not None:
             return tx_identity[-1]
         else:
@@ -57,84 +41,51 @@ def variant_to_gene_name(seqvar):
     else:
         return None
 
-
-class HgvsComponents(object):
-
-    """
-    Special handling when SeqType comes in empty:
-        If SeqType is none and REF in [a,c,t,g] and ALT in [a,c,t,g] --> then DNA or RNA 
-        If SeqType is none and REF in [u] or ALT in [u] --> then DNA or RNA 
-        If SeqType is none and REF in [AminoAcidsList] and ALT in [AminoAcidsList] --> then Protein
-    """
-
-    def __init__(self, seqvar=None, **kwargs):
-        if seqvar:
-            self.seqtype, self.edittype, self.ref, self.pos, self.alt = self.parse(seqvar)
-        else:
-            self.seqtype = kwargs.get('seqtype', None)
-            self.edittype = kwargs.get('edittype', None)
-            self.ref = kwargs.get('ref', None)
-            self.pos = kwargs.get('pos', None)
-            self.alt = kwargs.get('alt', None)
-
-    @staticmethod
-    def parse(seqvar):
-        """ return tuple of sequence variant components as 
-        (seqtype, edittype, ref, pos, alt)
-        """
-        if seqvar.type.strip() == '':
-            print('Warning: SequenceVariant has empty seqtype. (%r)' % seqvar)
-            seqtype = 'c'
-        else:
-            seqtype = seqvar.type
-
-        ref = alt = edittype = pos = None
-
-        try:
-            ref = seqvar.posedit.edit.ref
-            alt = seqvar.posedit.edit.alt
-            edittype = seqvar.posedit.edit.type.upper()
-        except AttributeError:
-            # seqvar has incomplete edit information. fail out.
-            print('Warning: SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
-
-        if seqtype == 'p':
-            try:
-                pos = '%s' % seqvar.posedit.pos.start.pos
-                ref = '%s' % seqvar.posedit.pos.start.aa
-            except AttributeError:
-                raise RejectedSeqVar('Protein entry incomplete (unusable).')
-
-        else:
-            if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
-                pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
-            else:
-                pos = '%s' % seqvar.posedit.pos.start
-
-        return seqtype, edittype, ref, pos, alt
-
-    def __str__(self):
-        return '%r' % self.__dict__
-
         
 class HgvsLVG(object):
 
-    def __init__(self, hgvs_text):
+    def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
 
         # use the hgvs library to get us some info about this HGVS string.
         self.seqvar = self.parse(hgvs_text)
 
-        # fill in all the different ways to talk about this variant in each sequence type.
-        self.variants = {'g': [], 'c': [], 'n': [], 'p': []}
-        self.variants[self.seqvar.type] = [self.seqvar]
+        # initialize transcripts list
+        self.transcripts = set(kwargs.get('transcripts', []))
 
-        for this_type, value in list(self.variants.items()):
-            if value == []:
-                self.variants[this_type] = [_seqvar_map_func(self.seqvar.type, this_type)(self.seqvar)]
+        # fill in all the different ways to talk about this variant in each sequence type.
+        self.variants = {'g': set(), 'c': set(), 'n': set(), 'p': set()}
+        self.variants[self.seqvar.type].add(self.seqvar)
+
+        if self.seqvar.type == 'p':
+            # no backreference to 'c','g','n' possible from a 'p' seqvar
+            self.variants['p'] = [self.seqvar]
+
+        elif self.seqvar.type == 'c':
+            # attempt to derive all 4 types of SequenceVariants from 'c'.
+            for this_type, value in list(self.variants.items()):
+                if value == []:
+                    self.variants[this_type].add(_seqvar_map_func(self.seqvar.type, this_type)(self.seqvar))
 
         if self.variants['g']:
-            self.transcripts = self.get_transcripts(self.variants['g'][0])
+            for var_g in self.variants['g']:
+                for trans in self.get_transcripts(var_g):
+                    self.transcripts.add(trans)
+
+        if self.seqvar.type == 'g' and self.transcripts:
+            # we still need to collect 'c', 'p', and 'n' variants
+            for trans in self.transcripts:
+                self.variants['c'].add(mapper.g_to_c(self.seqvar, trans))
+                self.variants['n'].add(mapper.g_to_n(self.seqvar, trans))
+
+            for seqvar in self.variants['c']:
+                self.variants['p'].add(mapper.c_to_p(seqvar))
+
+        # if we get transcripts, we can do g_to_c and g_to_n
+        if self.transcripts:
+            for trans in self.transcripts:
+                self.variants['c'].add(mapper.g_to_c(self.seqvar, trans))
+                self.variants['n'].add(mapper.g_to_n(self.seqvar, trans))
 
         # find out the gene name of this variant.
         self._gene_name = None
@@ -143,9 +94,11 @@ class HgvsLVG(object):
     def gene_name(self):
         if self._gene_name is None:
             if self.variants['c'] != []:
-                chosen_one = self.variants['c'][0]
+                chosen_one = self.variants['c'].pop()
             elif self.variants['n'] != []:
-                chosen_one = self.variants['n'][0]
+                chosen_one = self.variants['n'].pop()
+            else:
+                chosen_one = self.variants['p'].pop()
             self._gene_name = variant_to_gene_name(chosen_one)
         return self._gene_name
 
@@ -154,8 +107,28 @@ class HgvsLVG(object):
         return mapper.relevant_transcripts(var_g)
 
     @staticmethod
+    def get_seqvars_for_transcript(transcript, seqtype):
+        """Given a transcript and desired sequence type (in 'g','c','n','p'),
+        return all SequenceVariant objects that can be retrieved."""
+        pass
+
+    @staticmethod
     def parse(hgvs_text):
         return hgvs_parser.parse_hgvs_variant(hgvs_text)
+
+    def to_dict(self, with_gene_name=True):
+        outd = self.__dict__
+
+        if with_gene_name:
+            outd['gene_name'] = self.gene_name
+
+        outd.pop('_gene_name')
+
+        # turn sets into lists
+        outd['transcripts'] = list(self.transcripts)
+        for seqtype, seqvars in (self.variants.items()):
+            outd['variants'][seqtype] = list(seqvars)
+        return outd
 
     def __str__(self):
         out = 'HGVS input: %s\n' % self.hgvs_text

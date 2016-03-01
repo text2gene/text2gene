@@ -23,9 +23,9 @@ def HTTP200(serializable):
         message = unicode(json.dumps(serializable), "ISO-8859-1")
         return Response(message, status=200, mimetype='application/json')
 
-def HTTP400(e, errorMessage='Error'):
-    log.error('[HTTP_400] error while %s: %s', errorMessage, e)
-    return Response(json.dumps({str(errorMessage): str(e)}), status=400, mimetype='application/json')
+def HTTP400(err, errorMessage='Error'):
+    log.error('[HTTP_400] error while %s: %s', errorMessage, err)
+    return Response(json.dumps({str(errorMessage): str(err)}), status=400, mimetype='application/json')
 
 def HTTP200_file(content, filename):
     # create a response out of the content string
