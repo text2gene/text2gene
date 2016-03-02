@@ -6,10 +6,16 @@
 <h1>API Usage Examples</h1>
 
 <h3>NCBI Variant Lookup</h3>
-<ul><li>insert sample here</li></ul>
+{% for hgvs_text in hgvs_samples %}
 
-<h3>HGVS Lexical Variant Generation</h3>
-<ul><li>insert sample here</li></ul>
+<ul><li><a href="/{{api_version}}/ncbi/{{hgvs_text}}">/{{api_version}}/ncbi/{{hgvs_text}}</a></li></ul>
+{% endfor %}
+
+<h3>HGVS Lexical Variant Generation (UTA)</h3>
+{% for hgvs_text in hgvs_samples %}
+
+<ul><li><a href="/{{api_version}}/lvg/{{hgvs_text}}">/{{api_version}}/lvg/{{hgvs_text}}</a></li></ul>
+{% endfor %}
 
 </body>
 </html>

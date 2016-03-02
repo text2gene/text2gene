@@ -79,7 +79,11 @@ class HgvsLVG(object):
                 self.variants['n'].add(mapper.g_to_n(self.seqvar, trans))
 
             for seqvar in self.variants['c']:
-                self.variants['p'].add(mapper.c_to_p(seqvar))
+                try:
+                    self.variants['p'].add(mapper.c_to_p(seqvar))
+                except NotImplementedError:
+                    # some c_to_p translations currently unavailable (e.g. edittype DUP)
+                    pass
 
         # if we get transcripts, we can do g_to_c and g_to_n
         if self.transcripts:

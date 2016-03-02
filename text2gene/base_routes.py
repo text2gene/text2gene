@@ -17,7 +17,9 @@ def about():
 
 @base.route('/examples')
 def examples():
-    return render_template('examples.html')
+    api_version = CONFIG.get('api', 'latest_version')
+    hgvs_samples = ['NM_014855.2:c.333G>C', 'NM_001126115.1:c.318T>G', 'NM_005228.3:c.2240_2257del18']
+    return render_template('examples.html', hgvs_samples=hgvs_samples, api_version=api_version)
 
 @base.route('/OK')
 def OK():

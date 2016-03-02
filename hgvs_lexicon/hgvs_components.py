@@ -61,6 +61,10 @@ class HgvsComponents(object):
             self.fs_pos = kwargs.get('FS_Pos', '').strip()
             self.dupx = kwargs.get('DupX', '').strip()
 
+        if self.edittype.upper() == 'DELINS':
+            # normalize DELINS to INDEL (these are synonyms)
+            self.edittype = 'INDEL'
+
         if not self.seqtype:
             self.seqtype = self._infer_seqtype()
 
