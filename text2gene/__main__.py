@@ -48,6 +48,7 @@ def print_article_for_pmid(pmid):
 
 
 def process_hgvs_text(hgvs_text):
+    print('[%s]' % hgvs_text)
     lex = HgvsLVG(hgvs_text)
 
     print()

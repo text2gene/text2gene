@@ -85,7 +85,8 @@ class HgvsLVG(object):
         if self.transcripts:
             for trans in self.transcripts:
                 for var_g in self.variants['g']:
-                    self.variants['c'].add(mapper.g_to_c(var_g, trans))
+                    if not trans.startswith('NR'):
+                        self.variants['c'].add(mapper.g_to_c(var_g, trans))
                     self.variants['n'].add(mapper.g_to_n(var_g, trans))
 
         # find out the gene name of this variant.
