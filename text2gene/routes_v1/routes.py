@@ -9,8 +9,6 @@ from flask import Blueprint
 
 routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
 
-import requests
-
 from hgvs_lexicon import HgvsLVG
 from ..ncbi_variant_reporter import NCBI_Variant_Report
 

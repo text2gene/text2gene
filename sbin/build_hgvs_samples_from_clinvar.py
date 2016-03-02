@@ -12,8 +12,10 @@ cdb = ClinVarDB()
 
 MAX_SAMPLES = 50
 
+"""select H.hgvs_text, H.VariationID, C.citation_id from clinvar_hgvs H, var_citations C where H.hgvs_text like 'NM_%' and H.VariationID = C.VariationID and C.citation_source = 'PubMed' limit 20;"""
+
 def get_rows_from_clinvar(qual):
-    sql = 'select distinct(hgvs_text) from clinvar_hgvs where {qual} limit {limit}'.format(qual=qual, limit=MAX_SAMPLES)
+    sql = 'select H.hgvs_text, H.VariationID, C.citation_id from clinvar_hgvs H, var_citations C where {qual} and H.VariationID = C.VariationID and C.citation_source = "PubMed" order by rand() limit {limit}'.format(qual=qual, limit=MAX_SAMPLES)
     return cdb.fetchall(sql)
 
 
@@ -26,11 +28,11 @@ def write_samples_to_file(prefix, rows):
     fh.close()
 
 
-samples = {'NM': { 'qual': 'hgvs_text like "NM_%"',
+samples = {'NM': { 'qual': 'H.hgvs_text like "NM_%"',
                    'rows': []}, 
-           'NC': { 'qual': 'hgvs_text like "NC_%"',
+           'NC': { 'qual': 'H.hgvs_text like "NC_%"',
                    'rows': []},
-           'NP': {'qual': 'hgvs_text like "NP_%" and hgvs_text not like "%:p.?" and hgvs_text not like "%p.(=)"',
+           'NP': {'qual': 'H.hgvs_text like "NP_%" and H.hgvs_text not like "%:p.?" and H.hgvs_text not like "%p.(=)"',
                   'rows': []},
           }
 
