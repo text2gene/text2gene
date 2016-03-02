@@ -49,9 +49,6 @@ def ncbi_tsv_to_dict(tsv):
     keystr, valuestr = tsv.strip('\n').split('\n')
     values = valuestr.split('\t')
 
-    print("Values: %i" % len(values))
-    print("Keys: %i" % len(ncbi_result_keys))
-
     for idx in range(0, len(ncbi_result_keys)-1):
         outd[ncbi_result_keys[idx]] = values[idx]
     return outd

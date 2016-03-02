@@ -15,6 +15,10 @@ def home():
 def about():
     return render_template('about.html')
 
+@base.route('/examples')
+def examples():
+    return render_template('examples.html')
+
 @base.route('/OK')
 def OK():
     return HTTP200({ 'service': '%s' % PKGNAME, 
