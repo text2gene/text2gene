@@ -33,9 +33,9 @@ def ncbi_variant_reporter(hgvs_text):
     outd = {'action': 'ncbi', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
-        preamble, results_dict = NCBIVariantReport(hgvs_text)
+        report = NCBIVariantReport(hgvs_text)
 
-        outd['response'] = {'preamble': preamble, 'data': results_dict}
+        outd['response'] = {'preamble': report[0], 'data': report[1]}
 
     return HTTP200(outd)
 
