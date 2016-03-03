@@ -5,6 +5,11 @@
 
 <h1>API Usage Examples</h1>
 
+<h3>HGVS to PMID</h3>
+{% for hgvs_text in hgvs_samples %}
+<ul><li><a href="/{{api_version}}/hgvs2pmid/{{hgvs_text}}">/{{api_version}}/hgvs2pmid/{{hgvs_text}}</a></li></ul>
+{% endfor %}
+
 <h3>NCBI Variant Lookup</h3>
 {% for hgvs_text in hgvs_samples %}
 

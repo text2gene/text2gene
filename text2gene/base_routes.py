@@ -7,6 +7,12 @@ from .config import ENV, CONFIG, PKGNAME
 
 base = Blueprint('base', __name__, template_folder='templates')
 
+HGVS_SAMPLES = ['NM_194248.1:c.158C>T',
+                'NM_014855.2:c.333G>C',
+                'NM_001126115.1:c.318T>G',
+                'NM_005228.3:c.2240_2257del18'
+                ]
+
 @base.route('/')
 def home():
     return render_template('home.html') 
@@ -18,8 +24,7 @@ def about():
 @base.route('/examples')
 def examples():
     api_version = CONFIG.get('api', 'latest_version')
-    hgvs_samples = ['NM_014855.2:c.333G>C', 'NM_001126115.1:c.318T>G', 'NM_005228.3:c.2240_2257del18']
-    return render_template('examples.html', hgvs_samples=hgvs_samples, api_version=api_version)
+    return render_template('examples.html', hgvs_samples=HGVS_SAMPLES, api_version=api_version)
 
 @base.route('/OK')
 def OK():
