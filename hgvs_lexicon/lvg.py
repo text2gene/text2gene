@@ -13,7 +13,7 @@ log = logging.getLogger('hgvs.lvg')
 
 hgvs_parser = hgvs.parser.Parser()
 
-#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta_20150903'
+#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta_20150903/'
 #uta = hgvs.dataproviders.uta.connect(UTACONNECTION + '/' + _uta_schema, pooling=True)
 #uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
@@ -150,6 +150,12 @@ class HgvsLVG(object):
         out = 'HGVS input: %s\n' % self.hgvs_text
         out += '%r' % self.seqvar
         return out
+
+
+
+### API Convenience Functions
+
+Variant = HgvsLVG.parse
 
 
 if __name__=='__main__':

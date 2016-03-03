@@ -2,24 +2,52 @@ from __future__ import absolute_import, print_function
 
 API_INDICATOR = 'v1'
 
-import logging, json, os, sys
+import logging
 
-#from flask import Flask, render_template, Response, request
 from flask import Blueprint
+from hgvs.exceptions import HGVSParseError
 
-routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
-
-from medgen.api import NCBIVariantReport
-
+from medgen.api import NCBIVariantReport, NCBIVariantPubmeds
 from hgvs_lexicon import HgvsLVG
 
-# a weird one from N-of-1:
-#NM_194248.1:c.158C>T
-
+from ..pmid_lookups import pubtator_hgvs_to_pmid
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
 
+routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
+
 log = logging.getLogger('%s.routes_v1' % PKGNAME)
+
+
+@routes_v1.route('/v1/hgvs2pmid/<hgvs_text>')
+def hgvs2pmid(hgvs_text):
+    """ Takes an input hgvs_text and uses a combination of methods to name pubmed
+    articles by their PMID that mention this genetic variant.
+
+        # a weird one from N-of-1:
+        #NM_194248.1:c.158C>T
+
+    :param hgvs_text: str
+    :return: HTTP200 (json) or HTTP400 (json)
+    """
+    outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if 'hgvs_text' not in hgvs_text:
+        try:
+            pubtator_pmids = pubtator_hgvs_to_pmid(hgvs_text)
+        except HGVSParseError as error:
+            return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
+
+        outd['response'] = {}
+
+        ncbi_pmids = NCBIVariantPubmeds(hgvs_text)
+        if ncbi_pmids:
+            outd['response']['NCBI'] = ncbi_pmids
+
+        if pubtator_pmids:
+            outd['response']['PubTator'] = pubtator_pmids
+
+    return HTTP200(outd)
 
 
 @routes_v1.route('/v1/ncbi/<hgvs_text>')
