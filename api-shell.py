@@ -2,7 +2,7 @@
 
 from medgen.api import *
 from pubtatordb import PubtatorDB
-from hgvs_lexicon import HgvsLVG, HgvsComponents
+from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
 
 import hgvs.dataproviders.uta
 import hgvs.parser
@@ -21,20 +21,23 @@ _EOL = '\r\n'
 print _EOL
 print _EOL
 
-print '#################################################################'
-print ' text2gene '
-print
-print '        type whos for api function list'
-
-print  '              In [1]: whos '
-print
-print '#################################################################'
+print('#################################################################')
+print(' text2gene ')
+print()
+print('        type whos for api function list')
+print()
+print('              In [1]: whos ')
+print()
+print('#################################################################')
 
 hgvs_text_c1 = 'NM_001232.3:c.919G>C'
 hgvs_text_c2 = 'NM_198578.3:c.6055G>A'
 
 hgvs_text_g1 = 'NC_000001.10:g.100316615_100316616delAG'
 hgvs_text_g2 = 'NC_000001.10:g.100345603G>T' 
+
+print()
+print('Hi Andy, I made a "Variant" shortcut function just for you.  <3')
 
 import IPython
 IPython.embed()
