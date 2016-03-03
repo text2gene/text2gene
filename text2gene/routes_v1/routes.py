@@ -9,8 +9,12 @@ from flask import Blueprint
 
 routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
 
+from medgen.api import NCBIVariantReport
+
 from hgvs_lexicon import HgvsLVG
-from ..ncbi_variant_reporter import NCBI_Variant_Report
+
+# a weird one from N-of-1:
+#NM_194248.1:c.158C>T
 
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
@@ -29,7 +33,7 @@ def ncbi_variant_reporter(hgvs_text):
     outd = {'action': 'ncbi', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
-        preamble, results_dict = NCBI_Variant_Report(hgvs_text)
+        preamble, results_dict = NCBIVariantReport(hgvs_text)
 
         outd['response'] = {'preamble': preamble, 'data': results_dict}
 

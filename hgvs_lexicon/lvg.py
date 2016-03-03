@@ -1,14 +1,21 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
+
 import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
 from hgvs.exceptions import HGVSDataNotAvailableError
 
-
 from .hgvs_components import HgvsComponents
 
+log = logging.getLogger('hgvs.lvg')
+
 hgvs_parser = hgvs.parser.Parser()
+
+#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta_20150903'
+#uta = hgvs.dataproviders.uta.connect(UTACONNECTION + '/' + _uta_schema, pooling=True)
+#uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
 uta = hgvs.dataproviders.uta.connect()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
@@ -65,7 +72,10 @@ class HgvsLVG(object):
             # attempt to derive all 4 types of SequenceVariants from 'c'.
             for this_type, value in list(self.variants.items()):
                 if this_type != 'c':
-                    self.variants[this_type].add(_seqvar_map_func(self.seqvar.type, this_type)(self.seqvar))
+                    try:
+                        self.variants[this_type].add(_seqvar_map_func(self.seqvar.type, this_type)(self.seqvar))
+                    except HGVSDataNotAvailableError as error:
+                        log.debug('%r' % error)
 
         if self.variants['g']:
             for var_g in self.variants['g']:

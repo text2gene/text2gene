@@ -9,6 +9,9 @@ import hgvs.parser
 import hgvs.variantmapper
 
 hgvs_parser = hgvs.parser.Parser()
+
+#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta_20150903'
+#uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 uta = hgvs.dataproviders.uta.connect()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 
@@ -35,3 +38,4 @@ hgvs_text_g2 = 'NC_000001.10:g.100345603G>T'
 
 import IPython
 IPython.embed()
+

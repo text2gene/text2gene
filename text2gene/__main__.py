@@ -59,7 +59,12 @@ def process_hgvs_text(hgvs_text):
         print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
         return None
 
-    gene_id = GeneID(lex.gene_name)
+    try:
+        gene_id = GeneID(lex.gene_name)
+    except TypeError:
+        # no gene_name? it happens.
+        gene_id = None
+
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmids = set()

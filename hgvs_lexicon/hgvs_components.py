@@ -1,9 +1,10 @@
 from __future__ import print_function, unicode_literals
 
-import warnings
-import time
+import logging
 
 from .exceptions import RejectedSeqVar
+
+log = logging.getLogger('hgvs.components')
 
 amino_acid_map = { 'Ala': 'A',
                    'Arg': 'R',
@@ -29,7 +30,6 @@ amino_acid_map = { 'Ala': 'A',
 
 dna_nucleotides = ['A','C','T','G']
 #rna_nucleotides = ['A','C','U','G']
-
 
 class HgvsComponents(object):
 
@@ -89,7 +89,7 @@ class HgvsComponents(object):
         (seqtype, edittype, ref, pos, alt)
         """
         if seqvar.type.strip() == '':
-            warnings.warn('SequenceVariant has empty seqtype. (%r)' % seqvar)
+            log.warn('SequenceVariant has empty seqtype. (%r)' % seqvar)
             seqtype = ''
         else:
             seqtype = seqvar.type
@@ -99,10 +99,11 @@ class HgvsComponents(object):
         try:
             ref = seqvar.posedit.edit.ref
             alt = seqvar.posedit.edit.alt
-            edittype = seqvar.posedit.edit.type.upper()
         except AttributeError:
             # seqvar has incomplete edit information. fail out.
-            warnings.warn('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
+            log.warn('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
+
+        edittype = seqvar.posedit.edit.type.upper()
 
         if seqtype == 'p':
             try:
