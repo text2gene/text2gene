@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from medgen.api import GeneID
+from medgen.api import GeneID, NCBIVariantPubmeds
 from hgvs.exceptions import HGVSParseError
 from metapub import FindIt
 
@@ -68,6 +68,7 @@ def hgvs_to_pmid_results_dict(hgvs_text):
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmid_results = {}
+    pmid_results['NCBIVariantReporter'] = NCBIVariantPubmeds(hgvs_text)
     pmid_results['PubTator'] = pubtator_hgvs_to_pmid(lex)
     pmid_results['ClinVar'] = clinvar_hgvs_to_pmid(lex)
     return pmid_results
@@ -113,7 +114,7 @@ def process_hgvs_through_pubtator(hgvs_text):
     return pmids
 
 
-def process_one_from_command_line():
+def cli_pubtator_search_string():
     import sys
     try:
         hgvs_text = sys.argv[1]
@@ -134,7 +135,7 @@ def process_one_from_command_line():
         print('[%s] Cannot parse as HGVS; skipping' % hgvs_text) 
 
 
-def process_many_from_command_line():
+def cli_pubtator_search_file():
     import sys
     try:
         textfile = sys.argv[1]
@@ -168,16 +169,32 @@ def cli_hgvs2pmid():
 
     try:
         results = hgvs_to_pmid_results_dict(hgvs_text)
-        if results:
-            for key, pmids in results.items():
-                print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
-                    #print_article_for_pmid(pmid)
-        else:
-            print('[%s] No PMIDs found.' % hgvs_text)
+        for key, pmids in results.items():
+            print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
 
     except HGVSParseError:
         print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
 
+
+def cli_hgvsfile2pmid():
+    import sys
+    try:
+        textfile = sys.argv[1]
+    except IndexError:
+        print('Supply path to text file with HGVS strings (one per line) as argument to this script.')
+        sys.exit()
+
+    with open(textfile, 'r') as fh:
+        for hgvs_text in fh.read().split('\n'):
+            if not hgvs_text.strip():
+                continue
+        try:
+            results = hgvs_to_pmid_results_dict(hgvs_text)
+            for key, pmids in results.items():
+                print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
+
+        except HGVSParseError:
+            print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
 
 
 if __name__=='__main__':

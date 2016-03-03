@@ -23,9 +23,10 @@ setup(
     license = 'Apache 2.0',
     packages = find_packages(),
     entry_points = { 'console_scripts': [
-                            'hgvs_string_lookup = text2gene.__main__:process_one_from_command_line',
-                            'hgvs_file_lookup = text2gene.__main__:process_many_from_command_line', 
+                            'hgvs_search_pubtator = text2gene.__main__:cli_pubtator_search_string',
+                            'hgvsfile_search_pubtator= text2gene.__main__:cli_pubtator_search_file', 
                             'hgvs2pmid = text2gene.__main__:cli_hgvs2pmid',
+                            'hgvsfile2pmid = text2gene.__main__:cli_hgvsfile2pmid',
                             ] 
                    },
     cmdclass = {'build_ext': build_ext},
