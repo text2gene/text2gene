@@ -10,8 +10,15 @@ from .config import log
 pubtator_db = PubtatorDB()
 
 
-def clinvar_hgvs_to_pmid(hgvs_text):
-    lex = HgvsLVG(hgvs_text)
+def _guard_lex(hgvs_lex_or_text):
+    if type(hgvs_lex_or_text) == str:
+        return HgvsLVG(hgvs_lex_or_text)
+    else:
+        return hgvs_lex_or_text
+
+
+def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
+    lex = _guard_lex(hgvs_lex_or_text)
     pmids = set()
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype]:
@@ -19,9 +26,8 @@ def clinvar_hgvs_to_pmid(hgvs_text):
     return pmids
     
 
-def pubtator_hgvs_to_pmid(hgvs_text):
-
-    lex = HgvsLVG(hgvs_text)
+def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
+    lex = _guard_lex(hgvs_lex_or_text)
     edittype = HgvsComponents(lex.seqvar).edittype
 
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
@@ -34,7 +40,7 @@ def pubtator_hgvs_to_pmid(hgvs_text):
         # no gene_name? it happens.
         gene_id = None
 
-    log.info('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
+    log.info('[%s]' % lex.seqvar, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmids = set()
     for seqtype in lex.variants:
@@ -42,10 +48,10 @@ def pubtator_hgvs_to_pmid(hgvs_text):
             try:
                 components = HgvsComponents(seqvar)
             except RejectedSeqVar:
-                log.debug('[%s] Rejected sequence variant: %r' % (hgvs_text, seqvar))
+                log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
                 continue
 
-            log.info('[%s]' % hgvs_text, seqtype, components)
+            log.info('[%s]' % lex.seqvar, seqtype, components)
             if seqtype == 'p':
                 results = pubtator_db.search_proteins(components, gene_id)
             else:

@@ -34,7 +34,7 @@ def hgvs2pmid(hgvs_text):
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            pubtator_pmids = pubtator_hgvs_to_pmid(hgvs_text)
+            lex = HgvsLVG(hgvs_text)
         except HGVSParseError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
@@ -44,10 +44,11 @@ def hgvs2pmid(hgvs_text):
         if ncbi_pmids:
             outd['response']['NCBI'] = ncbi_pmids
 
-        clinvar_pmids = clinvar_hgvs_to_pmid(hgvs_text)
+        clinvar_pmids = clinvar_hgvs_to_pmid(lex)
         if clinvar_pmids:
             outd['response']['ClinVar'] = clinvar_pmids
 
+        pubtator_pmids = pubtator_hgvs_to_pmid(lex)
         if pubtator_pmids:
             outd['response']['PubTator'] = pubtator_pmids
 

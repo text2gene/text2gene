@@ -7,6 +7,8 @@ from metapub import FindIt
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
 
+from .pmid_lookups import pubtator_hgvs_to_pmid, clinvar_hgvs_to_pmid
+
 pubtator_db = PubtatorDB()
 
 SQLDEBUG = True
@@ -46,13 +48,36 @@ def print_article_for_pmid(pmid):
 # JIRA: https://text2gene.atlassian.net/browse/T2G-3
 
 
-
-def process_hgvs_text(hgvs_text):
+def hgvs_to_pmid_results_dict(hgvs_text):
+    print()
     print('[%s]' % hgvs_text)
+
     lex = HgvsLVG(hgvs_text)
 
+    edittype = HgvsComponents(lex.seqvar).edittype
+    if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
+        print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
+        return None
+
+    try:
+        gene_id = GeneID(lex.gene_name)
+    except TypeError:
+        # no gene_name? it happens.
+        gene_id = None
+
+    print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
+
+    pmid_results = {}
+    pmid_results['PubTator'] = pubtator_hgvs_to_pmid(lex)
+    pmid_results['ClinVar'] = clinvar_hgvs_to_pmid(lex)
+    return pmid_results
+
+
+def process_hgvs_through_pubtator(hgvs_text):
     print()
-    print('[%s]' % hgvs_text, lex)
+    print('[%s]' % hgvs_text)
+
+    lex = HgvsLVG(hgvs_text)
 
     edittype = HgvsComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
@@ -97,7 +122,7 @@ def process_one_from_command_line():
         sys.exit()
 
     try:
-        pmids = process_hgvs_text(hgvs_text)
+        pmids = process_hgvs_through_pubtator(hgvs_text)
         if pmids:
             print('[%s] PMIDs Found: %r' % (hgvs_text, pmids))
             for pmid in pmids:
@@ -122,7 +147,7 @@ def process_many_from_command_line():
             if not hgvs_text.strip():
                 continue
             try:
-                pmids = process_hgvs_text(hgvs_text)
+                pmids = process_hgvs_through_pubtator(hgvs_text)
                 if pmids:
                     print('[%s] PMIDs Found: %r' % (hgvs_text, pmids))
                     for pmid in pmids:
@@ -131,6 +156,28 @@ def process_many_from_command_line():
                     print('[%s] No PMIDs found.' % hgvs_text)
             except HGVSParseError:
                 print('[%s] Cannot parse as HGVS; skipping' % hgvs_text) 
+
+
+def cli_hgvs2pmid():
+    import sys
+    try:
+        hgvs_text = sys.argv[1]
+    except IndexError:
+        print('Supply hgvs text as argument to this script.')
+        sys.exit()
+
+    try:
+        results = hgvs_to_pmid_results_dict(hgvs_text)
+        if results:
+            for key, pmids in results.items():
+                print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
+                    #print_article_for_pmid(pmid)
+        else:
+            print('[%s] No PMIDs found.' % hgvs_text)
+
+    except HGVSParseError:
+        print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
+
 
 
 if __name__=='__main__':

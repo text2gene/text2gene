@@ -25,6 +25,7 @@ setup(
     entry_points = { 'console_scripts': [
                             'hgvs_string_lookup = text2gene.__main__:process_one_from_command_line',
                             'hgvs_file_lookup = text2gene.__main__:process_many_from_command_line', 
+                            'hgvs2pmid = text2gene.__main__:cli_hgvs2pmid',
                             ] 
                    },
     cmdclass = {'build_ext': build_ext},
