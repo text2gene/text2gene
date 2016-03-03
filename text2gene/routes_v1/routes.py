@@ -10,7 +10,7 @@ from hgvs.exceptions import HGVSParseError
 from medgen.api import NCBIVariantReport, NCBIVariantPubmeds
 from hgvs_lexicon import HgvsLVG
 
-from ..pmid_lookups import pubtator_hgvs_to_pmid
+from ..pmid_lookups import pubtator_hgvs_to_pmid, clinvar_hgvs_to_pmid
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
 
@@ -43,6 +43,10 @@ def hgvs2pmid(hgvs_text):
         ncbi_pmids = NCBIVariantPubmeds(hgvs_text)
         if ncbi_pmids:
             outd['response']['NCBI'] = ncbi_pmids
+
+        clinvar_pmids = clinvar_hgvs_to_pmid(hgvs_text)
+        if clinvar_pmids:
+            outd['response']['ClinVar'] = clinvar_pmids
 
         if pubtator_pmids:
             outd['response']['PubTator'] = pubtator_pmids

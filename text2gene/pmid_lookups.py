@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from medgen.api import GeneID
+from medgen.api import GeneID, ClinvarPubmeds
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
@@ -10,8 +10,14 @@ from .config import log
 pubtator_db = PubtatorDB()
 
 
-#def clinvar_hgvs_to_pmid(hgvs_text):
-
+def clinvar_hgvs_to_pmid(hgvs_text):
+    lex = HgvsLVG(hgvs_text)
+    pmids = set()
+    for seqtype in lex.variants:
+        for seqvar in lex.variants[seqtype]:
+            pmids.union(ClinvarPubmeds('%s' % seqvar))
+    return pmids
+    
 
 def pubtator_hgvs_to_pmid(hgvs_text):
 
