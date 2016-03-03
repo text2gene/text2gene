@@ -96,14 +96,17 @@ class HgvsComponents(object):
 
         ref = alt = edittype = pos = ''
 
+        if seqvar.posedit.edit == '?':
+            raise RejectedSeqVar('SequenceVariant has missing edittype. (%r)' % seqvar)
+
+        edittype = seqvar.posedit.edit.type.upper()
+
         try:
             ref = seqvar.posedit.edit.ref
             alt = seqvar.posedit.edit.alt
         except AttributeError:
-            # seqvar has incomplete edit information. fail out.
+            # hmm.
             log.warn('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
-
-        edittype = seqvar.posedit.edit.type.upper()
 
         if seqtype == 'p':
             try:

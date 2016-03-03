@@ -54,7 +54,7 @@ def process_hgvs_text(hgvs_text):
     print()
     print('[%s]' % hgvs_text, lex)
 
-    edittype = lex.seqvar.posedit.edit.type.upper()
+    edittype = HgvsComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
         print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
         return None

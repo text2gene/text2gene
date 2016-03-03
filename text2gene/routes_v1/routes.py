@@ -64,7 +64,7 @@ def ncbi_variant_reporter(hgvs_text):
         report = NCBIVariantReport(hgvs_text)
 
         outd['response'] = report
-        
+
     return HTTP200(outd)
 
 

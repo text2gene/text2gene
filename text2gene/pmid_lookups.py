@@ -10,10 +10,13 @@ from .config import log
 pubtator_db = PubtatorDB()
 
 
+#def clinvar_hgvs_to_pmid(hgvs_text):
+
+
 def pubtator_hgvs_to_pmid(hgvs_text):
 
     lex = HgvsLVG(hgvs_text)
-    edittype = lex.seqvar.posedit.edit.type.upper()
+    edittype = HgvsComponents(lex.seqvar).edittype
 
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
         log.info('[%s] Cannot process edit type %s' % (hgvs_text, edittype))
