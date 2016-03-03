@@ -63,8 +63,8 @@ def ncbi_variant_reporter(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         report = NCBIVariantReport(hgvs_text)
 
-        outd['response'] = {'preamble': report[0], 'data': report[1]}
-
+        outd['response'] = report
+        
     return HTTP200(outd)
 
 
