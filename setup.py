@@ -14,7 +14,7 @@ class build_ext(_build_ext):
 
 setup(
     name = 'pubtatordb',
-    version = '0.0.1',
+    version = '0.0.1.1',
     description = 'Pubtator database interaction layer',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
