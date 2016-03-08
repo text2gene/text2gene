@@ -1,10 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
 import hashlib
+import pickle
+import json
+from datetime import datetime
 
-import medgen.config as medgen_config
+import MySQLdb as mdb
 
-from pubtatordb import SQLData
+from medgen.config import config as medgen_config
+
+from pubtatordb.sqldata import SQLData, SQLdatetime
 
 
 class SQLCache(SQLData):
@@ -34,15 +39,55 @@ class SQLCache(SQLData):
 
 
     @staticmethod
-    def make_cache_key(self, querydict):
+    def get_cache_key(querydict):
         """ Default method to make a unique cache key from an input dictionary.
         """
-        return hashlib.md5(pickle.dumps((url, sorted(querydict.items())))).hexdigest()
+        return hashlib.md5(pickle.dumps(sorted(querydict.items()))).hexdigest()
 
-    def store(self, querydict, value):
+    def update(self, fv_dict):
+        """
+        :param fv_dict: field-value dictionary with values intended to replace existing entry at cache_key
+        :return: True if successful
+        :raises: MySQLdb exceptions
+        """
+        # SQL-format the date (SQLData.insert does this for us, so we have to do it explicitly here).
+        fv_dict['date_created'] = SQLdatetime(fv_dict['date_created'])
+        sql = 'update {db.tablename} set date_created="{date_created}" where cache_key="{cache_key}"'.format(db=self,
+                                                                                                        **fv_dict)
+        self.execute(sql)
+        return True
+
+    def store(self, querydict, value, **kwargs):
+        """ Takes a query dictionary containing "defining arguments" for the resultant value to be cached and the value,
+        stores this as cache_key - cache_value in the cache DB.
+
+        The value MUST be serializable to a string. (json.dumps will be used)
+
+        If an entry with previously stored querydict exists, entry will be updated with date_created set to datetime.now()
+        This behavior can be changed to ignoring the update by setting update_if_duplicate to False (default: True).
+
+        Keywords:
+           update_if_duplicate: (bool) see note above.
+           date_created: (datetime) optionally provide the date_created field desired for cache entry.
+
+        :param querydict:
+        :param value: serializable value
+        :return: True if successful
+        :raises: MySQLdb exceptions and json serialization errors
+        """
         date_created = kwargs.get('date_created', datetime.now())
-        fv_dict = {'cache_key': self.make_cache_key(querydict), 'cache_value': value, 'date_created': date_created}
-        self.insert(self.tablename, fv_dict)
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value), 'date_created': date_created}
+
+        try:
+            self.insert(self.tablename, fv_dict)
+        except mdb.IntegrityError:
+            if kwargs.get('update_if_duplicate', True):
+                # update entry with current time
+                return self.update(fv_dict)
+            else:
+                return False
+
+        return True
 
     def retrieve(self, querydict):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.
@@ -50,8 +95,9 @@ class SQLCache(SQLData):
         :param querydict:
         :return: value at this cache location, or None
         """
-        with row as self.get_row(querydict):
-            return row['cache_value']
+        row = self.get_row(querydict)
+        if row:
+            return json.loads(row['cache_value'])
         return None
 
     def get_row(self, querydict):
@@ -60,19 +106,29 @@ class SQLCache(SQLData):
         :param querydict:
         :return: dictionary representing entire row for this query dictionary
         """
-        key = self.make_cache_key(querydict)
+        key = self.get_cache_key(querydict)
         sql = 'SELECT * from {db.tablename} where cache_key = "{key}" limit 1'.format(db=self, key=key)
         return self.fetchrow(sql)
 
-    #def table_exists(self):
-    #    sql =
+    #def create_index(self):
+    #    sql = "call create_index('{}', 'cache_key')".format(self.tablename)
+    #    self.execute(sql)
+    #    return True
 
     def create_table(self):
 
         sql = """CREATE TABLE {} (
                 cache_key varchar(255) primary key not null,
                 cache_value text default NULL,
-                date_created datetime default NULL,
+                date_created datetime default NULL
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(self.tablename)
 
-        self.execute(sql)
+        try:
+            self.execute(sql)
+            return True
+        except mdb.OperationalError as error:
+            if error.args[0] == 1050:
+                # if table already exists, we're fine.
+                return True
+
+            raise mdb.OperationalError(error.args)
