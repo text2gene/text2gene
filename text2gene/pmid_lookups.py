@@ -22,7 +22,7 @@ def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
     lex = _guard_lex(hgvs_lex_or_text)
     pmids = set()
     for seqtype in lex.variants:
-        for seqvar in lex.variants[seqtype]:
+        for seqvar in lex.variants[seqtype].values():
             for pmid in ClinvarPubmeds('%s' % seqvar):
                 pmids.add(pmid)
     return list(pmids)
@@ -46,7 +46,7 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
 
     pmids = set()
     for seqtype in lex.variants:
-        for seqvar in lex.variants[seqtype]:
+        for seqvar in lex.variants[seqtype].values():
             try:
                 components = HgvsComponents(seqvar)
             except RejectedSeqVar:

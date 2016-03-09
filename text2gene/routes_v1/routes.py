@@ -38,7 +38,9 @@ def hgvs2pmid(hgvs_text):
         except HGVSParseError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
-        outd['response'] = {}
+        outd['lvg'] = lex.to_dict()
+
+        outd['response'] = { }
 
         ncbi_pmids = NCBIHgvs2Pmid(hgvs_text)
         if ncbi_pmids:
@@ -55,7 +57,7 @@ def hgvs2pmid(hgvs_text):
     return HTTP200(outd)
 
 
-@routes_v1.route('/v1/ncbi/<hgvs_text>')
+@routes_v1.route('/v1/report/<hgvs_text>')
 def ncbi_variant_reporter(hgvs_text):
     """ Takes an input hgvs_text and uses NCBI Variant Reporter to retrieve and display
     data related to this genetic variant.
