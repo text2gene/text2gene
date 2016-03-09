@@ -7,7 +7,7 @@ from metapub import FindIt
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
 
-from .pmid_lookups import pubtator_hgvs_to_pmid, clinvar_hgvs_to_pmid
+from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid, NCBIHgvs2Pmid
 
 pubtator_db = PubtatorDB()
 
@@ -68,9 +68,9 @@ def hgvs_to_pmid_results_dict(hgvs_text):
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmid_results = {}
-    pmid_results['NCBIVariantReporter'] = NCBIVariantPubmeds(hgvs_text)
-    pmid_results['PubTator'] = pubtator_hgvs_to_pmid(lex)
-    pmid_results['ClinVar'] = clinvar_hgvs_to_pmid(lex)
+    pmid_results['NCBIVariantReporter'] = NCBIHgvs2Pmid(hgvs_text)
+    pmid_results['PubTator'] = PubtatorHgvs2Pmid(lex)
+    pmid_results['ClinVar'] = ClinvarHgvs2Pmid(lex)
     return pmid_results
 
 
@@ -188,13 +188,13 @@ def cli_hgvsfile2pmid():
         for hgvs_text in fh.read().split('\n'):
             if not hgvs_text.strip():
                 continue
-        try:
-            results = hgvs_to_pmid_results_dict(hgvs_text)
-            for key, pmids in results.items():
-                print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
+            try:
+                results = hgvs_to_pmid_results_dict(hgvs_text)
+                for key, pmids in results.items():
+                    print('[%s] %i PMIDs Found in %s: %r' % (hgvs_text, len(pmids), key, pmids))
 
-        except HGVSParseError:
-            print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
+            except HGVSParseError:
+                print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
 
 
 if __name__=='__main__':

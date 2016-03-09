@@ -24,7 +24,7 @@ def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype]:
             pmids.union(ClinvarPubmeds('%s' % seqvar))
-    return pmids
+    return list(pmids)
     
 
 def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
@@ -63,16 +63,3 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
 
     return list(pmids)
 
-
-
-#### API classes
-
-
-ClinvarCache = SQLCache('clinvarpubmeds')
-ClinvarCache.create_table()
-
-PubtatorCache = SQLCache('pubtatorpubmeds')
-PubtatorCache.create_table()
-
-NCBIVariantReporterCache = SQLCache('ncbipubmeds')
-NCBIVariantReporterCache.create_table()

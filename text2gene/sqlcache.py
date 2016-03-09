@@ -110,13 +110,8 @@ class SQLCache(SQLData):
                 for each row set new.date_created = now()""".format(db=self)
         self.execute(sql)
 
-        sql = """delimiter $$
-                create trigger `{db.tablename}_update` before UPDATE on `{db.tablename}`
-                for each row
-                    begin
-                        set new.date_created = now();
-                    end $$
-                delimiter ;""".format(db=self)
+        sql = """create trigger `{db.tablename}_update` before UPDATE on `{db.tablename}`
+                for each row set new.date_created = now()""".format(db=self)
         self.execute(sql)
 
     def create_table(self):

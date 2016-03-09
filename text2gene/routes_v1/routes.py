@@ -7,10 +7,10 @@ import logging
 from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
-from medgen.api import NCBIVariantReport, NCBIVariantPubmeds
+from medgen.api import NCBIVariantReport
 from hgvs_lexicon import HgvsLVG
 
-from ..pmid_lookups import pubtator_hgvs_to_pmid, clinvar_hgvs_to_pmid
+from ..cached import PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
 
@@ -40,15 +40,15 @@ def hgvs2pmid(hgvs_text):
 
         outd['response'] = {}
 
-        ncbi_pmids = NCBIVariantPubmeds(hgvs_text)
+        ncbi_pmids = NCBIHgvs2Pmid(hgvs_text)
         if ncbi_pmids:
             outd['response']['NCBI'] = ncbi_pmids
 
-        clinvar_pmids = clinvar_hgvs_to_pmid(lex)
+        clinvar_pmids = ClinvarHgvs2Pmid(lex)
         if clinvar_pmids:
             outd['response']['ClinVar'] = clinvar_pmids
 
-        pubtator_pmids = pubtator_hgvs_to_pmid(lex)
+        pubtator_pmids = PubtatorHgvs2Pmid(lex)
         if pubtator_pmids:
             outd['response']['PubTator'] = pubtator_pmids
 
