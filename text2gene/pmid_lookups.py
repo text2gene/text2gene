@@ -23,7 +23,8 @@ def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
     pmids = set()
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype]:
-            pmids.union(ClinvarPubmeds('%s' % seqvar))
+            for pmid in ClinvarPubmeds('%s' % seqvar):
+                pmids.add(pmid)
     return list(pmids)
     
 
