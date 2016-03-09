@@ -50,10 +50,7 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions
         """
-        # SQL-format the date (SQLData.insert does this for us, so we have to do it explicitly here).
-        fv_dict['date_created'] = SQLdatetime(fv_dict['date_created'])
-        sql = 'update {db.tablename} set date_created="{date_created}" where cache_key="{cache_key}"'.format(db=self,
-                                                                                                        **fv_dict)
+        sql = "update {db.tablename} set cache_value='{cache_value}' where cache_key='{cache_key}'".format(db=self, **fv_dict)
         self.execute(sql)
         return True
 
@@ -68,15 +65,13 @@ class SQLCache(SQLData):
 
         Keywords:
            update_if_duplicate: (bool) see note above.
-           date_created: (datetime) optionally provide the date_created field desired for cache entry.
 
         :param querydict:
         :param value: serializable value
         :return: True if successful
         :raises: MySQLdb exceptions and json serialization errors
         """
-        date_created = kwargs.get('date_created', datetime.now())
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value), 'date_created': date_created}
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value) }
 
         try:
             self.insert(self.tablename, fv_dict)
@@ -110,10 +105,19 @@ class SQLCache(SQLData):
         sql = 'SELECT * from {db.tablename} where cache_key = "{key}" limit 1'.format(db=self, key=key)
         return self.fetchrow(sql)
 
-    #def create_index(self):
-    #    sql = "call create_index('{}', 'cache_key')".format(self.tablename)
-    #    self.execute(sql)
-    #    return True
+    def _create_triggers(self):
+        sql = """create trigger `{db.tablename}_new_entry_date` before INSERT on `{db.tablename}`
+                for each row set new.creation_date = now()""".format(db=self)
+        self.execute(sql)
+
+        sql = """delimiter $$
+                create trigger `{db.tablename}_update` before UPDATE on `{db.tablename}`
+                for each row
+                    begin
+                        set new.deactivation_date = now();
+                    end $$
+                delimiter ;""".format(db=self)
+        self.execute(sql)
 
     def create_table(self):
 
@@ -125,6 +129,7 @@ class SQLCache(SQLData):
 
         try:
             self.execute(sql)
+            self._create_triggers()
             return True
         except mdb.OperationalError as error:
             if error.args[0] == 1050:
