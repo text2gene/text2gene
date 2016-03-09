@@ -107,14 +107,14 @@ class SQLCache(SQLData):
 
     def _create_triggers(self):
         sql = """create trigger `{db.tablename}_new_entry_date` before INSERT on `{db.tablename}`
-                for each row set new.creation_date = now()""".format(db=self)
+                for each row set new.date_created = now()""".format(db=self)
         self.execute(sql)
 
         sql = """delimiter $$
                 create trigger `{db.tablename}_update` before UPDATE on `{db.tablename}`
                 for each row
                     begin
-                        set new.deactivation_date = now();
+                        set new.date_created = now();
                     end $$
                 delimiter ;""".format(db=self)
         self.execute(sql)

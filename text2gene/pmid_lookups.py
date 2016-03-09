@@ -5,6 +5,7 @@ from medgen.api import GeneID, ClinvarPubmeds
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
 
+from .sqlcache import SQLCache
 from .config import log
 
 pubtator_db = PubtatorDB()
@@ -61,3 +62,17 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
                 pmids.add(res['PMID'])
 
     return list(pmids)
+
+
+
+#### API classes
+
+
+ClinvarCache = SQLCache('clinvarpubmeds')
+ClinvarCache.create_table()
+
+PubtatorCache = SQLCache('pubtatorpubmeds')
+PubtatorCache.create_table()
+
+NCBIVariantReporterCache = SQLCache('ncbipubmeds')
+NCBIVariantReporterCache.create_table()
