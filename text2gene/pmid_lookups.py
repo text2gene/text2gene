@@ -42,7 +42,7 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
         # no gene_name? it happens.
         gene_id = None
 
-    log.info('[%s]' % lex.seqvar, lex.gene_name, '(Gene ID: %s)' % gene_id)
+    log.info('[%s] %s (Gene ID: %s)', lex.seqvar, lex.gene_name, gene_id)
 
     pmids = set()
     for seqtype in lex.variants:
@@ -53,7 +53,7 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
                 log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
                 continue
 
-            log.info('[%s]' % lex.seqvar, seqtype, components)
+            log.info('[%s] %s %s', lex.seqvar, seqtype, components)
             if seqtype == 'p':
                 results = pubtator_db.search_proteins(components, gene_id)
             else:
