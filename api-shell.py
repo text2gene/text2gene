@@ -3,6 +3,7 @@
 from medgen.api import *
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
+from text2gene import *
 
 import hgvs.dataproviders.uta
 import hgvs.parser
@@ -35,9 +36,6 @@ hgvs_text_c2 = 'NM_198578.3:c.6055G>A'
 
 hgvs_text_g1 = 'NC_000001.10:g.100316615_100316616delAG'
 hgvs_text_g2 = 'NC_000001.10:g.100345603G>T' 
-
-print()
-print('Hi Andy, I made a "Variant" shortcut function just for you.  <3')
 
 import IPython
 IPython.embed()

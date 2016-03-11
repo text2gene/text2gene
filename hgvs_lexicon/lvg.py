@@ -13,11 +13,10 @@ log = logging.getLogger('hgvs.lvg')
 
 hgvs_parser = hgvs.parser.Parser()
 
-#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta_20150903/'
-#uta = hgvs.dataproviders.uta.connect(UTACONNECTION + '/' + _uta_schema, pooling=True)
-#uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
+UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta/uta_20150903/'
+uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
-uta = hgvs.dataproviders.uta.connect()
+#uta = hgvs.dataproviders.uta.connect()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 
 
@@ -67,32 +66,42 @@ def _seqvar_to_seqvar(seqvar, base_type, new_type):
         log.debug('%r' % error)
         return None
 
-        
+
 class HgvsLVG(object):
 
-    def __init__(self, hgvs_text, **kwargs):
-        self.hgvs_text = hgvs_text
+    def __init__(self, hgvs_text_or_seqvar, **kwargs):
+        self.hgvs_text = str(hgvs_text_or_seqvar)
 
         # use the hgvs library to get us some info about this HGVS string.
-        self.seqvar = self.parse(hgvs_text)
+        self.seqvar = self.parse(hgvs_text_or_seqvar)
 
         # initialize transcripts list
         self.transcripts = set(kwargs.get('transcripts', []))
 
         # fill in all the different ways to talk about this variant in each sequence type.
         self.variants = {'g': dict(), 'c': dict(), 'n': dict(), 'p': dict()}
+
+        for input_hgvs_c in kwargs.get('hgvs_c', []):
+            self.variants['c'][str(input_hgvs_c)] = Variant(input_hgvs_c)
+
+        for input_hgvs_g in kwargs.get('hgvs_g', []):
+            self.variants['g'][str(input_hgvs_g)] = Variant(input_hgvs_g)
+
+        for input_hgvs_n in kwargs.get('hgvs_n', []):
+            self.variants['n'][str(input_hgvs_n)] = Variant(input_hgvs_n)
+
+        for input_hgvs_p in kwargs.get('hgvs_p', []):
+            self.variants['p'][str(input_hgvs_p)] = Variant(input_hgvs_p)
+
         self.variants[self.seqvar.type][str(self.seqvar)] = self.seqvar
 
-        if self.seqvar.type == 'p':
-            # no backreference to 'c','g','n' possible from a 'p' seqvar
-            self.variants['p'] = [self.seqvar]
-
         if self.variants['c']:
-            # attempt to derive all 4 types of SequenceVariants from 'c'.
-            for this_type, value in list(self.variants.items()):
-                new_seqvar = _seqvar_to_seqvar(self.seqvar, self.seqvar.type, this_type)
-                if new_seqvar:
-                    self.variants[this_type][str(new_seqvar)] = new_seqvar
+            # attempt to derive all 4 types of SequenceVariants from all available 'c'.
+            for var_c in list(self.variants['c'].values()):
+                for this_type, value in list(self.variants.items()):
+                    new_seqvar = _seqvar_to_seqvar(var_c, 'c', this_type)
+                    if new_seqvar:
+                        self.variants[this_type][str(new_seqvar)] = new_seqvar
 
         # Now that we have a 'g', collect all available transcripts.
         if self.variants['g']:
@@ -152,8 +161,34 @@ class HgvsLVG(object):
         return mapper.relevant_transcripts(var_g)
 
     @staticmethod
-    def parse(hgvs_text):
-        return hgvs_parser.parse_hgvs_variant(hgvs_text)
+    def parse(hgvs_text_or_seqvar):
+        """ Parse input through hgvs_parser if text, do nothing if SequenceVariant.
+        Return SequenceVariant object.
+
+        Allow all potential hgvs parsing errors and type errors to flow upwards.
+
+        :param hgvs_text_or_seqvar: string or SequenceVariant object
+        :return: SequenceVariant object
+        """
+        if type(hgvs_text_or_seqvar) == hgvs.variant.SequenceVariant:
+            return hgvs_text_or_seqvar
+        return hgvs_parser.parse_hgvs_variant(hgvs_text_or_seqvar)
+
+    @property
+    def hgvs_c_variants(self):
+        return self.variants['c'].keys()
+
+    @property
+    def hgvs_g_variants(self):
+        return self.variants['g'].keys()
+
+    @property
+    def hgvs_p_variants(self):
+        return self.variants['p'].keys()
+
+    @property
+    def hgvs_n_variants(self):
+        return self.variants['n'].keys()
 
     def to_dict(self, with_gene_name=True):
         """Returns contents of object as a 2-level dictionary.
