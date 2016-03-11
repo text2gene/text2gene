@@ -8,9 +8,8 @@ from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
 from medgen.api import NCBIVariantReport
-from hgvs_lexicon import HgvsLVG
 
-from ..cached import PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid
+from ..cached import LVG, PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
 
@@ -34,7 +33,7 @@ def hgvs2pmid(hgvs_text):
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            lex = HgvsLVG(hgvs_text)
+            lex = LVG(hgvs_text)
         except HGVSParseError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
@@ -78,13 +77,14 @@ def ncbi_variant_reporter(hgvs_text):
 @routes_v1.route('/v1/lvg/<hgvs_text>')
 def lvg(hgvs_text):
     """ Takes an input hgvs_text and generates valid HGVS alternative statements. 
-        Returns JSON (http 200).  If problem w/ HGVS string, responds with http 400"""
+        Returns JSON (http 200).  If problem w/ HGVS string, responds with http 400
+    """
 
     outd = {'action': 'lvg', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            hgvs_obj = HgvsLVG(hgvs_text)
+            hgvs_obj = LVG(hgvs_text)
         except Exception as error:
             return HTTP400(error, 'Error using HgvsLVG to find lexical variants for %s' % hgvs_text)
         outd['response'] = hgvs_obj.to_dict()
