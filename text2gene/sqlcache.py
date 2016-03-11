@@ -132,6 +132,10 @@ class SQLCache(SQLData):
                 return True
 
             raise mdb.OperationalError(error.args)
+
+    def drop_table(self):
+        super(SQLCache, self).drop_table(self.tablename)
+
     def reset(self, before=None):
         # UNTESTED!
         # TODO: test:

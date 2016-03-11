@@ -70,7 +70,7 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 class NCBIVariantReportCachedQuery(SQLCache):
 
     def __init__(self):
-        super(self.__class__, self).__init__('ncbi_hgvs2pmid')
+        super(self.__class__, self).__init__('ncbi_report')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
