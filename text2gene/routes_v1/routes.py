@@ -7,8 +7,9 @@ import logging
 from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
-from ..cached import LVG, PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid, NCBIReport
-from ..config import CONFIG, ENV, PKGNAME
+from ..lvg_cached import LVG
+from ..cached import PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid, NCBIReport
+from ..config import PKGNAME
 from ..utils import HTTP200, HTTP400
 
 routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
