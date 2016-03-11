@@ -183,7 +183,6 @@ class HgvsLVG(object):
         return out
 
 
-
 ### API Convenience Functions
 
 Variant = HgvsLVG.parse

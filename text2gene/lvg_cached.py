@@ -1,10 +1,11 @@
-
+from __future__ import absolute_import, unicode_literals
 
 import pickle
 
 from hgvs_lexicon import HgvsLVG
 
 from .exceptions import Text2GeneError
+from .sqlcache import SQLCache
 
 
 class HgvsLVGCached(SQLCache):
