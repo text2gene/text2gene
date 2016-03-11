@@ -63,7 +63,7 @@ def ncbi_variant_reporter(hgvs_text):
     :param hgvs_text: str
     :return: HTTP200 (json) or HTTP400 (json)
     """
-    outd = {'action': 'ncbi', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+    outd = {'action': 'report', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
         report = NCBIReport(hgvs_text)
