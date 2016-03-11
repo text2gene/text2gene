@@ -28,4 +28,3 @@ def get_data_log(filepath, name=PKGNAME+'-data'):
     datalog.addHandler(fh)
     return datalog
 
-

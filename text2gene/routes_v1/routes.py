@@ -7,9 +7,7 @@ import logging
 from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
-from medgen.api import NCBIVariantReport
-
-from ..cached import LVG, PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid
+from ..cached import LVG, PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid, NCBIReport
 from ..config import CONFIG, ENV, PKGNAME
 from ..utils import HTTP200, HTTP400
 
@@ -67,7 +65,7 @@ def ncbi_variant_reporter(hgvs_text):
     outd = {'action': 'ncbi', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
-        report = NCBIVariantReport(hgvs_text)
+        report = NCBIReport(hgvs_text)
 
         outd['response'] = report
 

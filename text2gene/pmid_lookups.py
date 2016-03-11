@@ -3,9 +3,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 from medgen.api import GeneID, ClinvarPubmeds
 
 from pubtatordb import PubtatorDB
-from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
+from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
-from .sqlcache import SQLCache
+from .lvg_cached import LVG
 from .config import log
 
 pubtator_db = PubtatorDB()
@@ -13,7 +13,7 @@ pubtator_db = PubtatorDB()
 
 def _guard_lex(hgvs_lex_or_text):
     if type(hgvs_lex_or_text) == str:
-        return HgvsLVG(hgvs_lex_or_text)
+        return LVG(hgvs_lex_or_text)
     else:
         return hgvs_lex_or_text
 
