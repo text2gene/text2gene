@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import pickle
 
-from medgen.api import NCBIVariantPubmeds
+from medgen.api import NCBIVariantPubmeds, NCBIVariantReport
 
 from hgvs_lexicon import HgvsLVG
 
@@ -12,6 +12,8 @@ from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
 
 #### Cached Query classes: one "Hgvs2Pmid" for each service
 
+# NOTE: remember to use sbin/init_cache.py ahead of first-time run, to create the necessary tables in MySQL.
+
 
 class HgvsLVGCached(SQLCache):
     def __init__(self):
@@ -20,7 +22,7 @@ class HgvsLVGCached(SQLCache):
     def get_cache_key(querydict, hgvs_text):
         return str(hgvs_text)
 
-    def lvg(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
@@ -43,7 +45,7 @@ class ClinvarCachedQuery(SQLCache):
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
-    def hgvs2pmid(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
@@ -62,7 +64,7 @@ class PubtatorCachedQuery(SQLCache):
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
-    def hgvs2pmid(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
@@ -81,7 +83,7 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
-    def hgvs2pmid(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
@@ -92,9 +94,30 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         return result
 
 
+class NCBIVariantReportCachedQuery(SQLCache):
+
+    def __init__(self):
+        super(self.__class__, self).__init__('ncbi_hgvs2pmid')
+
+    def get_cache_key(self, hgvs_text):
+        return str(hgvs_text)
+
+    def query(self, hgvs_text, skip_cache=False):
+        if not skip_cache:
+            result = self.retrieve(hgvs_text)
+            if result:
+                return result
+
+        result = NCBIVariantReport(hgvs_text)
+        self.store(hgvs_text, result)
+        return result
+
+
 ### API Definitions
 
-LVG = HgvsLVGCached().lvg
-ClinvarHgvs2Pmid = ClinvarCachedQuery().hgvs2pmid
-PubtatorHgvs2Pmid = PubtatorCachedQuery().hgvs2pmid
-NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery().hgvs2pmid
+LVG = HgvsLVGCached().query
+ClinvarHgvs2Pmid = ClinvarCachedQuery().query
+PubtatorHgvs2Pmid = PubtatorCachedQuery().query
+NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery().query
+NCBIReport = NCBIVariantReportCachedQuery().query
+

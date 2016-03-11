@@ -132,3 +132,17 @@ class SQLCache(SQLData):
                 return True
 
             raise mdb.OperationalError(error.args)
+    def reset(self, before=None):
+        # UNTESTED!
+        # TODO: test:
+
+        sql = "DELETE FROM {db.tablename} where date_created < ".format(db=self)
+
+        if before:
+            before = SQLdatetime(before)
+        else:
+            before = SQLdatetime(datetime.now())
+
+        sql += before
+
+        self.execute(sql)

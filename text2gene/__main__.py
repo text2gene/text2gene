@@ -5,9 +5,9 @@ from hgvs.exceptions import HGVSParseError
 from metapub import FindIt
 
 from pubtatordb import PubtatorDB
-from hgvs_lexicon import HgvsLVG, HgvsComponents, RejectedSeqVar
+from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
-from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid, NCBIHgvs2Pmid
+from .cached import LVG, PubtatorHgvs2Pmid, ClinvarHgvs2Pmid, NCBIHgvs2Pmid
 
 pubtator_db = PubtatorDB()
 
@@ -52,7 +52,7 @@ def hgvs_to_pmid_results_dict(hgvs_text):
     print()
     print('[%s]' % hgvs_text)
 
-    lex = HgvsLVG(hgvs_text)
+    lex = LVG(hgvs_text)
 
     edittype = HgvsComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
@@ -78,7 +78,7 @@ def process_hgvs_through_pubtator(hgvs_text):
     print()
     print('[%s]' % hgvs_text)
 
-    lex = HgvsLVG(hgvs_text)
+    lex = LVG(hgvs_text)
 
     edittype = HgvsComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
