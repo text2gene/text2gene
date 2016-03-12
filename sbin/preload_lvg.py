@@ -18,7 +18,10 @@ def dmesg(hgvs_text, msg):
 for entry in hgvs_examples:
     hgvs_text = entry['hgvs_text']
     dmesg(hgvs_text, 'collecting')
-    lex = LVG(hgvs_text)
-    dmesg(hgvs_text, '%r' % lex.variants)
+    try:
+        lex = LVG(hgvs_text)
+        dmesg(hgvs_text, '%r' % lex.variants)
+    except Exception as error:
+        dmesg(hgvs_text, '%r' % error)
     dmesg(hgvs_text, 'done')
 
