@@ -19,19 +19,19 @@ class HgvsLVGCached(SQLCache):
         self.granular = granular
         super(self.__class__, self).__init__('hgvslvg')
 
-    def get_cache_key(querydict, hgvs_text):
+    def get_cache_key(hgvs_text):
         return str(hgvs_text)
 
     def _store_granular_hgvs_type(self, lex, hgvs_seqtype_name):
         hgvs_vars = getattr(lex, hgvs_seqtype_name)
         entry_pairs = [{'hgvs_text': lex.hgvs_text,
                         hgvs_seqtype_name: item,
-                        'version': self.VERSION} for item in hgvs_vars ]
+                        'version': self.VERSION} for item in hgvs_vars]
 
         self.batch_insert('lvg_mappings', entry_pairs)
 
     def store_granular(self, lex):
-        for hgvs_type in ['c','g','n','p']:
+        for hgvs_type in ['c', 'g', 'n', 'p']:
             self._store_granular_hgvs_type(lex, 'hgvs_'+hgvs_type)
 
     def query(self, hgvs_text, skip_cache=False):
@@ -45,7 +45,6 @@ class HgvsLVGCached(SQLCache):
         if lexobj:
             self.store(hgvs_text, pickle.dumps(lexobj))
             if self.granular:
-                print("STORING GRANULAR CACHE!")
                 self.store_granular(lexobj)
 
             return lexobj

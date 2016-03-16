@@ -5,28 +5,24 @@ from hgvs_lexicon import Variant, HgvsLVG
 from .cached import NCBIReport
 
 
+def ncbi_report_to_variants(report):
+    variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
+    for seqtype in variants.keys():
+        hgvs_text = report[0].get('Hgvs_%s' % seqtype, '').strip()
+        if hgvs_text:
+            seqvar = Variant(hgvs_text)
+            variants[seqtype] = seqvar
+    return variants
+
+
 class NCBIHgvsLVG(object):
 
     VERSION = '0.0.1'
 
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
-
-        self.variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
-
         self.report = NCBIReport(self.hgvs_text)
-        self._parse_report()
-
-    def _parse_report(self):
-        rep = self.report[0]
-        for seqtype in self.variants.keys():
-            hgvs_text = rep.get('Hgvs_%s' % seqtype, '').strip()
-            if hgvs_text:
-                seqvar = Variant(hgvs_text)
-                self.variants[seqtype] = seqvar
-
-    #def to_dict(self):
-    #    outd = { }
+        self.variants = ncbi_report_to_variants(self.report)
 
 
 class NCBIEnrichedLVG(HgvsLVG):

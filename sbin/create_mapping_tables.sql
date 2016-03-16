@@ -41,7 +41,8 @@ call create_index("pubtator_match", "hgvs_text,PMID");
 drop table if exists ncbi_match;
 create table ncbi_match (
      hgvs_text varchar(255) not null,
-     PMID int(11) default NULL
+     PMID int(11) default NULL,
+     version varchar(10) default NULL
 );
 
 call create_index("ncbi_match", "hgvs_text,PMID");
@@ -49,7 +50,8 @@ call create_index("ncbi_match", "hgvs_text,PMID");
 drop table if exists clinvar_match;
 create table clinvar_match (
      hgvs_text varchar(255) not null,
-     PMID int(11) default NULL
+     PMID int(11) default NULL,
+     version varchar(10) default NULL
 );
 
 call create_index("clinvar_match", "hgvs_text,PMID");

@@ -6,6 +6,7 @@ import logging
 
 from .sqlcache import SQLCache
 from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
+from .ncbi_lvg import ncbi_report_to_variants
 from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.cached')
@@ -96,12 +97,20 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
 class NCBIVariantReportCachedQuery(SQLCache):
 
+    VERSION = '0.0.1'
+
     def __init__(self, granular=True):
         self.granular = granular
         super(self.__class__, self).__init__('ncbi_report')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
+
+    def store_granular(self, hgvs_text, result):
+        variants = ncbi_report_to_variants(result)
+
+        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid} for pmid in result]
+        self.batch_insert('ncbi_match', entry_pairs)
 
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
@@ -111,6 +120,8 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
         result = NCBIVariantReport(hgvs_text)
         self.store(hgvs_text, result)
+        if self.granular:
+            self.store_granular(hgvs_text, result)
         return result
 
 

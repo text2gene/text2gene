@@ -3,8 +3,6 @@ import unittest
 
 from hgvs_lexicon import HgvsLVG
 
-
-
 class TestHgvsLVG(unittest.TestCase):
 
     def setUp(self):
@@ -12,7 +10,6 @@ class TestHgvsLVG(unittest.TestCase):
 
     def tearDown(self):
         pass
-
 
     def test_del_numeric_or_chars(self):
         hgvs_text = 'NM_005228.3:c.2240_2257del18'
@@ -32,7 +29,6 @@ class TestHgvsLVG(unittest.TestCase):
         assert expected_g in lex.hgvs_g
         assert expected_n in lex.hgvs_n
         assert expected_p in lex.hgvs_p
-
     
     def test_no_variant_mappings(self):
         hgvs_text = 'NM_194248.1:c.158C>T'

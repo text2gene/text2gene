@@ -22,7 +22,7 @@ def hgvs2pmid(hgvs_text):
     """ Takes an input hgvs_text and uses a combination of methods to name pubmed
     articles by their PMID that mention this genetic variant.
 
-        # a weird one from N-of-1:
+        # a weird one:
         #NM_194248.1:c.158C>T
 
     :param hgvs_text: str
@@ -38,7 +38,7 @@ def hgvs2pmid(hgvs_text):
 
         outd['lvg'] = lex.to_dict()
 
-        outd['response'] = { }
+        outd['response'] = {}
 
         ncbi_pmids = NCBIHgvs2Pmid(hgvs_text)
         if ncbi_pmids:
