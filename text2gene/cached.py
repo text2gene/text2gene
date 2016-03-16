@@ -113,8 +113,8 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
 ### API Definitions
 
-ClinvarHgvs2Pmid = ClinvarCachedQuery().query
-PubtatorHgvs2Pmid = PubtatorCachedQuery().query
-NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery().query
-NCBIReport = NCBIVariantReportCachedQuery().query
+ClinvarHgvs2Pmid = ClinvarCachedQuery(GRANULAR_CACHE).query
+PubtatorHgvs2Pmid = PubtatorCachedQuery(GRANULAR_CACHE).query
+NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(GRANULAR_CACHE).query
+NCBIReport = NCBIVariantReportCachedQuery(GRANULAR_CACHE).query
 

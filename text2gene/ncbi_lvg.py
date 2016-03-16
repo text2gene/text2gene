@@ -12,7 +12,7 @@ class NCBIHgvsLVG(object):
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
 
-        self.variants = { 'p': {}, 'c': {}, 'g': {}, 'n': {} }
+        self.variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
 
         self.report = NCBIReport(self.hgvs_text)
         self._parse_report()

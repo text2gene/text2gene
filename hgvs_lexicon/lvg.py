@@ -83,6 +83,7 @@ class HgvsLVG(object):
         # fill in all the different ways to talk about this variant in each sequence type.
         self.variants = {'g': dict(), 'c': dict(), 'n': dict(), 'p': dict()}
 
+        # collect any variants that were supplied at instantiation ("enrichment")
         for input_hgvs_c in kwargs.get('hgvs_c', []):
             self.variants['c'][str(input_hgvs_c)] = Variant(input_hgvs_c)
 
@@ -199,10 +200,10 @@ class HgvsLVG(object):
 
         (gene_name is a lazy-loaded magic attribute, and may take a second or two).
         """
-        outd = { 'variants': {},
-                 'transcripts': list(self.transcripts),
-                 'seqvar': self.seqvar,
-                 'hgvs_text': self.hgvs_text,
+        outd = {'variants': {},
+                'transcripts': list(self.transcripts),
+                'seqvar': self.seqvar,
+                'hgvs_text': self.hgvs_text,
                }
 
         if with_gene_name:
