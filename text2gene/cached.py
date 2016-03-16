@@ -4,6 +4,7 @@ from medgen.api import NCBIVariantPubmeds, NCBIVariantReport
 
 from .sqlcache import SQLCache
 from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
+from .config import GRANULAR_CACHE
 
 #### Cached Query classes: one "Hgvs2Pmid" for each service
 
@@ -14,15 +15,16 @@ class ClinvarCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self, granular=False):
+    def __init__(self, granular=True):
+        self.granular = granular
         super(self.__class__, self).__init__('clinvar_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
     def store_granular(self, hgvs_text, result):
-        entry_pairs = dict(zip([hgvs_text for x in range(len(result))]),
-                                [pmid for pmid in result])
+        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
+        self.batch_insert('clinvar_match', entry_pairs)
 
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
@@ -41,11 +43,16 @@ class PubtatorCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self):
+    def __init__(self, granular=True):
+        self.granular = granular
         super(self.__class__, self).__init__('pubtator_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
+
+    def store_granular(self, hgvs_text, result):
+        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
+        self.batch_insert('clinvar_match', entry_pairs)
 
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
@@ -55,16 +62,23 @@ class PubtatorCachedQuery(SQLCache):
 
         result = pubtator_hgvs_to_pmid(hgvs_text)
         self.store(hgvs_text, result)
+        if self.granular:
+            self.store_granular(hgvs_text, result)
         return result
 
 
 class NCBIVariantPubmedsCachedQuery(SQLCache):
 
-    def __init__(self):
+    def __init__(self, granular=True):
+        self.granular = granular
         super(self.__class__, self).__init__('ncbi_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
+
+    def store_granular(self, hgvs_text, result):
+        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid} for pmid in result]
+        self.batch_insert('clinvar_match', entry_pairs)
 
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
@@ -79,7 +93,8 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
 class NCBIVariantReportCachedQuery(SQLCache):
 
-    def __init__(self):
+    def __init__(self, granular=True):
+        self.granular = granular
         super(self.__class__, self).__init__('ncbi_report')
 
     def get_cache_key(self, hgvs_text):

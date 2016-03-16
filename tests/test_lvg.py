@@ -27,11 +27,11 @@ class TestHgvsLVG(unittest.TestCase):
         expected_n = 'NM_005228.3:n.2486_2503delTAAGAGAAGCAACATCTC'
 
         for c_hgvs_text in expected_c:
-            assert c_hgvs_text in lex.hgvs_c_variants
+            assert c_hgvs_text in lex.hgvs_c
 
-        assert expected_g in lex.hgvs_g_variants
-        assert expected_n in lex.hgvs_n_variants
-        assert expected_p in lex.hgvs_p_variants
+        assert expected_g in lex.hgvs_g
+        assert expected_n in lex.hgvs_n
+        assert expected_p in lex.hgvs_p
 
     
     def test_no_variant_mappings(self):

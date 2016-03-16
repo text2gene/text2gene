@@ -18,6 +18,9 @@ class HgvsLVGCached(SQLCache):
     def get_cache_key(querydict, hgvs_text):
         return str(hgvs_text)
 
+    def store_granular(self, lex):
+        pass
+
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
@@ -28,6 +31,9 @@ class HgvsLVGCached(SQLCache):
         lexobj = HgvsLVG(hgvs_text)
         if lexobj:
             self.store(hgvs_text, pickle.dumps(lexobj))
+            if self.granular:
+                self.store_granular(lexobj)
+
             return lexobj
         else:
             raise Text2GeneError('HgvsLVG object could not be created from input hgvs_text %s' % hgvs_text)

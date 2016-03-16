@@ -7,6 +7,8 @@ from .cached import NCBIReport
 
 class NCBIHgvsLVG(object):
 
+    VERSION = '0.0.1'
+
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
 
@@ -29,6 +31,8 @@ class NCBIHgvsLVG(object):
 
 class NCBIEnrichedLVG(HgvsLVG):
 
+    VERSION = '0.0.1'
+
     def __init__(self, hgvs_text, **kwargs):
         self.variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
 
@@ -36,10 +40,10 @@ class NCBIEnrichedLVG(HgvsLVG):
         self._parse_report()
 
         super(NCBIEnrichedLVG, self).__init__(hgvs_text,
-                                              hgvs_c=self.hgvs_c_variants,
-                                              hgvs_g=self.hgvs_g_variants,
-                                              hgvs_p=self.hgvs_p_variants,
-                                              hgvs_n=self.hgvs_n_variants)
+                                              hgvs_c=self.hgvs_c,
+                                              hgvs_g=self.hgvs_g,
+                                              hgvs_p=self.hgvs_p,
+                                              hgvs_n=self.hgvs_n)
 
     def _parse_report(self):
         rep = self.report[0]

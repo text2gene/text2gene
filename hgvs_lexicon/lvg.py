@@ -177,19 +177,19 @@ class HgvsLVG(object):
         return hgvs_parser.parse_hgvs_variant(hgvs_text_or_seqvar)
 
     @property
-    def hgvs_c_variants(self):
+    def hgvs_c(self):
         return self.variants['c'].keys()
 
     @property
-    def hgvs_g_variants(self):
+    def hgvs_g(self):
         return self.variants['g'].keys()
 
     @property
-    def hgvs_p_variants(self):
+    def hgvs_p(self):
         return self.variants['p'].keys()
 
     @property
-    def hgvs_n_variants(self):
+    def hgvs_n(self):
         return self.variants['n'].keys()
 
     def to_dict(self, with_gene_name=True):

@@ -8,6 +8,7 @@ default_cfg_dir = os.path.join(os.getcwd(), 'etc')
 CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))
 ENV = os.getenv('%s_ENV' % PKGNAME, 'dev')
+GRANULAR_CACHE = True
 
 ####
 import logging
