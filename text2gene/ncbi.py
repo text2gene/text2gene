@@ -94,20 +94,23 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
     def _store_granular_hgvs_type(self, hgvs_text, hgvs_vars, seqtype):
         entry_pairs = [{'hgvs_text': hgvs_text,
-                        'hgvs_%s' % seqtype: item,
+                        'hgvs_%s' % seqtype: '%s' % item,
                         'version': self.VERSION} for item in hgvs_vars]
 
         self.batch_insert('ncbi_mappings', entry_pairs)
 
     def store_granular(self, hgvs_text, result):
+        #TODO: rename this and the others "store_grains"
         variants = ncbi_report_to_variants(result)
         for seqtype in variants.keys():
             self._store_granular_hgvs_type(hgvs_text, variants[seqtype], seqtype)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
+                if force_granular:
+                    self.store_granular(hgvs_text, result)
                 return result
 
         result = NCBIVariantReport(hgvs_text)
