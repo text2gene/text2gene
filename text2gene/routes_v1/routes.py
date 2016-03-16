@@ -8,7 +8,8 @@ from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
 from ..lvg_cached import LVG
-from ..cached import PubtatorHgvs2Pmid, NCBIHgvs2Pmid, ClinvarHgvs2Pmid, NCBIReport
+from ..ncbi import NCBIHgvs2Pmid, NCBIReport
+from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
 from ..utils import HTTP200, HTTP400
 

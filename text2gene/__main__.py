@@ -7,7 +7,8 @@ from metapub import FindIt
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
-from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid, NCBIHgvs2Pmid
+from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
+from .ncbi import NCBIHgvs2Pmid, NCBIEnrichedLVG, NCBIReport
 from .lvg_cached import LVG
 
 pubtator_db = PubtatorDB()

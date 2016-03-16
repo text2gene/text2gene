@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from medgen.api import *
+#from medgen.api import *
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
 from text2gene import *

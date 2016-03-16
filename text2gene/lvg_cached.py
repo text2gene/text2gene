@@ -19,7 +19,7 @@ class HgvsLVGCached(SQLCache):
         self.granular = granular
         super(self.__class__, self).__init__('hgvslvg')
 
-    def get_cache_key(hgvs_text):
+    def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
     def _store_granular_hgvs_type(self, lex, hgvs_seqtype_name):

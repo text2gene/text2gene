@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
-from text2gene.ncbi_lvg import NCBIEnrichedLVG
+from text2gene.ncbi import NCBIEnrichedLVG
 
 
 hgvs_text_no_uta_results = 'NM_194248.1:c.158C>T'
