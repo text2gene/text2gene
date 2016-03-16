@@ -70,8 +70,8 @@ def hgvs_to_pmid_results_dict(hgvs_text):
 
     pmid_results = {}
     pmid_results['NCBIVariantReporter'] = NCBIHgvs2Pmid(hgvs_text)
-    pmid_results['PubTator'] = PubtatorHgvs2Pmid(lex)
-    pmid_results['ClinVar'] = ClinvarHgvs2Pmid(lex)
+    pmid_results['PubTator'] = PubtatorHgvs2Pmid(hgvs_text)
+    pmid_results['ClinVar'] = ClinvarHgvs2Pmid(hgvs_text)
     return pmid_results
 
 
@@ -199,7 +199,7 @@ def cli_hgvsfile2pmid():
 
 
 if __name__=='__main__':
-    process_many_from_command_line()
+    cli_hgvs2pmid()
 
 
 """

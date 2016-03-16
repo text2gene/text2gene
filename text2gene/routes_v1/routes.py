@@ -44,11 +44,11 @@ def hgvs2pmid(hgvs_text):
         if ncbi_pmids:
             outd['response']['NCBI'] = ncbi_pmids
 
-        clinvar_pmids = ClinvarHgvs2Pmid(lex)
+        clinvar_pmids = ClinvarHgvs2Pmid(hgvs_text)
         if clinvar_pmids:
             outd['response']['ClinVar'] = clinvar_pmids
 
-        pubtator_pmids = PubtatorHgvs2Pmid(lex)
+        pubtator_pmids = PubtatorHgvs2Pmid(hgvs_text)
         if pubtator_pmids:
             outd['response']['PubTator'] = pubtator_pmids
 

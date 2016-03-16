@@ -69,6 +69,8 @@ def _seqvar_to_seqvar(seqvar, base_type, new_type):
 
 class HgvsLVG(object):
 
+    VERSION = '0.0.1'
+
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
         self.hgvs_text = str(hgvs_text_or_seqvar)
 

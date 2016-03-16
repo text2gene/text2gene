@@ -9,6 +9,9 @@ from .sqlcache import SQLCache
 
 
 class HgvsLVGCached(SQLCache):
+
+    VERSION = HgvsLVG.VERSION
+
     def __init__(self):
         super(self.__class__, self).__init__('hgvslvg')
 

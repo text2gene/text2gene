@@ -12,11 +12,17 @@ from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
 
 class ClinvarCachedQuery(SQLCache):
 
-    def __init__(self):
+    VERSION = '0.0.1'
+
+    def __init__(self, granular=False):
         super(self.__class__, self).__init__('clinvar_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
+
+    def store_granular(self, hgvs_text, result):
+        entry_pairs = dict(zip([hgvs_text for x in range(len(result))]),
+                                [pmid for pmid in result])
 
     def query(self, hgvs_text, skip_cache=False):
         if not skip_cache:
@@ -26,10 +32,14 @@ class ClinvarCachedQuery(SQLCache):
 
         result = clinvar_hgvs_to_pmid(hgvs_text)
         self.store(hgvs_text, result)
+        if self.granular:
+            self.store_granular(hgvs_text, result)
         return result
 
 
 class PubtatorCachedQuery(SQLCache):
+
+    VERSION = '0.0.1'
 
     def __init__(self):
         super(self.__class__, self).__init__('pubtator_hgvs2pmid')
