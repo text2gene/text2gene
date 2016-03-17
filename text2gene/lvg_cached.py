@@ -15,8 +15,9 @@ class HgvsLVGCached(SQLCache):
 
     VERSION = HgvsLVG.VERSION
 
-    def __init__(self, granular=True):
+    def __init__(self, granular=False, granular_table='lvg_mappings'):
         self.granular = granular
+        self.granular_table = granular_table
         super(self.__class__, self).__init__('hgvslvg')
 
     def get_cache_key(self, hgvs_text):
@@ -28,7 +29,7 @@ class HgvsLVGCached(SQLCache):
                         hgvs_seqtype_name: item,
                         'version': self.VERSION} for item in hgvs_vars]
 
-        self.batch_insert('lvg_mappings', entry_pairs)
+        self.batch_insert(self.granular_table, entry_pairs)
 
     def store_granular(self, lex):
         for hgvs_type in ['c', 'g', 'n', 'p']:

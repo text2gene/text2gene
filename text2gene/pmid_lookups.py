@@ -65,3 +65,4 @@ def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
 
     return list(pmids)
 
+

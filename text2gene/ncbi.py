@@ -4,7 +4,7 @@ from medgen.api import NCBIVariantReport
 from hgvs_lexicon import Variant, HgvsLVG
 
 from .sqlcache import SQLCache
-from .config import GRANULAR_CACHE
+from .config import GRANULAR_CACHE, CONFIG
 
 
 def ncbi_report_to_variants(report):
@@ -64,9 +64,9 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self, granular=True):
+    def __init__(self, granular=True, granular_table='ncbi_match'):
         self.granular = granular
-        self.granular_table = 'ncbi_match'
+        self.granular_table = granular_table
         super(self.__class__, self).__init__('ncbi_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
@@ -94,9 +94,9 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self, granular=True):
+    def __init__(self, granular=True, granular_table='ncbi_mappings'):
         self.granular = granular
-        self.granular_table = 'ncbi_mappings'
+        self.granular_table = granular_table
         super(self.__class__, self).__init__('ncbi_report')
 
     def get_cache_key(self, hgvs_text):
@@ -133,5 +133,7 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
 ### API Functions
 
-NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(GRANULAR_CACHE).query
-NCBIReport = NCBIVariantReportCachedQuery(GRANULAR_CACHE).query
+NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=GRANULAR_CACHE,
+                                              granular_table=CONFIG.get('training', 'ncbi_match_table')).query
+NCBIReport = NCBIVariantReportCachedQuery(granular=GRANULAR_CACHE,
+                                          granular_table=CONFIG.get('training', 'ncbi_mappings_table')).query

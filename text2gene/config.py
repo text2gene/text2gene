@@ -8,7 +8,6 @@ default_cfg_dir = os.path.join(os.getcwd(), 'etc')
 CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))
 ENV = os.getenv('%s_ENV' % PKGNAME, 'dev')
-GRANULAR_CACHE = True
 
 ####
 import logging
@@ -27,3 +26,5 @@ configs = [os.path.join(CFGDIR, x) for x in os.listdir(CFGDIR) if x.find(ENV+'.i
 CONFIG = ConfigParser()
 CONFIG.read(configs)
 
+# if training is "active", enable GRANULAR_CACHE for all cacheing engines.
+GRANULAR_CACHE = CONFIG.get('training', 'active')
