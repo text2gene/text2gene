@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 import time
 
 from medgen.api import ClinVarDB
-from text2gene.cached import NCBIReport
+from text2gene.ncbi import NCBIReport
 
 hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples')
 
