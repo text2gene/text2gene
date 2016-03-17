@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 import time
 
 from medgen.api import ClinVarDB
-from text2gene.ncbi import NCBIReport
+from text2gene.ncbi import NCBIReport, NCBIHgvs2Pmid
 
 hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples')
 
@@ -19,6 +19,8 @@ for entry in hgvs_examples:
     dmesg(hgvs_text, 'collecting')
     try:
         report = NCBIReport(hgvs_text)
+        pmids = NCBIHgvs2Pmid(hgvs_text)
+        dmesg(hgvs_text, 'PMIDs: %r' % pmids)
     except Exception as error:
         dmesg(hgvs_text, '%r' % error)
 
