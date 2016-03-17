@@ -12,7 +12,8 @@ pubtator_db = PubtatorDB()
 
 
 def _guard_lex(hgvs_lex_or_text):
-    if type(hgvs_lex_or_text) == str:
+    if hasattr(hgvs_lex_or_text, 'upper'):
+        #if this is a string of any kind
         return LVG(hgvs_lex_or_text)
     else:
         return hgvs_lex_or_text

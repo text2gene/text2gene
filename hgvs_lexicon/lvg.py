@@ -175,7 +175,7 @@ class HgvsLVG(object):
         """
         if type(hgvs_text_or_seqvar) == hgvs.variant.SequenceVariant:
             return hgvs_text_or_seqvar
-        return hgvs_parser.parse_hgvs_variant(hgvs_text_or_seqvar)
+        return hgvs_parser.parse_hgvs_variant(str(hgvs_text_or_seqvar))
 
     @property
     def hgvs_c(self):
