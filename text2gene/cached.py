@@ -36,7 +36,7 @@ class ClinvarCachedQuery(SQLCache):
 
         result = clinvar_hgvs_to_pmid(hgvs_text)
         self.store(hgvs_text, result)
-        if self.granular:
+        if self.granular and result:
             self.store_granular(hgvs_text, result)
         return result
 
@@ -64,7 +64,7 @@ class PubtatorCachedQuery(SQLCache):
 
         result = pubtator_hgvs_to_pmid(hgvs_text)
         self.store(hgvs_text, result)
-        if self.granular:
+        if self.granular and result:
             self.store_granular(hgvs_text, result)
         return result
 
