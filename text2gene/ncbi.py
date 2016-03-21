@@ -134,6 +134,20 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
             self.store_granular(hgvs_text, result)
         return result
 
+    def create_granular_table(self):
+        tname = self.granular_table
+        self.execute("drop table if exists {}".format(tname))
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version varchar(10) default NULL)""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
+        log.debug('creating table %s for ClinvarCachedQuery')
+
+
 
 class NCBIVariantReportCachedQuery(SQLCache):
 

@@ -1,20 +1,23 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
+
 from pubtatordb import SQLData
 
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
 from .lvg_cached import HgvsLVGCached
 
+log = logging.getLogger('text2gene.experiment')
 
 search_module_map = {'pubtator': PubtatorCachedQuery,
                      'clinvar': ClinvarCachedQuery,
                      'ncbi': NCBIVariantPubmedsCachedQuery,
                     }
 
-lvg_module_map = {'ncbi_enriched_lvg': NCBIEnrichedLVGCachedQuery,
-                  'hgvs_lvg': HgvsLVGCached,
-                  'ncbi_lvg': NCBIHgvsLVG,
+lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
+                  'hgvs': HgvsLVGCached,
+                  'ncbi': NCBIHgvsLVG,
                  }
 
 class Experiment(SQLData):
@@ -36,7 +39,10 @@ class Experiment(SQLData):
         # HGVS2PMID cache-backed functions internal to this Experiment
         self.ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=True, granular_table=self.get_table_name('clinvar')).query
         self.PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=True, granular_table=self.get_table_name('pubtator')).query
-        self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, self.get_table_name('ncbi')).query
+        self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, granular_table=self.get_table_name('ncbi')).query
+
+        # setup granular result tables necessary to store our results
+        self._setup_tables()
 
         # set our internal LVG query function based on preference stated in kwargs.
         self.LVG = lvg_module_map[self.lvg_mode]
@@ -58,22 +64,29 @@ class Experiment(SQLData):
         for mod in self.search_modules:
             tablename = self.get_table_name(mod)
             log.debug('Creating table %s', tablename)
-            search_module_map[mod]().create_table()
+            search_module_map[mod]().create_granular_table()
 
     def _load_examples(self):
-        sql = 'select * from {dbname}.{tname}'
+        sql = 'select * from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
         if self.hgvs_examples_limit:
             sql += ' limit %i' % self.hgvs_examples_limit
-
-        return self.
+        return self.fetchall(sql)
 
     def run(self):
-
-
         for row in self._load_examples():
             hgvs_text = row['hgvs_text'].strip()
 
             lex = self.LVG(hgvs_text)
 
             for mod in self.search_modules:
+                if mod == 'clinvar':
+                    result = self.ClinvarHgvs2Pmid(lex)
+
+                if mod == 'ncbi':
+                    result = self.NCBIHgvs2Pmid(lex.hgvs_text)
+
+                if mod == 'pubtator':
+                    result = self.PubtatorHgvs2Pmid(lex)
+
+                log.debug(mod, '%r' % result)
 

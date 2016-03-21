@@ -6,6 +6,8 @@ from .sqlcache import SQLCache
 from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
 from .config import GRANULAR_CACHE, CONFIG
 
+from .ncbi import NCBIHgvsLVG, NCBIEnrichedLVGCachedQuery
+
 log = logging.getLogger('text2gene.cached')
 
 #### Cached Query classes: one "Hgvs2Pmid" for each service
@@ -26,19 +28,37 @@ class ClinvarCachedQuery(SQLCache):
 
     def store_granular(self, hgvs_text, result):
         entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
-        self.batch_insert('clinvar_match', entry_pairs)
+        self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, lex, skip_cache=False):
+        """
+        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param skip_cache: whether to force reloading the data by skipping the cache
+        :return: list of PMIDs if found (result of Clinvar query)
+        """
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(lex.hgvs_text)
             if result:
                 return result
 
-        result = clinvar_hgvs_to_pmid(hgvs_text)
-        self.store(hgvs_text, result)
+        result = clinvar_hgvs_to_pmid(lex)
+        self.store(lex.hgvs_text, result)
         if self.granular and result:
-            self.store_granular(hgvs_text, result)
+            self.store_granular(lex.hgvs_text, result)
         return result
+
+    def create_granular_table(self):
+        tname = self.granular_table
+        self.execute("drop table if exists {}".format(tname))
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version varchar(10) default NULL)""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
+        log.debug('creating table %s for ClinvarCachedQuery')
 
 
 class PubtatorCachedQuery(SQLCache):
@@ -57,17 +77,37 @@ class PubtatorCachedQuery(SQLCache):
         entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
         self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, lex, skip_cache=False):
+        """
+        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param skip_cache: whether to force reloading the data by skipping the cache
+        :return: list of PMIDs if found (result of Clinvar query)
+        """
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(lex.hgvs_text)
             if result:
                 return result
 
-        result = pubtator_hgvs_to_pmid(hgvs_text)
-        self.store(hgvs_text, result)
+        result = pubtator_hgvs_to_pmid(lex)
+        self.store(lex.hgvs_text, result)
         if self.granular and result:
-            self.store_granular(hgvs_text, result)
+            self.store_granular(lex.hgvs_text, result)
         return result
+
+    def create_granular_table(self):
+        tname = self.granular_table
+        self.execute("drop table if exists {}".format(tname))
+        # ComponentString varchar(255) default NULL,  # TODO add in later. too complicated right now.
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version varchar(10) default NULL)""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
+        log.debug('creating table %s for PubtatorCachedQuery')
+
 
 
 ### API Definitions
