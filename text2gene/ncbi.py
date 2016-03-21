@@ -41,8 +41,10 @@ class NCBIHgvsLVG(object):
 
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
+        self.seqvar = Variant(hgvs_text)
         self.report = NCBIReport(self.hgvs_text)
         self.variants = ncbi_report_to_variants(self.report)
+
 
 class NCBIEnrichedLVG(HgvsLVG):
 
@@ -53,11 +55,54 @@ class NCBIEnrichedLVG(HgvsLVG):
 
         self.report = NCBIReport(str(hgvs_text))
         self.variants = ncbi_report_to_variants(self.report)
+
         super(NCBIEnrichedLVG, self).__init__(hgvs_text,
                                               hgvs_c=self.hgvs_c,
                                               hgvs_g=self.hgvs_g,
                                               hgvs_p=self.hgvs_p,
                                               hgvs_n=self.hgvs_n)
+
+
+class NCBIEnrichedLVGCachedQuery(SQLCache):
+
+    VERSION = '0.0.1'
+
+    def __init__(self, granular=False, granular_table='ncbi_enriched_mappings'):
+        self.granular = granular
+        self.granular_table = granular_table
+        super(self.__class__, self).__init__('ncbi_enriched_lvg')
+
+    def get_cache_key(self, hgvs_text):
+        return str(hgvs_text)
+
+    def _store_granular_hgvs_type(self, lex, hgvs_seqtype_name):
+        hgvs_vars = getattr(lex, hgvs_seqtype_name)
+        entry_pairs = [{'hgvs_text': lex.hgvs_text,
+                        hgvs_seqtype_name: item,
+                        'version': self.VERSION} for item in hgvs_vars]
+
+        self.batch_insert(self.granular_table, entry_pairs)
+
+    def store_granular(self, lex):
+        for hgvs_type in ['c', 'g', 'n', 'p']:
+            self._store_granular_hgvs_type(lex, 'hgvs_'+hgvs_type)
+
+    def query(self, hgvs_text, skip_cache=False):
+        if not skip_cache:
+            result = self.retrieve(hgvs_text)
+            if result:
+                lexobj = pickle.loads(self.retrieve(hgvs_text))
+                return lexobj
+
+        lexobj = NCBIEnrichedLVG(hgvs_text)
+        if lexobj:
+            self.store(hgvs_text, pickle.dumps(lexobj))
+            if self.granular:
+                self.store_granular(lexobj)
+
+            return lexobj
+        else:
+            raise Text2GeneError('NCBIEnrichedLVG object could not be created from input hgvs_text %s' % hgvs_text)
 
 
 class NCBIVariantPubmedsCachedQuery(SQLCache):

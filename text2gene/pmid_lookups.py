@@ -5,22 +5,28 @@ from medgen.api import GeneID, ClinvarPubmeds
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
-from .lvg_cached import LVG
+#from .lvg_cached import LVG
 from .config import log
 
 pubtator_db = PubtatorDB()
 
-
+"""
 def _guard_lex(hgvs_lex_or_text):
     if hasattr(hgvs_lex_or_text, 'upper'):
         #if this is a string of any kind
         return LVG(hgvs_lex_or_text)
     else:
         return hgvs_lex_or_text
+"""
 
 
-def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
-    lex = _guard_lex(hgvs_lex_or_text)
+def clinvar_hgvs_to_pmid(lex):
+    """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
+    lex.variants to do a search in Clinvar for associated PMIDs.  Returns a list of PMIDs.
+
+    :param lex: lexical variant object (see above options)
+    :return: list of pmids found in Clinvar
+    """
     pmids = set()
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype].values():
@@ -29,12 +35,17 @@ def clinvar_hgvs_to_pmid(hgvs_lex_or_text):
     return list(pmids)
     
 
-def pubtator_hgvs_to_pmid(hgvs_lex_or_text):
-    lex = _guard_lex(hgvs_lex_or_text)
+def pubtator_hgvs_to_pmid(lex):
+    """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
+    lex.variants to do a search in PubTator for associated PMIDs.  Returns a list of PMIDs.
+
+    :param lex: lexical variant object (see above options)
+    :return: list of pmids found in Clinvar
+    """
     edittype = HgvsComponents(lex.seqvar).edittype
 
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
-        log.info('[%s] Cannot process edit type %s' % (hgvs_text, edittype))
+        log.info('[%s] Cannot process edit type %s' % (hgvs_lex_or_text, edittype))
         return None
 
     try:
