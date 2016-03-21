@@ -1,10 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
+import pickle
+import logging
+
 from medgen.api import NCBIVariantReport
 from hgvs_lexicon import Variant, HgvsLVG
 
 from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE, CONFIG
+from .exceptions import Text2GeneError
+
+log = logging.getLogger('text2gene.ncbi')
 
 
 def ncbi_report_to_variants(report):
