@@ -49,6 +49,8 @@ class ClinvarCachedQuery(SQLCache):
 
     def create_granular_table(self):
         tname = self.granular_table
+        log.info('creating table {} for ClinvarCachedQuery'.format(tname))
+
         self.execute("drop table if exists {}".format(tname))
 
         sql = """create table {} (
@@ -58,7 +60,6 @@ class ClinvarCachedQuery(SQLCache):
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)
-        log.debug('creating table %s for ClinvarCachedQuery')
 
 
 class PubtatorCachedQuery(SQLCache):
@@ -67,7 +68,7 @@ class PubtatorCachedQuery(SQLCache):
 
     def __init__(self, granular=True, granular_table='pubtator_match'):
         self.granular = granular
-        self.granular_table=granular_table
+        self.granular_table = granular_table
         super(self.__class__, self).__init__('pubtator_hgvs2pmid')
 
     def get_cache_key(self, hgvs_text):
@@ -99,6 +100,8 @@ class PubtatorCachedQuery(SQLCache):
         self.execute("drop table if exists {}".format(tname))
         # ComponentString varchar(255) default NULL,  # TODO add in later. too complicated right now.
 
+        log.info('creating table {} for PubtatorCachedQuery'.format(tname))
+
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
                   PMID int(11) default NULL,
@@ -106,8 +109,6 @@ class PubtatorCachedQuery(SQLCache):
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)
-        log.debug('creating table %s for PubtatorCachedQuery')
-
 
 
 ### API Definitions

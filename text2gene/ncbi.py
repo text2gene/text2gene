@@ -127,10 +127,12 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
         self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
+                if force_granular:
+                    self.store_granular(hgvs_text, result)
                 return result
 
         report = NCBIReport(hgvs_text, skip_cache)
@@ -142,6 +144,8 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
     def create_granular_table(self):
         tname = self.granular_table
+        log.info('creating table {} for NCBIVariantPubmedsCachedQuery'.format(tname))
+
         self.execute("drop table if exists {}".format(tname))
 
         sql = """create table {} (
@@ -151,7 +155,6 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)
-        log.debug('creating table %s for ClinvarCachedQuery')
 
 
 

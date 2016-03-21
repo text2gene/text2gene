@@ -2,13 +2,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-from pubtatordb import SQLData
-
+from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
 from .lvg_cached import HgvsLVGCached
 
 log = logging.getLogger('text2gene.experiment')
+log.setLevel(logging.DEBUG)
 
 search_module_map = {'pubtator': PubtatorCachedQuery,
                      'clinvar': ClinvarCachedQuery,
@@ -20,7 +20,7 @@ lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
                   'ncbi': NCBIHgvsLVG,
                  }
 
-class Experiment(SQLData):
+class Experiment(SQLCache):
 
     def __init__(self, experiment_name, **kwargs):
         self.experiment_name = experiment_name
@@ -36,25 +36,25 @@ class Experiment(SQLData):
         self.hgvs_examples_db = kwargs.get('hgvs_examples_db', 'clinvar')
         self.hgvs_examples_limit = kwargs.get('hgvs_examples_limit', None)
 
+        # setup granular result tables necessary to store our results
+        self._setup_tables()
+
         # HGVS2PMID cache-backed functions internal to this Experiment
         self.ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=True, granular_table=self.get_table_name('clinvar')).query
         self.PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=True, granular_table=self.get_table_name('pubtator')).query
         self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, granular_table=self.get_table_name('ncbi')).query
 
-        # setup granular result tables necessary to store our results
-        self._setup_tables()
-
         # set our internal LVG query function based on preference stated in kwargs.
-        self.LVG = lvg_module_map[self.lvg_mode]
+        self.LVG = lvg_module_map[self.lvg_mode]().query
 
-        super(self.__class__, self).__init__('ncbi_hgvs2pmid')
+        super(self.__class__, self).__init__('experiment')
 
-    def get_table_name(module_name):
+    def get_table_name(self, module_name):
         """ Produce a table name for given module_name, based on this Experiment's experiment_name and iteration.
 
         :return: (str) table name for this experiment and iteration, given module_name
         """
-        tname_tmpl = '{expname}_{iteration}_{mod_name}_match'
+        tname_tmpl = '{expname}_{iteration}_{mod}_match'
         return tname_tmpl.format(expname = self.experiment_name, iteration=self.iteration, mod=module_name)
 
     def _setup_tables(self):
@@ -63,8 +63,8 @@ class Experiment(SQLData):
         """
         for mod in self.search_modules:
             tablename = self.get_table_name(mod)
-            log.debug('Creating table %s', tablename)
-            search_module_map[mod]().create_granular_table()
+            log.debug('EXPERIMENT %s: creating table %s for %s', self.experiment_name, tablename, mod)
+            search_module_map[mod](granular=True, granular_table=tablename).create_granular_table()
 
     def _load_examples(self):
         sql = 'select * from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
@@ -80,13 +80,13 @@ class Experiment(SQLData):
 
             for mod in self.search_modules:
                 if mod == 'clinvar':
-                    result = self.ClinvarHgvs2Pmid(lex)
+                    result = self.ClinvarHgvs2Pmid(lex, skip_cache=True)
 
                 if mod == 'ncbi':
-                    result = self.NCBIHgvs2Pmid(lex.hgvs_text)
+                    result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
 
                 if mod == 'pubtator':
-                    result = self.PubtatorHgvs2Pmid(lex)
+                    result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
 
-                log.debug(mod, '%r' % result)
+                log.info('EXPERIMENT %s: [%s] %s results: %r', self.experiment_name, hgvs_text, mod, result)
 

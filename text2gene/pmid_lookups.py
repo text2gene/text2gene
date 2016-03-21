@@ -45,7 +45,7 @@ def pubtator_hgvs_to_pmid(lex):
     edittype = HgvsComponents(lex.seqvar).edittype
 
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
-        log.info('[%s] Cannot process edit type %s' % (hgvs_lex_or_text, edittype))
+        log.info('[%s] Cannot process edit type %s' % (lex.hgvs_text, edittype))
         return None
 
     try:
