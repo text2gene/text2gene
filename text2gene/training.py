@@ -17,8 +17,8 @@ search_module_map = {'pubtator': PubtatorCachedQuery,
 
 lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
                   'hgvs': HgvsLVGCached,
-                  'ncbi': NCBIHgvsLVG,
-                 }
+                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
+
 
 class Experiment(SQLCache):
 
@@ -45,7 +45,7 @@ class Experiment(SQLCache):
         self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, granular_table=self.get_table_name('ncbi')).query
 
         # set our internal LVG query function based on preference stated in kwargs.
-        self.LVG = lvg_module_map[self.lvg_mode]().query
+        self.LVG = lvg_module_map[self.lvg_mode](granular_table=self.get_mapping_table_name(self.lvg_mode)).query
 
         super(self.__class__, self).__init__('experiment')
 
@@ -55,7 +55,11 @@ class Experiment(SQLCache):
         :return: (str) table name for this experiment and iteration, given module_name
         """
         tname_tmpl = '{expname}_{iteration}_{mod}_match'
-        return tname_tmpl.format(expname = self.experiment_name, iteration=self.iteration, mod=module_name)
+        return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration, mod=module_name)
+
+    def get_mapping_table_name(self, lvg_mode):
+        tname_tmpl = '{expname}_{iteration}_{lvg}_mappings'
+        return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration, lvg=lvg_mode)
 
     def _setup_tables(self):
         """ Creates experiment tables in text2gene database for all search_modules used in this Experiment.
@@ -65,6 +69,11 @@ class Experiment(SQLCache):
             tablename = self.get_table_name(mod)
             log.debug('EXPERIMENT %s: creating table %s for %s', self.experiment_name, tablename, mod)
             search_module_map[mod](granular=True, granular_table=tablename).create_granular_table()
+
+        # create LVG mapping table
+        tablename = self.get_mapping_table_name(self.lvg_mode)
+        log.debug('EXPERIMENT %s: creating LVG mapping table %s', self.experiment_name, tablename)
+        lvg_module_map[self.lvg_mode](granular=True, granular_table=tablename).create_granular_table()
 
     def _load_examples(self):
         sql = 'select * from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
@@ -76,7 +85,7 @@ class Experiment(SQLCache):
         for row in self._load_examples():
             hgvs_text = row['hgvs_text'].strip()
 
-            lex = self.LVG(hgvs_text)
+            lex = self.LVG(hgvs_text, force_granular=True)
 
             for mod in self.search_modules:
                 if mod == 'clinvar':

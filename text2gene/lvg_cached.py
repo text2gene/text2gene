@@ -35,11 +35,13 @@ class HgvsLVGCached(SQLCache):
         for hgvs_type in ['c', 'g', 'n', 'p']:
             self._store_granular_hgvs_type(lex, 'hgvs_'+hgvs_type)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
                 lexobj = pickle.loads(self.retrieve(hgvs_text))
+                if force_granular:
+                    self.store_granular(lexobj)
                 return lexobj
 
         lexobj = HgvsLVG(hgvs_text)

@@ -93,11 +93,13 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
         for hgvs_type in ['c', 'g', 'n', 'p']:
             self._store_granular_hgvs_type(lex, 'hgvs_'+hgvs_type)
 
-    def query(self, hgvs_text, skip_cache=False):
+    def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
             result = self.retrieve(hgvs_text)
             if result:
                 lexobj = pickle.loads(self.retrieve(hgvs_text))
+                if force_granular:
+                    self.store_granular(lexobj)
                 return lexobj
 
         lexobj = NCBIEnrichedLVG(hgvs_text)
@@ -109,6 +111,42 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
             return lexobj
         else:
             raise Text2GeneError('NCBIEnrichedLVG object could not be created from input hgvs_text %s' % hgvs_text)
+
+    def create_granular_table(self):
+        tname = self.granular_table
+        log.info('creating table {} for NCBIEnrichedLVGCachedQuery'.format(tname))
+
+        self.execute("drop table if exists {};".format(tname))
+
+        sql = """create table {} (
+              hgvs_text varchar(255) not null,
+              hgvs_g varchar(255) default NULL,
+              hgvs_c varchar(255) default NULL,
+              hgvs_n varchar(255) default NULL,
+              hgvs_p varchar(255) default NULL,
+              version varchar(10) default NULL
+            );""".format(tname)
+        self.execute(sql)
+
+        self.execute('call create_index("{}", "hgvs_text,hgvs_g")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_c")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_n")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_p")'.format(tname))
+
+
+
+
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version varchar(10) default NULL)""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
+
+
+
 
 
 class NCBIVariantPubmedsCachedQuery(SQLCache):
