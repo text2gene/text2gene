@@ -114,4 +114,4 @@ class Experiment(SQLCache):
                     log.info('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:
                     log.info('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
-                                    self.experiment_name, self.iteration, hgvs_text, error)
+                                    self.experiment_name, self.iteration, hgvs_text, mod, error)
