@@ -39,7 +39,7 @@ def ncbi_report_to_pubmeds(report):
     :param report: list of strings representing NCBI Variation Reporter output
     :return: list of pubmeds found in report
     """
-    return report[0]['PMIDs']
+    return [int(item) for item in report[0]['PMIDs']]
 
 
 class NCBIHgvsLVG(object):
