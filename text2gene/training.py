@@ -85,17 +85,25 @@ class Experiment(SQLCache):
         for row in self._load_examples():
             hgvs_text = row['hgvs_text'].strip()
 
-            lex = self.LVG(hgvs_text, force_granular=True)
+            try:
+                lex = self.LVG(hgvs_text, force_granular=True)
+            except Exception as error:
+                log.info('EXPERIMENT %s: [%s] Error creating LVG; skipping. (Error: %r',
+                                self.experiment_name, hgvs_text, error)
+                continue
 
             for mod in self.search_modules:
-                if mod == 'clinvar':
-                    result = self.ClinvarHgvs2Pmid(lex, skip_cache=True)
+                try:
+                    if mod == 'clinvar':
+                        result = self.ClinvarHgvs2Pmid(lex, skip_cache=True)
 
-                if mod == 'ncbi':
-                    result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
+                    if mod == 'ncbi':
+                        result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
 
-                if mod == 'pubtator':
-                    result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
+                    if mod == 'pubtator':
+                        result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
 
-                log.info('EXPERIMENT %s: [%s] %s results: %r', self.experiment_name, hgvs_text, mod, result)
-
+                    log.info('EXPERIMENT %s: [%s] %s results: %r', self.experiment_name, hgvs_text, mod, result)
+                except Exception as error:
+                    log.info('EXPERIMENT %s: [%s] Error searching for matches in %s: %r',
+                                    self.experiment_name, hgvs_text, error)
