@@ -149,6 +149,14 @@ class SQLCache(SQLData):
         else:
             before = SQLdatetime(datetime.now())
 
-        sql += before
+        sql += '"%s"' % before
 
         self.execute(sql)
+
+    def size(self):
+        """ Counts number of rows currently in table.
+
+        :return: (long) length of table in number of rows
+        """
+        result = self.execute("SELECT count(*) as cnt from {db.tablename}".format(db=self))
+        return result.record[0]['cnt']
