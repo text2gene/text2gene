@@ -149,6 +149,7 @@ class HgvsLVG(object):
 
     @property
     def gene_name(self):
+        "lazy-loaded gene name based on hgvs lookup and Gene database select."
         if self._gene_name is None:     # and self.seqvar.type != 'p':
             if self.variants['c']:
                 chosen_one = list(self.variants['c'].values())[0]

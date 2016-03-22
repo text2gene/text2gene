@@ -10,15 +10,6 @@ from .config import log
 
 pubtator_db = PubtatorDB()
 
-"""
-def _guard_lex(hgvs_lex_or_text):
-    if hasattr(hgvs_lex_or_text, 'upper'):
-        #if this is a string of any kind
-        return LVG(hgvs_lex_or_text)
-    else:
-        return hgvs_lex_or_text
-"""
-
 
 def clinvar_hgvs_to_pmid(lex):
     """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
@@ -75,5 +66,3 @@ def pubtator_hgvs_to_pmid(lex):
                 pmids.add(res['PMID'])
 
     return list(pmids)
-
-

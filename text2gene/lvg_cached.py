@@ -54,6 +54,21 @@ class HgvsLVGCached(SQLCache):
         else:
             raise Text2GeneError('HgvsLVG object could not be created from input hgvs_text %s' % hgvs_text)
 
+    def create_granular_table(self):
+        tname = self.granular_table
+        log.info('creating table {} for HgvsLVGCached'.format(tname))
+
+        self.execute("drop table if exists {}".format(tname))
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version varchar(10) default NULL)""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
+
+
 
 # API Definitions
 
