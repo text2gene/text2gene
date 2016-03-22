@@ -8,7 +8,7 @@ from flask import Blueprint
 from hgvs.exceptions import HGVSParseError
 
 from ..lvg_cached import LVG
-from ..ncbi import NCBIHgvs2Pmid, NCBIReport
+from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
 from ..utils import HTTP200, HTTP400
@@ -70,6 +70,26 @@ def ncbi_variant_reporter(hgvs_text):
         report = NCBIReport(hgvs_text)
 
         outd['response'] = report
+
+    return HTTP200(outd)
+
+
+@routes_v1.route('/v1/lvgenriched/<hgvs_text>')
+def lvg_enriched(hgvs_text):
+    """ Takes an input hgvs_text and generates valid HGVS alternative statements,
+    using a pre-enrichment process of seeding HgvsLVG with variants from the NCBI Variation Reporter.
+
+    Returns JSON (http 200).  If problem w/ HGVS string, responds with http 400
+    """
+
+    outd = {'action': 'ncbienrichedlvg', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if 'hgvs_text' not in hgvs_text:
+        try:
+            hgvs_obj = LVGEnriched(hgvs_text)
+        except Exception as error:
+            return HTTP400(error, 'Error using HgvsLVG to find lexical variants for %s' % hgvs_text)
+        outd['response'] = hgvs_obj.to_dict()
 
     return HTTP200(outd)
 

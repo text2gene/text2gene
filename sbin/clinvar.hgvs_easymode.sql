@@ -1,5 +1,5 @@
-drop   table if exists hgvs_examples;
-create table           hgvs_examples
+drop   table if exists hgvs_easymode;
+create table           hgvs_easymode
 select distinct
        Pathogenic.hgvs_text
 from
@@ -10,5 +10,5 @@ where
 order by
       HGMD.hgvs_text;
 
-call create_index('hgvs_examples', 'hgvs_text');  
+call create_index('hgvs_easymode', 'hgvs_text');  
 
