@@ -83,7 +83,7 @@ class SQLCache(SQLData):
         return True
 
     def delete(self, querydict):
-        sql = 'delete from {db.tablename} where cache_key={key}'.format(db=self, key=self.get_cache_key(querydict))
+        sql = 'delete from {db.tablename} where cache_key="{key}"'.format(db=self, key=self.get_cache_key(querydict))
         self.execute(sql)
 
     def retrieve(self, querydict):
