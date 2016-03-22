@@ -5,7 +5,7 @@ import time
 from medgen.api import ClinVarDB
 from text2gene.ncbi import NCBIReport, NCBIHgvs2Pmid
 
-hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples')
+hgvs_examples = ClinVarDB().fetchall('select hgvs_text from clinvar_hgvs where hgvs_text like "NM_%c.%" order by rand()  limit 2000000')
 
 print()
 print('%i HGVS examples found' % len(hgvs_examples))
