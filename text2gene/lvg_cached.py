@@ -25,9 +25,10 @@ class HgvsLVGCached(SQLCache):
 
     def _store_granular_hgvs_type(self, lex, hgvs_seqtype_name):
         hgvs_vars = getattr(lex, hgvs_seqtype_name)
-        entry_pairs = [{'hgvs_text': lex.hgvs_text,
-                        hgvs_seqtype_name: item,
-                        'version': self.VERSION} for item in hgvs_vars]
+        if hgvs_vars:
+            entry_pairs = [{'hgvs_text': lex.hgvs_text,
+                            hgvs_seqtype_name: item,
+                            'version': self.VERSION} for item in hgvs_vars]
 
         self.batch_insert(self.granular_table, entry_pairs)
 
