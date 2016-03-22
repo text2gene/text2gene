@@ -29,11 +29,7 @@ def ncbi_report_to_variants(report):
             # set up data structure just like HgvsLVG object, i.e.:
             # {seqtype: { 'hgvs_string': SequenceVariant object }
             seqvar = Variant(hgvs_text)
-            variants[seqtype][str(seqvar)] = seqvar
-
-
-    # TODO: Check for validity; reclassify variants where appropriate.  E.g. Report for variant
-    #       XR_242108.1:n.1438_1451delGGACCTGCCCTGCT comes out of Hgvs_c, but is an 'n'.
+            variants[seqvar.type][str(seqvar)] = seqvar
 
     return variants
 
