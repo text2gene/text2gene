@@ -133,7 +133,5 @@ class PubtatorCachedQuery(SQLCache):
 
 ### API Definitions
 
-ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=GRANULAR_CACHE,
-                                      granular_table=CONFIG.get('training', 'clinvar_match_table')).query
-PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=GRANULAR_CACHE,
-                                        granular_table=CONFIG.get('training', 'pubtator_match_table')).query
+ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=GRANULAR_CACHE).query
+PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=GRANULAR_CACHE).query

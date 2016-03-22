@@ -48,7 +48,7 @@ class HgvsLVGCached(SQLCache):
         lexobj = HgvsLVG(hgvs_text)
         if lexobj:
             self.store(hgvs_text, pickle.dumps(lexobj))
-            if self.granular:
+            if force_granular or self.granular:
                 self.store_granular(lexobj)
 
             return lexobj

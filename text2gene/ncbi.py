@@ -248,9 +248,6 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
 ### API Functions
 
-NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=GRANULAR_CACHE,
-                                              granular_table=CONFIG.get('training', 'ncbi_match_table')).query
-NCBIReport = NCBIVariantReportCachedQuery(granular=GRANULAR_CACHE,
-                                          granular_table=CONFIG.get('training', 'ncbi_mappings_table')).query
-LVGEnriched = NCBIEnrichedLVGCachedQuery(granular=GRANULAR_CACHE,
-                                         granular_table=CONFIG.get('training', 'ncbi_enriched_lvg_table')).query
+NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=GRANULAR_CACHE).query
+NCBIReport = NCBIVariantReportCachedQuery(granular=GRANULAR_CACHE).query
+LVGEnriched = NCBIEnrichedLVGCachedQuery(granular=GRANULAR_CACHE).query
