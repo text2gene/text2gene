@@ -42,8 +42,8 @@ def pubtator_hgvs_to_pmid(lex):
     try:
         gene_id = GeneID(lex.gene_name)
     except TypeError:
-        # no gene_name? it happens.
-        gene_id = None
+        # no gene_name? it happens -- but our results will be basically bunk without it.
+        return []
 
     log.info('[%s] %s (Gene ID: %s)', lex.seqvar, lex.gene_name, gene_id)
 
