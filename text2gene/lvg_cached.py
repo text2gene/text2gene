@@ -30,7 +30,7 @@ class HgvsLVGCached(SQLCache):
                             hgvs_seqtype_name: item,
                             'version': self.VERSION} for item in hgvs_vars]
 
-        self.batch_insert(self.granular_table, entry_pairs)
+            self.batch_insert(self.granular_table, entry_pairs)
 
     def store_granular(self, lex):
         for hgvs_type in ['c', 'g', 'n', 'p']:
@@ -68,7 +68,6 @@ class HgvsLVGCached(SQLCache):
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)
-
 
 
 # API Definitions
