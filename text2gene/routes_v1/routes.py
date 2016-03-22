@@ -82,7 +82,7 @@ def lvg_enriched(hgvs_text):
     Returns JSON (http 200).  If problem w/ HGVS string, responds with http 400
     """
 
-    outd = {'action': 'ncbienrichedlvg', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+    outd = {'action': 'lvgenriched', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
         try:
