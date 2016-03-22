@@ -2,7 +2,7 @@
 from text2gene.lvg_cached import LVG, HgvsLVGCached
 
 db = HgvsLVGCached()
-all_rows = db.fetchall('select * from lvg_mappings')
+all_rows = db.fetchall('select * from hgvslvg_cache')
 
 for row in all_rows:
     hgvs_text = row['hgvs_text'].strip()
