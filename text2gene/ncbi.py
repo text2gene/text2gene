@@ -134,21 +134,6 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
         self.execute('call create_index("{}", "hgvs_text,hgvs_p")'.format(tname))
 
 
-
-
-
-        sql = """create table {} (
-                  hgvs_text varchar(255) not null,
-                  PMID int(11) default NULL,
-                  version varchar(10) default NULL)""".format(tname)
-        self.execute(sql)
-        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
-        self.execute(sql)
-
-
-
-
-
 class NCBIVariantPubmedsCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
