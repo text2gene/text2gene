@@ -75,6 +75,14 @@ class Experiment(SQLCache):
         log.debug('EXPERIMENT %s: creating LVG mapping table %s', self.experiment_name, tablename)
         lvg_module_map[self.lvg_mode](granular=True, granular_table=tablename).create_granular_table()
 
+    def _delete_tables(self):
+        for mod in self.search_modules:
+            tablename = self.get_table_name(mod)
+            log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, tablename)
+            self.execute('drop table %s' % tablename)
+
+        self.execute('drop table %s' % self.get_mapping_table_name(self.lvg_mode))
+
     def _load_examples(self):
         sql = 'select * from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
         if self.hgvs_examples_limit:
@@ -88,8 +96,8 @@ class Experiment(SQLCache):
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)
             except Exception as error:
-                log.info('EXPERIMENT %s: [%s] Error creating LVG; skipping. (Error: %r',
-                                self.experiment_name, hgvs_text, error)
+                log.info('EXPERIMENT [%s.%i]: [%s] Error creating LVG; skipping. (Error: %r',
+                                self.experiment_name, self.iteration, hgvs_text, error)
                 continue
 
             for mod in self.search_modules:
@@ -103,7 +111,7 @@ class Experiment(SQLCache):
                     if mod == 'pubtator':
                         result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
 
-                    log.info('EXPERIMENT %s: [%s] %s results: %r', self.experiment_name, hgvs_text, mod, result)
+                    log.info('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:
-                    log.info('EXPERIMENT %s: [%s] Error searching for matches in %s: %r',
-                                    self.experiment_name, hgvs_text, error)
+                    log.info('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
+                                    self.experiment_name, self.iteration, hgvs_text, error)

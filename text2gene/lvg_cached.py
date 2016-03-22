@@ -57,18 +57,24 @@ class HgvsLVGCached(SQLCache):
 
     def create_granular_table(self):
         tname = self.granular_table
-        log.info('creating table {} for HgvsLVGCached'.format(tname))
+        log.info('creating table {} for NCBIVariantReportCachedQuery'.format(tname))
 
-        self.execute("drop table if exists {}".format(tname))
+        self.execute("drop table if exists {};".format(tname))
 
         sql = """create table {} (
-                  hgvs_text varchar(255) not null,
-                  PMID int(11) default NULL,
-                  version varchar(10) default NULL)
-                  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
+              hgvs_text varchar(255) not null,
+              hgvs_g varchar(255) default NULL,
+              hgvs_c varchar(255) default NULL,
+              hgvs_n varchar(255) default NULL,
+              hgvs_p varchar(255) default NULL,
+              version varchar(10) default NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
-        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
-        self.execute(sql)
+
+        self.execute('call create_index("{}", "hgvs_text,hgvs_g")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_c")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_n")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_p")'.format(tname))
 
 
 # API Definitions
