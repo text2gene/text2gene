@@ -61,15 +61,20 @@ def _seqvar_to_seqvar(seqvar, base_type, new_type):
     try:
         return _seqvar_map_func(base_type, new_type)(seqvar)
     except NotImplementedError:
+        log.debug('Cannot map %s to %s (NotImplementedError)', seqvar, new_type)
         return None
     except HGVSDataNotAvailableError as error:
         log.debug('%r' % error)
         return None
-
+    except Exception as error:
+        # catch the general case to be robust around the hgvs library's occasional volatility.
+        log.debug('%r' % error)
+        return None
 
 class HgvsLVG(object):
 
     VERSION = '0.0.1'
+    LVG_MODE = 'lvg'
 
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
         self.hgvs_text = str(hgvs_text_or_seqvar)

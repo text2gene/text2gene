@@ -23,28 +23,38 @@ class ClinvarCachedQuery(SQLCache):
         self.granular_table = granular_table
         super(self.__class__, self).__init__('clinvar_hgvs2pmid')
 
-    def get_cache_key(self, hgvs_text):
-        return str(hgvs_text)
+    def get_cache_key(self, lex):
+        """ Returns a cache_key in the following shape:
 
-    def store_granular(self, hgvs_text, result):
-        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
+        "<hgvs_text>@<lvg_mode>"
+
+        :param lex: any variant LVG object (HgvsLVG, NCBIEnrichedLVG, etc)
+        :return: key generated from relevant details in lex
+        """
+        tmpl = '{hgvs_text}@{lvg_mode}'
+        return tmpl.format(hgvs_text=lex.hgvs_text, lvg_mode=lex.LVG_MODE)
+
+    def store_granular(self, lex, result):
+        entry_pairs = [{'hgvs_text': lex.hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
         self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, lex, skip_cache=False):
+    def query(self, lex, skip_cache=False, force_granular=False):
         """
         :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of PMIDs if found (result of Clinvar query)
         """
         if not skip_cache:
-            result = self.retrieve(lex.hgvs_text)
+            result = self.retrieve(lex)
             if result:
+                if force_granular:
+                    self.store_granular(lex, result)
                 return result
 
         result = clinvar_hgvs_to_pmid(lex)
-        self.store(lex.hgvs_text, result)
+        self.store(lex, result)
         if self.granular and result:
-            self.store_granular(lex.hgvs_text, result)
+            self.store_granular(lex, result)
         return result
 
     def create_granular_table(self):
@@ -72,36 +82,46 @@ class PubtatorCachedQuery(SQLCache):
         self.granular_table = granular_table
         super(self.__class__, self).__init__('pubtator_hgvs2pmid')
 
-    def get_cache_key(self, hgvs_text):
-        return str(hgvs_text)
+    def get_cache_key(self, lex):
+        """ Returns a cache_key in the following shape:
 
-    def store_granular(self, hgvs_text, result):
-        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
+        "<hgvs_text>@<lvg_mode>"
+
+        :param lex: any variant LVG object (HgvsLVG, NCBIEnrichedLVG, etc)
+        :return: key generated from relevant details in lex
+        """
+        tmpl = '{hgvs_text}@{lvg_mode}'
+        return tmpl.format(hgvs_text=lex.hgvs_text, lvg_mode=lex.LVG_MODE)
+
+    def store_granular(self, lex, result):
+        entry_pairs = [{'hgvs_text': lex.hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
         self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, lex, skip_cache=False):
+    def query(self, lex, skip_cache=False, force_granular=False):
         """
         :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of PMIDs if found (result of Clinvar query)
         """
         if not skip_cache:
-            result = self.retrieve(lex.hgvs_text)
+            result = self.retrieve(lex)
             if result:
+                if force_granular:
+                    self.store_granular(lex, result)
                 return result
 
         result = pubtator_hgvs_to_pmid(lex)
-        self.store(lex.hgvs_text, result)
+        self.store(lex, result)
         if self.granular and result:
-            self.store_granular(lex.hgvs_text, result)
+            self.store_granular(lex, result)
         return result
 
     def create_granular_table(self):
         tname = self.granular_table
+        log.info('creating table {} for PubtatorCachedQuery'.format(tname))
+
         self.execute("drop table if exists {}".format(tname))
         # ComponentString varchar(255) default NULL,  # TODO add in later. too complicated right now.
-
-        log.info('creating table {} for PubtatorCachedQuery'.format(tname))
 
         sql = """create table {} (
                   hgvs_text varchar(255) not null,

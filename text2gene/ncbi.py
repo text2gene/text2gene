@@ -45,6 +45,7 @@ def ncbi_report_to_pubmeds(report):
 class NCBIHgvsLVG(object):
 
     VERSION = '0.0.1'
+    LVG_MODE = 'ncbi'
 
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
@@ -56,6 +57,7 @@ class NCBIHgvsLVG(object):
 class NCBIEnrichedLVG(HgvsLVG):
 
     VERSION = '0.0.1'
+    LVG_MODE = 'ncbi_enriched'
 
     def __init__(self, hgvs_text, **kwargs):
         self.variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
@@ -180,7 +182,6 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)
-
 
 
 class NCBIVariantReportCachedQuery(SQLCache):

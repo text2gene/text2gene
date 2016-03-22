@@ -37,9 +37,7 @@ class SQLCache(SQLData):
         self.servicename = servicename
         self.tablename = kwargs.get('tablename', self.TABLENAME_FORMAT.format(self.servicename))
 
-
-    @staticmethod
-    def get_cache_key(querydict):
+    def get_cache_key(self, querydict):
         """ Default method to make a unique cache key from an input dictionary.
         """
         return hashlib.md5(pickle.dumps(sorted(querydict.items()))).hexdigest()

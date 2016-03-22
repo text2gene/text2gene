@@ -16,7 +16,7 @@ search_module_map = {'pubtator': PubtatorCachedQuery,
                     }
 
 lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
-                  'hgvs': HgvsLVGCached,
+                  'lvg': HgvsLVGCached,
                  }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
 
 
@@ -27,7 +27,7 @@ class Experiment(SQLCache):
 
         self.iteration = kwargs.get('iteration', 0)
 
-        self.lvg_mode = kwargs.get('lvg_mode', 'hgvs')      # or 'ncbi' or 'ncbi_enriched'
+        self.lvg_mode = kwargs.get('lvg_mode', 'lvg')      # or 'ncbi' or 'ncbi_enriched'
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
         self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi'])]
