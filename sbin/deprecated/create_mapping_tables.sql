@@ -1,3 +1,5 @@
+--- OBSOLETE!  CACHE CLASSES CREATE THEIR OWN TABLES ON DEMAND NOW.
+
 drop table if exists lvg_mappings;
 create table lvg_mappings (
      hgvs_text varchar(255) not null,

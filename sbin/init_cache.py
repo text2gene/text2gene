@@ -8,3 +8,9 @@ PubtatorCachedQuery().create_table()
 NCBIVariantPubmedsCachedQuery().create_table()
 NCBIVariantReportCachedQuery().create_table()
 
+HgvsLVGCached().create_granular_table()
+ClinvarCachedQuery().create_granular_table()
+PubtatorCachedQuery().create_granular_table()
+NCBIVariantPubmedsCachedQuery().create_granular_table()
+NCBIVariantReportCachedQuery().create_granular_table()
+
