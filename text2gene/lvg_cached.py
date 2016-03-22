@@ -64,7 +64,8 @@ class HgvsLVGCached(SQLCache):
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
                   PMID int(11) default NULL,
-                  version varchar(10) default NULL)""".format(tname)
+                  version varchar(10) default NULL)
+                  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)

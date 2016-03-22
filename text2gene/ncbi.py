@@ -126,7 +126,7 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
               hgvs_n varchar(255) default NULL,
               hgvs_p varchar(255) default NULL,
               version varchar(10) default NULL
-            );""".format(tname)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
 
         self.execute('call create_index("{}", "hgvs_text,hgvs_g")'.format(tname))
@@ -175,7 +175,8 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
                   PMID int(11) default NULL,
-                  version varchar(10) default NULL)""".format(tname)
+                  version varchar(10) default NULL)
+                  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
         self.execute(sql)

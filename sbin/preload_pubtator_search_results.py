@@ -5,8 +5,7 @@ import time
 from medgen.api import ClinVarDB
 from text2gene import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 
-
-hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples limit 2')
+hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples')
 
 print()
 print('PUBTATOR')
@@ -25,7 +24,6 @@ for entry in hgvs_examples:
         dmesg(hgvs_text, 'Pubtator PMIDs: %r' % pmids)
     except Exception as error:
         dmesg(hgvs_text, '%r' % error)
-        from IPython import embed; embed()
 
     try:
         pmids = ClinvarHgvs2Pmid(hgvs_text)
@@ -34,7 +32,4 @@ for entry in hgvs_examples:
         dmesg(hgvs_text, '%r' % error)
         
     dmesg(hgvs_text, 'done')
-
-
-
 
