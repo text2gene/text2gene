@@ -6,8 +6,6 @@ from .sqlcache import SQLCache
 from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
 from .config import GRANULAR_CACHE, CONFIG
 
-from .ncbi import NCBIHgvsLVG, NCBIEnrichedLVGCachedQuery
-
 log = logging.getLogger('text2gene.cached')
 
 #### Cached Query classes: one "Hgvs2Pmid" for each service
@@ -53,7 +51,7 @@ class ClinvarCachedQuery(SQLCache):
 
         result = clinvar_hgvs_to_pmid(lex)
         self.store(lex, result)
-        if self.granular and result:
+        if (force_granular or self.granular) and result:
             self.store_granular(lex, result)
         return result
 
@@ -112,7 +110,7 @@ class PubtatorCachedQuery(SQLCache):
 
         result = pubtator_hgvs_to_pmid(lex)
         self.store(lex, result)
-        if self.granular and result:
+        if (force_granular or self.granular) and result:
             self.store_granular(lex, result)
         return result
 

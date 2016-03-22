@@ -108,7 +108,7 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
         lexobj = NCBIEnrichedLVG(hgvs_text)
         if lexobj:
             self.store(hgvs_text, pickle.dumps(lexobj))
-            if self.granular:
+            if force_granular or self.granular:
                 self.store_granular(lexobj)
 
             return lexobj
@@ -164,7 +164,7 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
         report = NCBIReport(hgvs_text, skip_cache)
         result = ncbi_report_to_pubmeds(report)
         self.store(hgvs_text, result)
-        if self.granular and result:
+        if (force_granular or self.granular) and result:
             self.store_granular(hgvs_text, result)
         return result
 
@@ -220,9 +220,30 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
         result = NCBIVariantReport(hgvs_text)
         self.store(hgvs_text, result)
-        if self.granular:
+        if force_granular or self.granular:
             self.store_granular(hgvs_text, result)
         return result
+
+    def create_granular_table(self):
+        tname = self.granular_table
+        log.info('creating table {} for NCBIVariantReportCachedQuery'.format(tname))
+
+        self.execute("drop table if exists {};".format(tname))
+
+        sql = """create table {} (
+              hgvs_text varchar(255) not null,
+              hgvs_g varchar(255) default NULL,
+              hgvs_c varchar(255) default NULL,
+              hgvs_n varchar(255) default NULL,
+              hgvs_p varchar(255) default NULL,
+              version varchar(10) default NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
+        self.execute(sql)
+
+        self.execute('call create_index("{}", "hgvs_text,hgvs_g")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_c")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_n")'.format(tname))
+        self.execute('call create_index("{}", "hgvs_text,hgvs_p")'.format(tname))
 
 
 ### API Functions
