@@ -61,12 +61,12 @@ component_patterns = {
 {"PMID": 10760203, "Mentions": "RS2000", "Components": "rs2000"},
 """
 
-FH_UNHANDLED = open('m2p_unhandled.dump', 'w')
+FH_UNHANDLED = open('data/m2p_unhandled.dump', 'w')
 def write_unhandled_row(row):
     FH_UNHANDLED.write(json.dumps(row) + '\n')
     FH_UNHANDLED.flush()
 
-FH_MISSING_POSITION = open('m2p_missing_position.dump', 'w')
+FH_MISSING_POSITION = open('data/m2p_missing_position.dump', 'w')
 def write_missing_position(row):
     FH_MISSING_POSITION.write(json.dumps(row) + '\n')
     FH_MISSING_POSITION.flush()
