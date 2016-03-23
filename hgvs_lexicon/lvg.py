@@ -8,12 +8,13 @@ import hgvs.variantmapper
 from hgvs.exceptions import HGVSDataNotAvailableError
 
 from .hgvs_components import HgvsComponents
+from .config import UTACONNECTION
 
 log = logging.getLogger('hgvs.lvg')
 
 hgvs_parser = hgvs.parser.Parser()
 
-UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta/uta_20150903/'
+#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta/uta_20150903/'
 uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
 #uta = hgvs.dataproviders.uta.connect()
