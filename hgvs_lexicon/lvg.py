@@ -48,7 +48,7 @@ def variant_to_gene_name(seqvar):
         return None
 
 
-def _seqvar_to_seqvar(seqvar, base_type, new_type):
+def _seqvar_to_seqvar(seqvar, base_type, new_type, transcript=None):
     if base_type == new_type:
         return None
 
@@ -58,22 +58,28 @@ def _seqvar_to_seqvar(seqvar, base_type, new_type):
     if new_type == 'p' and base_type == 'g':
         return None
 
+    map_seqvar = _seqvar_map_func(base_type, new_type)
     try:
-        return _seqvar_map_func(base_type, new_type)(seqvar)
+        if base_type == 'g':
+            if transcript:
+                return map_seqvar(seqvar, transcript)
+            else:
+                return None
+        return map_seqvar(seqvar)
     except NotImplementedError:
-        log.debug('Cannot map %s to %s (NotImplementedError)', seqvar, new_type)
+        log.debug('Cannot map %s to %s: hgvs raised NotImplementedError', seqvar, new_type)
         return None
     except HGVSDataNotAvailableError as error:
-        log.debug('%r' % error)
+        log.debug('Cannot map %s to %s: hgvs raised HGVSDataNotAvailableError (%r)', seqvar, new_type, error)
         return None
     except Exception as error:
         # catch the general case to be robust around the hgvs library's occasional volatility.
-        log.debug('%r' % error)
+        log.debug('Cannot map %s to %s: unexpected Exception (%r)', seqvar, new_type, error)
         return None
 
 class HgvsLVG(object):
 
-    VERSION = '0.0.1'
+    VERSION = '0.0.2'
     LVG_MODE = 'lvg'
 
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
@@ -121,10 +127,10 @@ class HgvsLVG(object):
         if self.seqvar.type == 'g' and self.transcripts:
             # we still need to collect 'c' and 'n' variants
             for trans in self.transcripts:
-                var_c = mapper.g_to_c(self.seqvar, trans)
+                var_c = _seqvar_to_seqvar(self.seqvar, 'g', 'c', trans)
                 if var_c:
                     self.variants['c'][str(var_c)] = var_c
-                var_n = mapper.g_to_n(self.seqvar, trans)
+                var_n = _seqvar_to_seqvar(self.seqvar, 'g', 'n', trans)
                 if var_n:
                     self.variants['n'][str(var_n)] = var_n
 
@@ -134,14 +140,14 @@ class HgvsLVG(object):
                 for var_g in list(self.variants['g'].values()):
                     # Find all available 'c'
                     if not trans.startswith('NR'):
-                        new_seqvar = mapper.g_to_c(var_g, trans)
-                        if new_seqvar:
-                            self.variants['c'][str(new_seqvar)] = new_seqvar
+                        var_c = _seqvar_to_seqvar(var_g, 'g', 'c', trans)
+                        if var_c:
+                            self.variants['c'][str(var_c)] = var_c
 
                     # Find all available 'n'
-                    new_seqvar = mapper.g_to_n(var_g, trans)
-                    if new_seqvar:
-                        self.variants['n'][str(new_seqvar)] = new_seqvar
+                    var_n = _seqvar_to_seqvar(var_g, 'g', 'n', trans)
+                    if var_n:
+                        self.variants['n'][str(var_n)] = var_n
 
         # map all newly found 'c' to 'p'
         for var_c in list(self.variants['c'].values()):

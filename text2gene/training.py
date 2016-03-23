@@ -61,6 +61,8 @@ class Experiment(SQLCache):
         tname_tmpl = '{expname}_{iteration}_{lvg}_mappings'
         return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration, lvg=lvg_mode)
 
+
+
     def _setup_tables(self):
         """ Creates experiment tables in text2gene database for all search_modules used in this Experiment.
         :return: None
