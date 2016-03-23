@@ -142,6 +142,19 @@ def create_rs_table(db):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
 
 
+def create_gene2mutation2pubmed_table(db):
+    """Creates table mapping GeneID to PMID to Components."""
+    db.drop_table('gene2mutation2pubmed')
+    db.execute('''create table gene2mutation2pubmed
+        select distinct  G.GeneID, G.PMID, M.Components
+                   from  gene2pubtator G, mutation2pubtator M
+                   where G.PMID=M.PMID''')
+    db.execute('call create_index("gene2mutation2pubmed", "Components")')
+    db.execute('call create_index("gene2mutation2pubmed", "GeneID")')
+    db.execute('call create_index("gene2mutation2pubmed", "GeneID,PMID")')
+    db.execute('call create_index("gene2mutation2pubmed", "GeneID,Components")')
+
+
 def parse_components(components):
     for name, re_patt in list(component_patterns.items()):
         match = re_patt.search(components)
@@ -220,6 +233,8 @@ def setup_db():
             db.execute("call create_index('m2p_%s', 'Pos')" % key)
             db.execute("call create_index('m2p_%s', 'Alt')" % key)
 
+    print('@@@ Setting up gene2mutation2pubmed table (with indexes)...')
+    create_gene2mutation2pubmed_table(db)
     return db
 
 
@@ -268,7 +283,7 @@ def main():
     # create a dictionary with one empty list per component pattern in a new_rows hash
     new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
 
-    table = json.loads(open('m2p.json', 'r').read())
+    table = json.loads(open(M2P_JSON_DATA, 'r').read())
     progress_tick = int(round(math.log(len(table)))) * 100
 
     broken = 0
