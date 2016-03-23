@@ -8,9 +8,9 @@ import hgvs.variantmapper
 from hgvs.exceptions import HGVSDataNotAvailableError
 
 from .hgvs_components import HgvsComponents
-from .config import UTACONNECTION
+from .config import UTACONNECTION, PKGNAME
 
-log = logging.getLogger('hgvs.lvg')
+log = logging.getLogger(PKGNAME)
 
 hgvs_parser = hgvs.parser.Parser()
 

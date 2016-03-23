@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 from configparser import ConfigParser
 
-PKGNAME = 'hgvs.lexicon'
+PKGNAME = 'hgvs_lexicon'
 default_cfg_dir = os.path.join(os.getcwd(), 'etc')
 CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))

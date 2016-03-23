@@ -2,9 +2,10 @@ from __future__ import print_function, unicode_literals
 
 import logging
 
+from .config import PKGNAME
 from .exceptions import RejectedSeqVar
 
-log = logging.getLogger('hgvs.components')
+log = logging.getLogger(PKGNAME)
 
 amino_acid_map = { 'Ala': 'A',
                    'Arg': 'R',
