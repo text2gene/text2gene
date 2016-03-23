@@ -10,9 +10,10 @@ from hgvs_lexicon import HgvsComponents
 
 from pubtatordb.config import get_data_log
 
-log = get_data_log('sqldata.log')
+log = get_data_log('logs/sqldata.log')
 
 TABLENAME_TEMPLATE = 'm2p_%s'
+M2P_JSON_DATA = 'data/m2p.json'
 
 # limit of rows to collect, for testing purposes. Set to None to turn off testing.
 ROW_LIMIT = 100
@@ -231,7 +232,7 @@ def main_one_at_a_time():
     # create a dictionary with one empty list per component pattern in a new_rows hash
     new_rows = dict(zip(component_patterns.keys(), [[] for key in component_patterns.keys()]))
 
-    table = json.loads(open('m2p.json', 'r').read())
+    table = json.loads(open(M2P_JSON_DATA, 'r').read())
     progress_tick = int(round(math.log(len(table)))) * 100
 
     broken = 0

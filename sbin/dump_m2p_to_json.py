@@ -2,6 +2,8 @@ import json
 
 from pubtatordb import sqldata
 
+M2P_JSON_DATA = 'data/m2p.json'
+
 # Data looks like this:
 """
  {'Components': 'p|SUB|T|415|N', 'Mentions': 'Thr415Asn', 'PMID': 10072423},
@@ -21,7 +23,7 @@ new_rows = []
 row_tmpl = {'Mentions': '', 'PMID': None, 'Components': '',
             'edit_type': False, 'seq_type': '', 'ref': '', 'pos': '', 'alt': '' }
 
-open('m2p.json', 'w').write(json.dumps(table))
+open(M2P_JSON_DATA, 'w').write(json.dumps(table))
 
 for row in table:
     print('')
