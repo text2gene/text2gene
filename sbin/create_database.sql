@@ -1,5 +1,8 @@
 CREATE DATABASE IF NOT EXISTS text2gene CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
+GRANT ALL on text2gene.* to 'medgen'@'localhost' identified by 'medgen';
+GRANT EXECUTE on text2gene.* to 'medgen'@'localhost' identified by 'medgen';
+
 use text2gene;
 
 -- http://www.jamediasolutions.com/blog/deterministic-no-sql-or-reads-sql-data-in-its-declaration.html
