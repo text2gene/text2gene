@@ -9,6 +9,7 @@ from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
 from .lvg_cached import HgvsLVGCached
+from .exceptions import Text2GeneError
 
 log = logging.getLogger('text2gene.experiment')
 log.setLevel(logging.DEBUG)
@@ -26,6 +27,49 @@ lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
 class Experiment(SQLCache):
 
     """
+    Example that could be run from ./api-shell:
+
+        experiment = Experiment('crazy_harebrained_scheme', iteration=42, hgvs_examples=[hgvs_text_c1, hgvs_text_c2])
+        experiment.run()
+
+    Note that "iteration" is an optional, arbitrary qualifier which defaults to 0 and only affects table names.
+
+    In the above example, the Experiment object will set up these tables:
+
+        * crazy_harebrained_scheme_42_clinvar_match
+        * crazy_harebrained_scheme_42_ncbi_match
+        * crazy_harebrained_scheme_42_pubtator_match
+        * crazy_harebrained_scheme_42_lvg_mappings
+
+    Results in the above tables for the search_modules (able to be specified via keyword argument) consist of
+    hgvs_text -> PMID pairings based on the results achieved for given HGVS string using given search method.
+
+    To change the LVG function used, supply the following keyword:
+
+        lvg_mode        # one of ['lvg', 'ncbi_enriched']
+
+    Results for the lvg_mappings (or ncbi_enriched_mappings) consist of a breakdown of input hgvs_text -> one of
+    hgvs_c, hgvs_g, hgvs_n, hgvs_p.  So if an input HGVS string had 1 of each different type of variant mappings,
+    the *_mappings table would contain four separate rows with the same hgvs_text (and a different variant result per row).
+
+    A list of HGVS strings must be supplied to run an experiment.
+
+    If reading examples from the database, these two keyword arguments are needed:
+
+        hgvs_examples_table
+        hgvs_examples_db
+
+    ...and optionally, supply a limit to the number of examples to draw from the table (default is no limit):
+        hgvs_examples_limit
+
+
+    If supplying examples from a list, feed the list into this keyword argument:
+
+        hgvs_examples
+
+    NOTE that database details are preferred over a supplied list. The list will be ignored if DB details are supplied.
+
+    If neither source of HGVS examples is supplied, a Text2Gene error is raised in complaint.
     """
 
     VERSION = "0.0.1"
@@ -44,12 +88,13 @@ class Experiment(SQLCache):
         self.hgvs_examples_db = kwargs.get('hgvs_examples_db', None)
         self.hgvs_examples_limit = kwargs.get('hgvs_examples_limit', None)
 
+        self.hgvs_examples = []
         if self.hgvs_examples_table is None:
             # maybe a list was supplied instead.
             self.hgvs_examples = kwargs.get('hgvs_examples', [])
 
         if not self.hgvs_examples_table and not self.hgvs_examples:
-            raise Text2GeneError('You need to supply either a list of hgvs_examples or database details to produce a list. (see Experiment doc)')
+            raise Text2GeneError('You need to supply either a list of hgvs_examples or database details to produce a list. (see Experiment class documentation)')
 
         # setup granular result tables necessary to store our results
         self._setup_tables()
@@ -135,7 +180,13 @@ class Experiment(SQLCache):
         return self.fetchall(sql)
 
     def run(self):
-        for row in self._load_examples():
+        if not self.hgvs_examples:
+            # don't store a long list in memory after running, if we don't have to.
+            hgvs_examples = self._load_examples()
+        else:
+            hgvs_examples = self.hgvs_examples
+
+        for row in hgvs_examples:
             hgvs_text = row['hgvs_text'].strip()
 
             try:

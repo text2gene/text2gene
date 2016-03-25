@@ -7,7 +7,7 @@ from medgen.api import NCBIVariantReport
 from hgvs_lexicon import Variant, HgvsLVG
 
 from .sqlcache import SQLCache
-from .config import GRANULAR_CACHE, CONFIG
+from .config import GRANULAR_CACHE
 from .exceptions import Text2GeneError
 
 log = logging.getLogger('text2gene.ncbi')
@@ -29,7 +29,9 @@ def ncbi_report_to_variants(report):
             # set up data structure just like HgvsLVG object, i.e.:
             # {seqtype: { 'hgvs_string': SequenceVariant object }
             seqvar = Variant(hgvs_text)
-            variants[seqvar.type][str(seqvar)] = seqvar
+            if seqvar:
+                # Sometimes NCBI has variant strings that do not parse. Variant() function returns None in these cases.
+                variants[seqvar.type][str(seqvar)] = seqvar
 
     return variants
 
@@ -246,7 +248,7 @@ class NCBIVariantReportCachedQuery(SQLCache):
         self.execute('call create_index("{}", "hgvs_text,hgvs_p")'.format(tname))
 
 
-### API Functions
+# == API Functions == #
 
 NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=GRANULAR_CACHE).query
 NCBIReport = NCBIVariantReportCachedQuery(granular=GRANULAR_CACHE).query

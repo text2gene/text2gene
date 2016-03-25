@@ -4,7 +4,7 @@ import logging
 
 from .sqlcache import SQLCache
 from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
-from .config import GRANULAR_CACHE, CONFIG
+from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.cached')
 
