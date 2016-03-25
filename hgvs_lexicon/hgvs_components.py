@@ -97,7 +97,7 @@ class HgvsComponents(object):
 
         ref = alt = edittype = pos = ''
 
-        if seqvar.posedit.edit == '?':
+        if seqvar.posedit.edit in ['?', '=']:
             raise RejectedSeqVar('SequenceVariant has missing edittype. (%r)' % seqvar)
 
         edittype = seqvar.posedit.edit.type.upper()

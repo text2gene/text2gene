@@ -1,6 +1,9 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+import pickle
+
+import MySQLdb as mdb
 
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
@@ -22,6 +25,11 @@ lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
 
 class Experiment(SQLCache):
 
+    """
+    """
+
+    VERSION = "0.0.1"
+
     def __init__(self, experiment_name, **kwargs):
         self.experiment_name = experiment_name
 
@@ -32,9 +40,16 @@ class Experiment(SQLCache):
         # normalize module names to lowercase to save on the aggravation of case-matching.
         self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi'])]
 
-        self.hgvs_examples_table = kwargs.get('hgvs_examples_table', 'hgvs_examples')
-        self.hgvs_examples_db = kwargs.get('hgvs_examples_db', 'clinvar')
+        self.hgvs_examples_table = kwargs.get('hgvs_examples_table', None)
+        self.hgvs_examples_db = kwargs.get('hgvs_examples_db', None)
         self.hgvs_examples_limit = kwargs.get('hgvs_examples_limit', None)
+
+        if self.hgvs_examples_table is None:
+            # maybe a list was supplied instead.
+            self.hgvs_examples = kwargs.get('hgvs_examples', [])
+
+        if not self.hgvs_examples_table and not self.hgvs_examples:
+            raise Text2GeneError('You need to supply either a list of hgvs_examples or database details to produce a list. (see Experiment doc)')
 
         # setup granular result tables necessary to store our results
         self._setup_tables()
@@ -61,7 +76,35 @@ class Experiment(SQLCache):
         tname_tmpl = '{expname}_{iteration}_{lvg}_mappings'
         return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration, lvg=lvg_mode)
 
+    def to_dict(self):
+        return {'experiment_name': self.experiment_name,
+                'search_modules': self.search_modules,
+                'iteration': self.iteration,
+                'lvg_mode': self.lvg_mode
+                }
 
+    def cache(self, **kwargs):
+        """ Store current state of experiment in database as cache_key (hashed pickle of self.to_dict() ->
+        cache_value (pickled object).
+
+        Keywords:
+            update_if_duplicate: when True: if item with same cache_key found, update value.
+
+        :return: True if successful, False otherwise
+        """
+        querydict = self.to_dict()
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': pickle(self) }
+
+        try:
+            self.insert(self.tablename, fv_dict)
+        except mdb.IntegrityError:
+            if kwargs.get('update_if_duplicate', True):
+                # update entry with current time
+                return self.update(fv_dict)
+            else:
+                return False
+
+        return True
 
     def _setup_tables(self):
         """ Creates experiment tables in text2gene database for all search_modules used in this Experiment.
@@ -117,3 +160,10 @@ class Experiment(SQLCache):
                 except Exception as error:
                     log.info('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
                                     self.experiment_name, self.iteration, hgvs_text, mod, error)
+
+    def evaluate(self):
+        """ Performs a series of MySQL queries on the match results tables to produce quantitative analysis.
+
+        :return: dict of results
+        """
+        pass

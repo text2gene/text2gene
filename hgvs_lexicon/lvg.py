@@ -5,7 +5,7 @@ import logging
 import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
-from hgvs.exceptions import HGVSDataNotAvailableError
+from hgvs.exceptions import HGVSDataNotAvailableError, HGVSParseError
 
 from .hgvs_components import HgvsComponents
 from .config import UTACONNECTION, PKGNAME
@@ -188,7 +188,12 @@ class HgvsLVG(object):
         """
         if type(hgvs_text_or_seqvar) == hgvs.variant.SequenceVariant:
             return hgvs_text_or_seqvar
-        return hgvs_parser.parse_hgvs_variant(str(hgvs_text_or_seqvar))
+        try:
+            return hgvs_parser.parse_hgvs_variant(str(hgvs_text_or_seqvar))
+        except HGVSParseError as error:
+            log.debug('HGVSParseError: %r' % error)
+            # e.g. this looks like: NM_021961.5:c.1261T>C HGVSParseError(u'NP_068780.2:p.Tyr?His: char 17: expected a digit',)
+            return None
 
     @property
     def hgvs_c(self):
