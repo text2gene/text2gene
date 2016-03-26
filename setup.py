@@ -41,6 +41,7 @@ setup(
         'uta',
         'hgvs',
         'medgen',
+        'requests',  # ncbi and google query retrieval
         'flask',  # web api
         'gunicorn',  # web api
         'fabric',  # web api

@@ -10,14 +10,13 @@
 <ul><li><a href="/{{api_version}}/hgvs2pmid/{{hgvs_text}}">/{{api_version}}/hgvs2pmid/{{hgvs_text}}</a></li></ul>
 {% endfor %}
 
-<h3>Variant Report</h3>
-{% for hgvs_text in hgvs_samples %}
-
 <h3>HGVS to PMID ENRICHED by Variant Report</h3>
 {% for hgvs_text in hgvs_samples %}
 <ul><li><a href="/{{api_version}}/hgvs2pmid_enriched/{{hgvs_text}}">/{{api_version}}/hgvs2pmid_enriched/{{hgvs_text}}</a></li></ul>
 {% endfor %}
 
+<h3>Variant Report</h3>
+{% for hgvs_text in hgvs_samples %}
 <ul><li><a href="/{{api_version}}/report/{{hgvs_text}}">/{{api_version}}/report/{{hgvs_text}}</a></li></ul>
 {% endfor %}
 

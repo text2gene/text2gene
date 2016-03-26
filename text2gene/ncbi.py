@@ -2,6 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import pickle
 import logging
+import urllib
+
+import requests
 
 from medgen.api import NCBIVariantReport
 from hgvs_lexicon import Variant, HgvsLVG
@@ -42,6 +45,55 @@ def ncbi_report_to_pubmeds(report):
     :return: list of pubmeds found in report
     """
     return [int(item) for item in report[0]['PMIDs']]
+
+def get_ncbi_variant_report(hgvs_text):
+    """
+    Return results from API query to the NCBI Variant Reporter Service
+    See documentation at:
+    http://www.ncbi.nlm.nih.gov/variation/tools/reporter
+
+    :param hgvs_text: ( c.DNA | r.RNA | p.Protein | g.Genomic )
+    :return: dict of parsed results
+    """
+    response = requests.get("http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
+
+    # lifted from medgen.annotate.ncbi_variant.py
+    if 'Error' in response.text:
+        error_str = 'An error occurred when using the NCBI Variant Report Service: "{}"\n'.format(res)
+        error_str += 'To reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text)
+        raise RuntimeError(error_str)
+
+    keys = []
+    values = []
+    for line in response.text.split('\n'):
+        line = line.strip()
+        if not line or line.startswith('.') or line.startswith('##') or line.startswith('Submitted'):
+            continue
+
+        if line.startswith('# '):
+            keys = line.strip('# ').split('\t')
+        else:
+            values = line.split('\t')
+
+    outd = dict(zip(keys, values))
+
+    return outd
+
+"""
+    res = map(lambda x: x.split('\t'), res)
+    keys = map(lambda x: x.strip('# '), res[0])
+    values = res[1:]
+    res = map(lambda x: dict(zip(keys, x)), values)
+    for r in res:
+        if r.has_key('PMIDs'):
+            if len(r['PMIDs']) == 0:
+                r['PMIDs'] = []
+            else:
+                r['PMIDs'] = r.get('PMIDs').replace(', ', ';').split(';')
+
+    return res
+"""
+
 
 
 class NCBIHgvsLVG(object):
