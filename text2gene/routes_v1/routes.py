@@ -67,7 +67,7 @@ def hgvs2pmid_enriched(hgvs_text):
     :param hgvs_text: str
     :return: HTTP200 (json) or HTTP400 (json)
     """
-    outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+    outd = {'action': 'hgvs2pmid_enriched', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
         try:
