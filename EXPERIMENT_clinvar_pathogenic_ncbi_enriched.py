@@ -1,6 +1,6 @@
 import logging
 
-experiment_name = 'clinvar_pathogenic_plain_lvg'
+experiment_name = 'clinvar_pathogenic_ncbi_enriched'
 iteration = 1
 
 fh = logging.FileHandler('%s.%i.log' % (experiment_name, iteration))

@@ -6,7 +6,6 @@ import urllib
 
 import requests
 
-from medgen.api import NCBIVariantReport
 from hgvs_lexicon import Variant, HgvsLVG
 
 from .sqlcache import SQLCache
@@ -64,7 +63,6 @@ def get_ncbi_variant_report(hgvs_text):
         raise RuntimeError(error_str)
 
     keys = []
-    values = []
     report = []
 
     for line in response.text.split('\n'):
@@ -261,7 +259,7 @@ class NCBIVariantReportCachedQuery(SQLCache):
                     self.store_granular(hgvs_text, result)
                 return result
 
-        result = NCBIVariantReport(hgvs_text)
+        result = get_ncbi_variant_report(hgvs_text)
         self.store(hgvs_text, result)
         if force_granular or self.granular:
             self.store_granular(hgvs_text, result)
