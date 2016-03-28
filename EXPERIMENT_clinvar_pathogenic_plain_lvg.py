@@ -11,7 +11,7 @@ otherlog = logging.getLogger('text2gene')
 otherlog.addHandler(logging.StreamHandler())
 
 from text2gene.training import Experiment
-exper = Experiment(experiment_name, lvg_mode='ncbi_enriched', iteration=iteration,
+exper = Experiment(experiment_name, lvg_mode='lvg', iteration=iteration,
                         hgvs_examples_table = 'hgvs_citations_pathogenic',
                         hgvs_examples_db = 'clinvar',
                   )
