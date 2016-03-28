@@ -53,7 +53,7 @@ def get_ncbi_variant_report(hgvs_text):
     http://www.ncbi.nlm.nih.gov/variation/tools/reporter
 
     :param hgvs_text: ( c.DNA | r.RNA | p.Protein | g.Genomic )
-    :return: dict of parsed results
+    :return: list containing each dict of parsed results
     """
     response = requests.get("http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
 
@@ -65,35 +65,24 @@ def get_ncbi_variant_report(hgvs_text):
 
     keys = []
     values = []
+    report = []
+
     for line in response.text.split('\n'):
-        line = line.strip()
-        if not line or line.startswith('.') or line.startswith('##') or line.startswith('Submitted'):
+        if not line.strip() or line.startswith('.') or line.startswith('##') or line.startswith('Submitted'):
             continue
 
         if line.startswith('# '):
             keys = line.strip('# ').split('\t')
         else:
             values = line.split('\t')
+            outd = dict(zip(keys, values))
 
-    outd = dict(zip(keys, values))
+            # convert PMIDs from semicolon- or comma-separated string into python list
+            if len(outd.get('PMIDs', '')) > 0:
+                outd['PMIDs'] = outd['PMIDs'].replace(', ', ';').split(';')
+            report.append(outd)
 
-    return outd
-
-"""
-    res = map(lambda x: x.split('\t'), res)
-    keys = map(lambda x: x.strip('# '), res[0])
-    values = res[1:]
-    res = map(lambda x: dict(zip(keys, x)), values)
-    for r in res:
-        if r.has_key('PMIDs'):
-            if len(r['PMIDs']) == 0:
-                r['PMIDs'] = []
-            else:
-                r['PMIDs'] = r.get('PMIDs').replace(', ', ';').split(';')
-
-    return res
-"""
-
+    return report
 
 
 class NCBIHgvsLVG(object):
