@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from medgen.api import GeneID, ClinvarPubmeds
 
 from pubtatordb import PubtatorDB
+from pubtatordb.exceptions import PubtatorDBError
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
 #from .lvg_cached import LVG
@@ -56,13 +57,15 @@ def pubtator_hgvs_to_pmid(lex):
                 log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
                 continue
 
-            log.info('[%s] %s %s', lex.seqvar, seqtype, components)
-            if seqtype == 'p':
-                results = pubtator_db.search_proteins(components, gene_id)
-            else:
-                results = pubtator_db.search_m2p(components, gene_id)
-
-            for res in results:
-                pmids.add(res['PMID'])
+            log.info('[%s] (%s) %s %s', lex.seqvar, seqvar, seqtype, components)
+            try:
+                if seqtype == 'p':
+                    results = pubtator_db.search_proteins(components, gene_id)
+                else:
+                    results = pubtator_db.search_m2p(components, gene_id)
+                for res in results:
+                    pmids.add(res['PMID'])
+            except PubtatorDBError as error:
+                log.info('[%s] (%s) %r', lex.seqvar, seqvar, error)
 
     return list(pmids)

@@ -109,6 +109,11 @@ class Experiment(SQLCache):
 
         super(self.__class__, self).__init__('experiment')
 
+    @property
+    def results_table_name(self):
+        tname_tmpl = '{expname}_{iteration}_results'
+        return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration)
+
     def get_table_name(self, module_name):
         """ Produce a table name for given module_name, based on this Experiment's experiment_name and iteration.
 
@@ -138,7 +143,7 @@ class Experiment(SQLCache):
         :return: True if successful, False otherwise
         """
         querydict = self.to_dict()
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': pickle(self) }
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': pickle(self)}
 
         try:
             self.insert(self.tablename, fv_dict)
@@ -165,6 +170,24 @@ class Experiment(SQLCache):
         log.debug('EXPERIMENT %s: creating LVG mapping table %s', self.experiment_name, tablename)
         lvg_module_map[self.lvg_mode](granular=True, granular_table=tablename).create_granular_table()
 
+    def _create_experiment_results_table(self):
+        tablename = self.results_table_name
+        log.debug('EXPERIMENT %s: creating Experiment results table %s', self.experiment_name, tablename)
+        sql = '''create table {} (
+                  id int(11) primary key auto_increment,
+                  hgvs_text varchar(255) unique,
+                  pmids varchar(255) default NULL,
+                  error varchar(255) default NULL
+              )'''.format(tablename)
+        try:
+            self.execute(sql)
+
+        except mdb.OperationalError as error:
+            if error[0] == 1050:
+                pass
+            else:
+                raise Text2GeneError('Unexpected error creating Experiment results table: %r' % error)
+
     def _delete_tables(self):
         for mod in self.search_modules:
             tablename = self.get_table_name(mod)
@@ -174,12 +197,22 @@ class Experiment(SQLCache):
         self.execute('drop table %s' % self.get_mapping_table_name(self.lvg_mode))
 
     def _load_examples(self):
-        sql = 'select * from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
+        sql = 'select distinct(hgvs_text) from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
         if self.hgvs_examples_limit:
             sql += ' limit %i' % self.hgvs_examples_limit
         return self.fetchall(sql)
 
+    def store_results(self, hgvs_text, pmids=[], errors=[]):
+        row = {'hgvs_text': hgvs_text,
+               'pmids': json.dumps(list(pmids)),
+               'errors': json.dumps(list(errors))
+               }
+        self.insert(self.results_table_name, row)
+
     def run(self):
+        # create table to track experiment progress and aggregate results from all search modules.
+        self._create_experiment_results_table()
+
         if not self.hgvs_examples:
             # don't store a long list in memory after running, if we don't have to.
             hgvs_examples = self._load_examples()
@@ -196,6 +229,8 @@ class Experiment(SQLCache):
                                 self.experiment_name, self.iteration, hgvs_text, error)
                 continue
 
+            pmids = set()
+            errors = []
             for mod in self.search_modules:
                 try:
                     if mod == 'clinvar':
@@ -207,10 +242,17 @@ class Experiment(SQLCache):
                     if mod == 'pubtator':
                         result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
 
-                    log.info('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
+                    log.debug('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:
-                    log.info('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
+                    log.debug('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
                                     self.experiment_name, self.iteration, hgvs_text, mod, error)
+                    errors.append('%r' % error)
+            for pmid in result:
+                pmids.add(pmid)
+
+            log.info('EXPERIMENT [%s.%i]: [%s] All PMIDs found: %r', self.experiment_name, self.iteration, hgvs_text, pmids)
+            log.info('EXPERIMENT [%s.%i]: [%s] All Errors: %r', self.experiment_name, self.iteration, hgvs_text, errors)
+            self.store_result(hgvs_text, pmids=pmids, errors=errors)
 
     def evaluate(self):
         """ Performs a series of MySQL queries on the match results tables to produce quantitative analysis.
