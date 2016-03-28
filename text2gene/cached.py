@@ -16,7 +16,7 @@ class ClinvarCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self, granular=True, granular_table='clinvar_match'):
+    def __init__(self, granular=False, granular_table='clinvar_match'):
         self.granular = granular
         self.granular_table = granular_table
         super(self.__class__, self).__init__('clinvar_hgvs2pmid')
@@ -75,7 +75,7 @@ class PubtatorCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
-    def __init__(self, granular=True, granular_table='pubtator_match'):
+    def __init__(self, granular=False, granular_table='pubtator_match'):
         self.granular = granular
         self.granular_table = granular_table
         super(self.__class__, self).__init__('pubtator_hgvs2pmid')
