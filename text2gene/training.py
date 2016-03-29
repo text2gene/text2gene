@@ -247,6 +247,7 @@ class Experiment(SQLCache):
             pmids = set()
             errors = []
             for mod in self.search_modules:
+                result = []
                 try:
                     if mod == 'clinvar':
                         result = self.ClinvarHgvs2Pmid(lex, skip_cache=self.skip_cache)
@@ -262,12 +263,14 @@ class Experiment(SQLCache):
                     log.debug('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
                                     self.experiment_name, self.iteration, hgvs_text, mod, error)
                     errors.append('%r' % error)
-            for pmid in result:
-                pmids.add(pmid)
+
+                for pmid in result:
+                    pmids.add(pmid)
 
             log.info('EXPERIMENT [%s.%i]: [%s] All PMIDs found: %r', self.experiment_name, self.iteration, hgvs_text, pmids)
             if errors:
                 log.info('EXPERIMENT [%s.%i]: [%s] %r', self.experiment_name, self.iteration, hgvs_text, errors)
+
             self.store_result(hgvs_text, pmids, errors=errors)
 
     def evaluate(self):
