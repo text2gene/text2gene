@@ -30,6 +30,8 @@ def hgvs2pmid(hgvs_text):
     :param hgvs_text: str
     :return: HTTP200 (json) or HTTP400 (json)
     """
+    # TODO: allow URL argument to specify type of lvg_mode to use.
+    
     outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
@@ -55,45 +57,6 @@ def hgvs2pmid(hgvs_text):
             outd['response']['PubTator'] = pubtator_pmids
 
     return HTTP200(outd)
-
-
-@routes_v1.route('/v1/hgvs2pmid_enriched/<hgvs_text>')
-def hgvs2pmid_enriched(hgvs_text):
-    """ Takes an input hgvs_text and uses a combination of methods to name pubmed
-    articles by their PMID that mention this genetic variant.
-
-        # a weird one:
-        #NM_194248.1:c.158C>T
-
-    :param hgvs_text: str
-    :return: HTTP200 (json) or HTTP400 (json)
-    """
-    outd = {'action': 'hgvs2pmid_enriched', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
-
-    if 'hgvs_text' not in hgvs_text:
-        try:
-            lex = LVGEnriched(hgvs_text)
-        except CriticalHgvsError as error:
-            return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
-
-        outd['lvg'] = lex.to_dict()
-
-        outd['response'] = {}
-
-        ncbi_pmids = NCBIHgvs2Pmid(lex.hgvs_text)
-        if ncbi_pmids:
-            outd['response']['NCBI'] = ncbi_pmids
-
-        clinvar_pmids = ClinvarHgvs2Pmid(lex)
-        if clinvar_pmids:
-            outd['response']['ClinVar'] = clinvar_pmids
-
-        pubtator_pmids = PubtatorHgvs2Pmid(lex)
-        if pubtator_pmids:
-            outd['response']['PubTator'] = pubtator_pmids
-
-    return HTTP200(outd)
-
 
 
 @routes_v1.route('/v1/report/<hgvs_text>')
