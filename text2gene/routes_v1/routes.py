@@ -34,7 +34,7 @@ def hgvs2pmid(hgvs_text):
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            lex = LVG(hgvs_text)
+            lex = LVGEnriched(hgvs_text)
         except CriticalHgvsError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 

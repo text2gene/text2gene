@@ -13,9 +13,9 @@ class build_ext(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 setup(
-    name = 'pubtatordb',
-    version = '0.0.1.1',
-    description = 'Pubtator database interaction layer',
+    name = 'text2gene',
+    version = '0.0.2',
+    description = 'genetic variant lvg and medical genetics search for relevant literature',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
     author_email = 'naomi@nthmost.com',

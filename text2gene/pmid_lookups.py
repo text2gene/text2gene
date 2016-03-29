@@ -21,6 +21,13 @@ def clinvar_lex_to_pmid(lex):
     pmids = set()
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype].values():
+            # throw away sequence variants without enough information
+            try:
+                HgvsComponents(seqvar)
+            except RejectedSeqVar:
+                log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
+                continue
+
             for pmid in ClinvarPubmeds('%s' % seqvar):
                 pmids.add(pmid)
     return list(pmids)
