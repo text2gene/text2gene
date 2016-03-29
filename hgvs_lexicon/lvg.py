@@ -89,7 +89,7 @@ class HgvsLVG(object):
         self.seqvar = self.parse(hgvs_text_or_seqvar)
 
         if self.seqvar is None:
-            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
+            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text_or_seqvar)
 
         # initialize transcripts list
         self.transcripts = set(kwargs.get('transcripts', []))
