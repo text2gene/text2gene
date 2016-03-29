@@ -6,7 +6,9 @@ from text2gene.lvg_cached import HgvsLVGCached
 from text2gene.training import Experiment
 
 try:
-    reset = True if sys.argv[1] == 'reset'
+    reset = sys.argv[1].lower()
+    if reset == 'reset':
+        reset = True
 except IndexError:
     reset = False
 
