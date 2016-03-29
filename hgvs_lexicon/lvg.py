@@ -193,7 +193,7 @@ class HgvsLVG(object):
         try:
             return hgvs_parser.parse_hgvs_variant(str(hgvs_text_or_seqvar))
         except HGVSParseError as error:
-            log.info('Cannot create SequenceVariant from hgvs_text "%s": %r', hgvs_text, error)
+            log.info('Cannot create SequenceVariant from hgvs_text "%s": %r', hgvs_text_or_seqvar, error)
             # Examples:
             #  HGVSParseError(u'NP_068780.2:p.Tyr?His: char 17: expected a digit',)
             #  HGVSParseError(u'NM_004628.4:c.621_622ins83: char 24: Syntax error',)
