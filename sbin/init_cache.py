@@ -9,6 +9,8 @@ try:
     reset = sys.argv[1].lower()
     if reset == 'reset':
         reset = True
+    else:
+        reset = False
 except IndexError:
     reset = False
 
