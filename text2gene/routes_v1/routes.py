@@ -5,7 +5,8 @@ API_INDICATOR = 'v1'
 import logging
 
 from flask import Blueprint
-from hgvs.exceptions import HGVSParseError
+
+from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from ..lvg_cached import LVG
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
@@ -34,7 +35,7 @@ def hgvs2pmid(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         try:
             lex = LVG(hgvs_text)
-        except HGVSParseError as error:
+        except CriticalHgvsError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
         outd['lvg'] = lex.to_dict()
@@ -72,7 +73,7 @@ def hgvs2pmid_enriched(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         try:
             lex = LVGEnriched(hgvs_text)
-        except HGVSParseError as error:
+        except CriticalHgvsError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
         outd['lvg'] = lex.to_dict()
