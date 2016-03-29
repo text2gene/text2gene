@@ -27,4 +27,4 @@ CONFIG = ConfigParser()
 CONFIG.read(configs)
 
 # if training is "active", enable GRANULAR_CACHE for all cacheing engines.
-GRANULAR_CACHE = CONFIG.get('cache', 'granular')
+GRANULAR_CACHE = False

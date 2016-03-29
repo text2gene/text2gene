@@ -80,6 +80,8 @@ class Experiment(SQLCache):
 
         self.iteration = kwargs.get('iteration', 0)
 
+        self.skip_cache = kwargs.get('skip_cache', False)
+
         self.lvg_mode = kwargs.get('lvg_mode', 'lvg')      # or 'ncbi' or 'ncbi_enriched'
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
@@ -247,13 +249,13 @@ class Experiment(SQLCache):
             for mod in self.search_modules:
                 try:
                     if mod == 'clinvar':
-                        result = self.ClinvarHgvs2Pmid(lex, skip_cache=True)
+                        result = self.ClinvarHgvs2Pmid(lex, skip_cache=self.skip_cache)
 
                     if mod == 'ncbi':
                         result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
 
                     if mod == 'pubtator':
-                        result = self.PubtatorHgvs2Pmid(lex, skip_cache=True)
+                        result = self.PubtatorHgvs2Pmid(lex, skip_cache=self.skip_cache)
 
                     log.debug('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:
