@@ -37,7 +37,7 @@ def pubtator_lex_to_pmid(lex):
 
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
         log.info('[%s] Cannot process edit type %s' % (lex.hgvs_text, edittype))
-        return None
+        return []
 
     try:
         gene_id = GeneID(lex.gene_name)
