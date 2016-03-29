@@ -108,8 +108,8 @@ class NCBIEnrichedLVG(HgvsLVG):
         if self.seqvar is None:
             raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
 
-        self.report = NCBIReport(str(hgvs_text))
-        self.variants = ncbi_report_to_variants(self.report)
+        report = NCBIReport(hgvs_text)
+        self.variants = ncbi_report_to_variants(report)
 
         super(NCBIEnrichedLVG, self).__init__(hgvs_text,
                                               hgvs_c=self.hgvs_c,

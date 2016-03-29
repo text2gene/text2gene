@@ -273,4 +273,6 @@ class Experiment(SQLCache):
 
         :return: dict of results
         """
-        pass
+        # select count(*) as cnt, count(distinct hgvs_text), count(distinct PMID) from clinvar_match;
+
+        #

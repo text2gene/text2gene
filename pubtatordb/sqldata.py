@@ -44,7 +44,8 @@ class SQLData(object):
 
     def connect(self):
         return PySQLPool.getNewConnection(username=self._db_user, 
-                password=self._db_pass, host=self._db_host, db=self._db_name)
+                                          password=self._db_pass, host=self._db_host, db=self._db_name,
+                                          charset='utf8', use_unicode=True)
 
     def cursor(self, execute_sql=None):
         conn = self.connect()
