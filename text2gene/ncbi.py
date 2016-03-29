@@ -7,6 +7,7 @@ import urllib
 import requests
 
 from hgvs_lexicon import Variant, HgvsLVG
+from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE
@@ -91,6 +92,8 @@ class NCBIHgvsLVG(object):
     def __init__(self, hgvs_text, **kwargs):
         self.hgvs_text = hgvs_text
         self.seqvar = Variant(hgvs_text)
+        if self.seqvar is None:
+            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
         self.report = NCBIReport(self.hgvs_text)
         self.variants = ncbi_report_to_variants(self.report)
 
@@ -101,7 +104,9 @@ class NCBIEnrichedLVG(HgvsLVG):
     LVG_MODE = 'ncbi_enriched'
 
     def __init__(self, hgvs_text, **kwargs):
-        self.variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
+        self.seqvar = Variant(hgvs_text)
+        if self.seqvar is None:
+            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
 
         self.report = NCBIReport(str(hgvs_text))
         self.variants = ncbi_report_to_variants(self.report)

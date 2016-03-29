@@ -6,13 +6,12 @@ from pubtatordb import PubtatorDB
 from pubtatordb.exceptions import PubtatorDBError
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar
 
-#from .lvg_cached import LVG
 from .config import log
 
 pubtator_db = PubtatorDB()
 
 
-def clinvar_hgvs_to_pmid(lex):
+def clinvar_lex_to_pmid(lex):
     """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
     lex.variants to do a search in Clinvar for associated PMIDs.  Returns a list of PMIDs.
 
@@ -27,7 +26,7 @@ def clinvar_hgvs_to_pmid(lex):
     return list(pmids)
     
 
-def pubtator_hgvs_to_pmid(lex):
+def pubtator_lex_to_pmid(lex):
     """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
     lex.variants to do a search in PubTator for associated PMIDs.  Returns a list of PMIDs.
 

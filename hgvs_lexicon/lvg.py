@@ -9,15 +9,14 @@ from hgvs.exceptions import HGVSDataNotAvailableError, HGVSParseError
 
 from .hgvs_components import HgvsComponents
 from .config import UTACONNECTION, PKGNAME
+from .exceptions import CriticalHgvsError
 
 log = logging.getLogger(PKGNAME)
 
+# === UTA Connection setup. === #
 hgvs_parser = hgvs.parser.Parser()
-
-#UTACONNECTION = 'postgresql://uta_admin:anonymous@192.168.1.3/uta/uta_20150903/'
 uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
-#uta = hgvs.dataproviders.uta.connect()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 
 
@@ -88,6 +87,9 @@ class HgvsLVG(object):
 
         # use the hgvs library to get us some info about this HGVS string.
         self.seqvar = self.parse(hgvs_text_or_seqvar)
+
+        if self.seqvar is None:
+            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
 
         # initialize transcripts list
         self.transcripts = set(kwargs.get('transcripts', []))
@@ -191,8 +193,10 @@ class HgvsLVG(object):
         try:
             return hgvs_parser.parse_hgvs_variant(str(hgvs_text_or_seqvar))
         except HGVSParseError as error:
-            log.debug('HGVSParseError: %r' % error)
-            # e.g. this looks like: NM_021961.5:c.1261T>C HGVSParseError(u'NP_068780.2:p.Tyr?His: char 17: expected a digit',)
+            log.info('Cannot create SequenceVariant from hgvs_text "%s": %r', hgvs_text, error)
+            # Examples:
+            #  HGVSParseError(u'NP_068780.2:p.Tyr?His: char 17: expected a digit',)
+            #  HGVSParseError(u'NM_004628.4:c.621_622ins83: char 24: Syntax error',)
             return None
 
     @property

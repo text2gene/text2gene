@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import json
 import logging
 import pickle
 
@@ -173,20 +174,20 @@ class Experiment(SQLCache):
     def _create_experiment_results_table(self):
         tablename = self.results_table_name
         log.debug('EXPERIMENT %s: creating Experiment results table %s', self.experiment_name, tablename)
+        self.execute('drop table if exists %s' % self.results_table_name)
         sql = '''create table {} (
                   id int(11) primary key auto_increment,
                   hgvs_text varchar(255) unique,
-                  pmids varchar(255) default NULL,
-                  error varchar(255) default NULL
+                  num_pmids INT default NULL,
+                  errors text default NULL
               )'''.format(tablename)
         try:
             self.execute(sql)
-
         except mdb.OperationalError as error:
             if error[0] == 1050:
                 pass
             else:
-                raise Text2GeneError('Unexpected error creating Experiment results table: %r' % error)
+                raise Text2GeneError('Problem creating Experiment results table %s: %r' % (self.results_table_name, error))
 
     def _delete_tables(self):
         for mod in self.search_modules:
@@ -194,7 +195,19 @@ class Experiment(SQLCache):
             log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, tablename)
             self.execute('drop table %s' % tablename)
 
-        self.execute('drop table %s' % self.get_mapping_table_name(self.lvg_mode))
+        tablename = self.get_mapping_table_name(self.lvg_mode)
+        log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, tablename)
+        self.execute('drop table %s' % tablename)
+
+        try:
+            log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, self.results_table_name)
+            self.execute('drop table %s' % self.results_table_name)
+        except mdb.OperationalError as error:
+            if error[0] == 1051:
+                #it never got created, so that's fine.
+                pass
+            else:
+                raise Text2GeneError('Problem deleting Experiment results table %s: %r' % (self.results_table_name, error))
 
     def _load_examples(self):
         sql = 'select distinct(hgvs_text) from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
@@ -202,9 +215,9 @@ class Experiment(SQLCache):
             sql += ' limit %i' % self.hgvs_examples_limit
         return self.fetchall(sql)
 
-    def store_results(self, hgvs_text, pmids=[], errors=[]):
+    def store_result(self, hgvs_text, pmids, errors=[]):
         row = {'hgvs_text': hgvs_text,
-               'pmids': json.dumps(list(pmids)),
+               'num_pmids': len(pmids),
                'errors': json.dumps(list(errors))
                }
         self.insert(self.results_table_name, row)
@@ -252,7 +265,7 @@ class Experiment(SQLCache):
 
             log.info('EXPERIMENT [%s.%i]: [%s] All PMIDs found: %r', self.experiment_name, self.iteration, hgvs_text, pmids)
             log.info('EXPERIMENT [%s.%i]: [%s] All Errors: %r', self.experiment_name, self.iteration, hgvs_text, errors)
-            self.store_result(hgvs_text, pmids=pmids, errors=errors)
+            self.store_result(hgvs_text, pmids, errors=errors)
 
     def evaluate(self):
         """ Performs a series of MySQL queries on the match results tables to produce quantitative analysis.

@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from .sqlcache import SQLCache
-from .pmid_lookups import clinvar_hgvs_to_pmid, pubtator_hgvs_to_pmid
+from .pmid_lookups import clinvar_lex_to_pmid, pubtator_lex_to_pmid
 from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.cached')
@@ -49,7 +49,7 @@ class ClinvarCachedQuery(SQLCache):
                     self.store_granular(lex, result)
                 return result
 
-        result = clinvar_hgvs_to_pmid(lex)
+        result = clinvar_lex_to_pmid(lex)
         self.store(lex, result)
         if (force_granular or self.granular) and result:
             self.store_granular(lex, result)
@@ -108,7 +108,7 @@ class PubtatorCachedQuery(SQLCache):
                     self.store_granular(lex, result)
                 return result
 
-        result = pubtator_hgvs_to_pmid(lex)
+        result = pubtator_lex_to_pmid(lex)
         self.store(lex, result)
         if (force_granular or self.granular) and result:
             self.store_granular(lex, result)
