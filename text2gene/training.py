@@ -234,8 +234,13 @@ class Experiment(SQLCache):
         else:
             hgvs_examples = self.hgvs_examples
 
-        for row in hgvs_examples:
-            hgvs_text = row['hgvs_text'].strip()
+        for item in hgvs_examples:
+            if hasattr(item, 'upper'):
+                # assume this is a string from a list
+                hgvs_text = str(item).strip()
+            else:
+                # assume this is a row from mysql
+                hgvs_text = item['hgvs_text'].strip()
 
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)
@@ -250,13 +255,13 @@ class Experiment(SQLCache):
                 result = []
                 try:
                     if mod == 'clinvar':
-                        result = self.ClinvarHgvs2Pmid(lex, skip_cache=self.skip_cache)
+                        result = self.ClinvarHgvs2Pmid(lex, force_granular=True, skip_cache=self.skip_cache)
 
                     if mod == 'ncbi':
                         result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
 
                     if mod == 'pubtator':
-                        result = self.PubtatorHgvs2Pmid(lex, skip_cache=self.skip_cache)
+                        result = self.PubtatorHgvs2Pmid(lex, force_granular=True, skip_cache=self.skip_cache)
 
                     log.debug('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:
