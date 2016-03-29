@@ -109,6 +109,10 @@ class HgvsComponents(object):
             # hmm.
             log.warn('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
 
+        # if alt is a '*' it represents a Ter (STOP) sequence, which PubTator represents as an 'X'.
+        if alt == '*':
+            alt = 'X'
+
         if seqtype == 'p':
             try:
                 pos = '%s' % seqvar.posedit.pos.start.pos
