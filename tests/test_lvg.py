@@ -30,6 +30,12 @@ class TestHgvsLVG(unittest.TestCase):
         assert expected_n in lex.hgvs_n
         assert expected_p in lex.hgvs_p
     
-    def test_no_variant_mappings(self):
+    def test_plain_lvgno_variant_mappings(self):
+        #TODO
         hgvs_text = 'NM_194248.1:c.158C>T'
+
+    def test_bad_hgvs_text_raises_CriticalHgvsError(self):
+        #TODO
+        bad_hgvs_text = 'NM_004628.4:c.621_622ins83'
+        lex = HgvsLVG(bad_hgvs_text)
 

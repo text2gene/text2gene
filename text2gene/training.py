@@ -215,10 +215,10 @@ class Experiment(SQLCache):
             sql += ' limit %i' % self.hgvs_examples_limit
         return self.fetchall(sql)
 
-    def store_result(self, hgvs_text, pmids, errors=[]):
+    def store_result(self, hgvs_text, pmids, errors=None):
         row = {'hgvs_text': hgvs_text,
                'num_pmids': len(pmids),
-               'errors': json.dumps(list(errors))
+               'errors': None if errors is None else json.dumps(errors)
                }
         self.insert(self.results_table_name, row)
 
@@ -264,7 +264,8 @@ class Experiment(SQLCache):
                 pmids.add(pmid)
 
             log.info('EXPERIMENT [%s.%i]: [%s] All PMIDs found: %r', self.experiment_name, self.iteration, hgvs_text, pmids)
-            log.info('EXPERIMENT [%s.%i]: [%s] All Errors: %r', self.experiment_name, self.iteration, hgvs_text, errors)
+            if errors:
+                log.info('EXPERIMENT [%s.%i]: [%s] %r', self.experiment_name, self.iteration, hgvs_text, errors)
             self.store_result(hgvs_text, pmids, errors=errors)
 
     def evaluate(self):
