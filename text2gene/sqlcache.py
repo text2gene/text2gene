@@ -116,7 +116,9 @@ class SQLCache(SQLData):
                 for each row set new.date_created = now()""".format(db=self)
         self.execute(sql)
 
-    def create_table(self):
+    def create_table(self, reset=False):
+        if reset:
+            self.execute("DROP TABLE IF EXISTS {}".format(self.tablename))
 
         sql = """CREATE TABLE {} (
                 cache_key varchar(255) primary key not null,

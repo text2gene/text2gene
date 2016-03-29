@@ -1,21 +1,28 @@
+import sys
+
 from text2gene.cached import ClinvarCachedQuery, PubtatorCachedQuery 
 from text2gene.ncbi import NCBIVariantReportCachedQuery, NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
 from text2gene.lvg_cached import HgvsLVGCached
 from text2gene.training import Experiment
 
-HgvsLVGCached().create_table()
-ClinvarCachedQuery().create_table()
-PubtatorCachedQuery().create_table()
-NCBIVariantPubmedsCachedQuery().create_table()
-NCBIVariantReportCachedQuery().create_table()
-NCBIEnrichedLVGCachedQuery().create_table()
+try:
+    reset = True if sys.argv[1] == 'reset'
+except IndexError:
+    reset = False
 
-HgvsLVGCached().create_granular_table()
-ClinvarCachedQuery().create_granular_table()
-PubtatorCachedQuery().create_granular_table()
-NCBIVariantPubmedsCachedQuery().create_granular_table()
-NCBIVariantReportCachedQuery().create_granular_table()
-NCBIEnrichedLVGCachedQuery().create_granular_table()
+HgvsLVGCached().create_table(reset)
+ClinvarCachedQuery().create_table(reset)
+PubtatorCachedQuery().create_table(reset)
+NCBIVariantPubmedsCachedQuery().create_table(reset)
+NCBIVariantReportCachedQuery().create_table(reset)
+NCBIEnrichedLVGCachedQuery().create_table(reset)
+
+# HgvsLVGCached().create_granular_table(reset)
+# ClinvarCachedQuery().create_granular_table(reset)
+# PubtatorCachedQuery().create_granular_table(reset)
+# NCBIVariantPubmedsCachedQuery().create_granular_table(reset)
+# NCBIVariantReportCachedQuery().create_granular_table(reset)
+# NCBIEnrichedLVGCachedQuery().create_granular_table(reset)
 
 Experiment('generic', hgvs_examples=['fake']).create_table()
 
