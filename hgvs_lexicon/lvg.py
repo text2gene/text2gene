@@ -15,7 +15,11 @@ log = logging.getLogger(PKGNAME)
 
 # === UTA Connection setup. === #
 hgvs_parser = hgvs.parser.Parser()
-uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
+
+if UTACONNECTION == 'default':
+    uta = hgvs.dataproviders.uta.connect()
+else:
+    uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
 
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 

@@ -31,7 +31,7 @@ def hgvs2pmid(hgvs_text):
     :return: HTTP200 (json) or HTTP400 (json)
     """
     # TODO: allow URL argument to specify type of lvg_mode to use.
-    
+
     outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
