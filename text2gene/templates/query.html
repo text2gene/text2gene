@@ -3,13 +3,13 @@
     <title>Text2Gene HgvsQuery</title>
     <style>
             #left {
-                width: 380px;
+                width: 480px;
                 float: left;
             }
 
             #right {
                 margin-top: 40px;
-                margin-left: 400px;
+                margin-left: 500px;
                 padding-bottom: 20px;
             }
 
@@ -37,7 +37,7 @@
 <hr />
 
 <div id="left">
-    <h3><a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a></h3>
+    <h3>{% if clinvar.url %}<a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a>{% else %} Clinvar Variation ID: unknown{% endif %}</h3>
 
     {% if ncbi_gene_url %}<h3>Gene: <a href="{{ ncbi_gene_url }}">{{ gene_name }}</a></h3>{% else %}
     <h3>Gene: {{ gene_name }}</h3>
@@ -93,7 +93,16 @@
 
 
 <div class="clear">
-<hr /></div>
+<hr />
+    {% if found_in_clinvar_example_tables %}<h3>Found in clinvar.hgvs_* tables:</h3>
+    <ul>{% for tname in found_in_clinvar_example_tables %}
+    <li>{{ tname }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+
+</div>
 <!--
 <h3># TODO: Google Query</h3>
 

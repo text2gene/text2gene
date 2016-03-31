@@ -13,7 +13,8 @@ from .config import ENV, CONFIG, PKGNAME
 
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
-from .report_utils import hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_ncbi_url_for_gene_id
+from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_ncbi_url_for_gene_id,
+                           get_clinvar_tables_containing_variant)
 
 fetch = PubMedFetcher()
 
@@ -64,7 +65,7 @@ def query(hgvs_text=''):
 
     clinvar_results = {'pmids': ClinvarHgvs2Pmid(lex),
                        'variationID': hgvs_to_clinvar_variationID(hgvs_text),
-                       'url': get_variation_url(clinvar_varID)}
+                       'url': get_variation_url(clinvar_varID) if clinvar_varID else ''}
 
     pubtator_results = {'pmids': PubtatorHgvs2Pmid(lex)}
     ncbi_results = {'pmids': NCBIHgvs2Pmid(hgvs_text),
@@ -78,9 +79,12 @@ def query(hgvs_text=''):
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp.pos)
 
+    found_in_clinvar_example_tables = get_clinvar_tables_containing_variant(hgvs_text)
+
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
-                           gene_name=lex.gene_name, ncbi_variants=ncbi_variants, ncbi_gene_url=ncbi_gene_url)
+                           gene_name=lex.gene_name, ncbi_variants=ncbi_variants, ncbi_gene_url=ncbi_gene_url,
+                           found_in_clinvar_example_tables = found_in_clinvar_example_tables)
 
 
 @base.route('/examples')

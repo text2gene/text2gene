@@ -1,10 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
-from medgen.api import ClinvarVariationID
+from MySQLdb import ProgrammingError
+
+from medgen.api import ClinvarVariationID, ClinVarDB
 
 def hgvs_to_clinvar_variationID(hgvs_text):
     var_ids = ClinvarVariationID(hgvs_text)
-    return var_ids[0]
+    if len(var_ids) > 0:
+        return var_ids[0]
+    else:
+        return None
 
 def get_variation_url(varID):
     return 'http://www.ncbi.nlm.nih.gov/clinvar/variation/{}'.format(varID)
@@ -35,3 +40,25 @@ def get_hgnc_url_for_gene_name(gene_name):
 
 def get_ncbi_url_for_gene_id(gene_id):
     return 'http://www.ncbi.nlm.nih.gov/gene/{}'.format(gene_id)
+
+def get_clinvar_tables_containing_variant(hgvs_text):
+    """ Return list of clinvar tables that contain this variant. """
+
+    out = []
+    clinvar_tables = ['hgvs_uncited_vus', 'hgvs_uncited_pathogenic', 'hgvs_uncited_likely_benign', 'hgvs_uncited_likely_pathogenic',
+                      'hgvs_examples', 'hgvs_citations', 'hgvs_citations_benign', 'hgvs_citations_likely_benign', 'hgvs_citations_vus',
+                      'hgvs_citations_pathogenic', 'hgvs_citations_likely_pathogenic']
+
+    sql_tmpl = 'select * from {tname} where hgvs_text = "{hgvs_text}"'
+    for tname in clinvar_tables:
+        try:
+            result = ClinVarDB().fetchall(sql_tmpl.format(tname=tname, hgvs_text=hgvs_text))
+            if result:
+                out.append(tname)
+        except ProgrammingError:
+            # no such table
+            pass
+    return out
+
+#def get_variant_summary_for_variationID(variationID):
+#
