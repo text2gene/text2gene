@@ -40,12 +40,6 @@ def pubtator_lex_to_pmid(lex):
     :param lex: lexical variant object (see above options)
     :return: list of pmids found in Clinvar
     """
-    edittype = HgvsComponents(lex.seqvar).edittype
-
-    if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
-        log.info('[%s] Cannot process edit type %s' % (lex.hgvs_text, edittype))
-        return []
-
     try:
         gene_id = GeneID(lex.gene_name)
     except TypeError:
