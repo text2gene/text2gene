@@ -122,7 +122,7 @@ class HgvsComponents(object):
 
         else:
             if seqvar.posedit.pos.end != seqvar.posedit.pos.start:
-                # compose a "range" for
+                # compose a "range"
                 pos = '%s_%s' % (seqvar.posedit.pos.start, seqvar.posedit.pos.end)
             else:
                 pos = '%s' % seqvar.posedit.pos.start

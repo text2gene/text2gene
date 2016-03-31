@@ -1,9 +1,17 @@
 <html>
-<head><title>Flask Skeleton: Home</title>
+<head><title>Text2Gene</title>
 </head>
 <body>
 
 <h1>Text2Gene Demo</h1>
+
+<div id="top_error">{{ error_msg }}</div>
+
+<p>Input an HGVS string (NM_ or NC_ only):</p>
+
+<form action="/query" method="POST">
+   <input type="text" name="hgvs_text" />
+</form>
 
 <h3>API Examples</h3>
 

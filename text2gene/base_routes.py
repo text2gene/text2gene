@@ -1,9 +1,20 @@
 from __future__ import print_function, absolute_import
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, request
 
-from .utils import HTTP200, HTTP400, get_hostname
+from metapub import PubMedFetcher
+
+from hgvs_lexicon import HgvsComponents
+from hgvs_lexicon.exceptions import CriticalHgvsError
+
+from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
+
+from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport
+from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
+from .report_utils import hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url
+
+fetch = PubMedFetcher()
 
 base = Blueprint('base', __name__, template_folder='templates')
 
@@ -21,6 +32,46 @@ def home():
 def about():
     return render_template('about.html')
 
+@base.route('/query', methods=['POST'])
+@base.route('/query/<hgvs_text>', methods=['GET'])
+def query(hgvs_text=''):
+    """ Runs all of the relevant search queries after producing a lex object from input hgvs_text """
+
+    if request.method=='POST':
+        hgvs_text = request.form.get('hgvs_text', '').strip()
+        return redirect('/query/%s' % hgvs_text, code=302)
+    else:
+        hgvs_text = hgvs_text.strip()
+
+    try:
+        lex = LVGEnriched(hgvs_text)
+    except CriticalHgvsError as error:
+        return render_template('home.html', error_msg='%r' % error)
+
+    variants = {'c': lex.hgvs_c,
+                'g': lex.hgvs_g,
+                'p': lex.hgvs_p,
+                'n': lex.hgvs_n
+                }
+
+    clinvar_varID = hgvs_to_clinvar_variationID(hgvs_text)
+
+    clinvar_results = {'pmids': ClinvarHgvs2Pmid(lex),
+                       'variationID': hgvs_to_clinvar_variationID(hgvs_text),
+                       'url': get_variation_url(clinvar_varID)}
+
+    pubtator_results = {'pmids': PubtatorHgvs2Pmid(lex)}
+    ncbi_results = {'pmids': NCBIHgvs2Pmid(hgvs_text),
+                    'report': NCBIReport(hgvs_text)}
+
+    comp = HgvsComponents(lex.seqvar)
+    lovd_url = get_lovd_url(lex.gene_name, comp.pos)
+
+    return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
+                           clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
+                           gene_name=lex.gene_name)
+
+
 @base.route('/examples')
 def examples():
     api_version = CONFIG.get('api', 'latest_version')
@@ -34,4 +85,3 @@ def OK():
                      'api_latest_version': CONFIG.get('api', 'latest_version'), 
                      'api_supported_versions': CONFIG.get('api', 'supported_versions'),
                    })
-

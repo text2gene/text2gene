@@ -113,3 +113,10 @@ def lvg(hgvs_text):
         outd['response'] = hgvs_obj.to_dict()
     
     return HTTP200(outd)
+
+
+@routes_v1.route('/v1/google/<hgvs_text>')
+def google_query(hgvs_text):
+    """ Outputs a Google Query link for given hgvs_text string. """
+    baseurl = 'https://www.google.com/?gws_rd=ssl#q=%s'
+    return HTTP200(baseurl % hgvs_text)

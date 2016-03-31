@@ -1,0 +1,82 @@
+<html>
+<head><title>Text2Gene HgvsQuery</title>
+      <style>
+    #left
+    {
+        width: 350px;
+        float: left;
+    }
+
+    #right
+    {
+        margin-top: 40px;
+        margin-left: 400px; /* Change this to whatever the width of your left column is*/
+    }
+
+    .clear
+    {
+      clear: both;
+    }
+  </style>
+</head>
+<body>
+
+<div class="clear">{{ error_msg }}</div>
+
+<div id="left">
+    <h1>{{ hgvs_text }}</h1>
+    <h3><a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a></h3>
+
+    <h3>Gene: {{ gene_name }}</h3>
+
+    <h3>LVG Output</h3>
+    <ul>
+    {% for seqtype, hgvs_list in variants.iteritems() %}
+    {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
+        <li>{{ hgvs_text }}</li>{% endfor %}{% endif %}
+    {% endfor %}
+    </ul>
+</div>
+
+<div id="right">
+
+    <h3>Sources</h3>
+
+    <p><strong>ClinVar</strong></p>
+    {% if clinvar.pmids %}
+        <ul>{% for pmid in clinvar.pmids %}<li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
+           {% endfor %}
+        </ul>
+    {% else %}
+        (None)
+    {% endif %}
+
+    <p><strong>Pubtator</strong></p>
+    {% if pubtator.pmids %}
+        <ul>{% for pmid in pubtator.pmids %}
+        <li><a href="http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={{pmid}}&searchtype=PubMed_Search&query={{pmid}}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax=">{{pmid}}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        (None)
+    {% endif %}
+
+    <p><strong>NCBI Variation Reporter</strong></p>
+    {% if ncbi.pmids %}
+        <ul>{% for pmid in ncbi.pmids %}
+        <li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{pmid}}">{{pmid}}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        (None)
+    {% endif %}
+
+    <h3><a href="{{lovd_url}}">LOVD Linkout</a></h3>
+</div>
+
+<h3># TODO: Google Query</h3>
+
+<h3># TODO: HGMD Lookup</h3>
+
+</body>
+</html>
