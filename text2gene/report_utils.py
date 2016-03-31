@@ -27,8 +27,11 @@ def get_lovd_url(gene_name, position):
         return 'NOPE'
     return tmpl.format(pos=position)
 
-def get_hgnc_url_for_hgnc_id(gene_id):
-    return 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:{}'.format(gene_id)
+def get_hgnc_url_for_hgnc_id(hgnc_id):
+    return 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:{}'.format(hgnc_id)
 
 def get_hgnc_url_for_gene_name(gene_name):
     return 'http://www.genenames.org/cgi-bin/search?search_type=all&search={}&submit=Submit'.format(gene_name)
+
+def get_ncbi_url_for_gene_id(gene_id):
+    return 'http://www.ncbi.nlm.nih.gov/gene/{}'.format(gene_id)

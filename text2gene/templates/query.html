@@ -31,7 +31,7 @@
     <h1>{{ hgvs_text }}</h1>
     <h3><a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a></h3>
 
-    {% if hgnc_url %}<h3>Gene: <a href="{{hgnc_url}}">{{ gene_name }}</a></h3>{% else %}
+    {% if ncbi_gene_url %}<h3>Gene: <a href="{{ ncbi_gene_url }}">{{ gene_name }}</a></h3>{% else %}
     <h3>Gene: {{ gene_name }}</h3>
     {% endif %}
 
