@@ -24,7 +24,7 @@ def get_lovd_url(gene_name, position):
     elif gene_name == 'OTOF':
         tmpl = 'https://research.cchmc.org/LOVD2/variants.php?select_db=OTOF&action=search_unique&order=Variant%2FDNA%2CASC&search_Variant%2FDNA={pos}'
     else:
-        return 'NOPE'
+        return None
     return tmpl.format(pos=position)
 
 def get_hgnc_url_for_hgnc_id(hgnc_id):

@@ -1,34 +1,42 @@
 <html>
-<head><title>Text2Gene HgvsQuery</title>
-      <style>
-    #left
-    {
-        width: 350px;
-        float: left;
-    }
+<head>
+    <title>Text2Gene HgvsQuery</title>
+    <style>
+            #left {
+                width: 380px;
+                float: left;
+            }
 
-    #right
-    {
-        margin-top: 40px;
-        margin-left: 400px; /* Change this to whatever the width of your left column is*/
-    }
+            #right {
+                margin-top: 40px;
+                margin-left: 400px;
+                padding-bottom: 20px;
+            }
 
-    .ncbi_tag
-    {
-        color: darkolivegreen;
-    }
-    .clear
-    {
-      clear: both;
-    }
-  </style>
+            .ncbi_tag {
+                color: darkolivegreen;
+            }
+
+            .error {
+                color: red;
+            }
+
+            .clear {
+                clear: both;
+            }
+    </style>
 </head>
+
 <body>
 
-<div class="clear">{{ error_msg }}</div>
+<div class="clear">
+    <h1>{{ hgvs_text }}</h1>
+    <span class="error">{{ error_msg }}</span>
+</div>
+
+<hr />
 
 <div id="left">
-    <h1>{{ hgvs_text }}</h1>
     <h3><a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a></h3>
 
     {% if ncbi_gene_url %}<h3>Gene: <a href="{{ ncbi_gene_url }}">{{ gene_name }}</a></h3>{% else %}
@@ -47,7 +55,7 @@
 
 <div id="right">
 
-    <h3>Sources</h3>
+    <h3>Pubmed Sources</h3>
 
     <p><strong>ClinVar</strong></p>
     {% if clinvar.pmids %}
@@ -78,12 +86,19 @@
         (None)
     {% endif %}
 
-    <h3><a href="{{lovd_url}}">LOVD Linkout</a></h3>
+
+    {% if lovd_url %}<h3><a href="{{lovd_url}}">LOVD Search</a></h3>{% endif %}
+
 </div>
 
+
+<div class="clear">
+<hr /></div>
+<!--
 <h3># TODO: Google Query</h3>
 
 <h3># TODO: HGMD Lookup</h3>
+-->
 
 </body>
 </html>
