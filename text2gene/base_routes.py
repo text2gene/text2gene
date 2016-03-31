@@ -2,6 +2,7 @@ from __future__ import print_function, absolute_import
 
 from flask import Blueprint, render_template, redirect, request
 
+from medgen.api import GeneID
 from metapub import PubMedFetcher
 
 from hgvs_lexicon import HgvsComponents
@@ -10,9 +11,9 @@ from hgvs_lexicon.exceptions import CriticalHgvsError
 from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
 
-from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport
+from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
-from .report_utils import hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url
+from .report_utils import hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_hgnc_url_for_gene_name
 
 fetch = PubMedFetcher()
 
@@ -48,6 +49,11 @@ def query(hgvs_text=''):
     except CriticalHgvsError as error:
         return render_template('home.html', error_msg='%r' % error)
 
+    if lex.gene_name:
+        hgnc_url = get_hgnc_url_for_gene_name(lex.gene_name)
+    else:
+        hgnc_url = None
+
     variants = {'c': lex.hgvs_c,
                 'g': lex.hgvs_g,
                 'p': lex.hgvs_p,
@@ -64,12 +70,17 @@ def query(hgvs_text=''):
     ncbi_results = {'pmids': NCBIHgvs2Pmid(hgvs_text),
                     'report': NCBIReport(hgvs_text)}
 
+    ncbi_variants = []
+    ncbi_lvg = NCBIHgvsLVG(hgvs_text)
+    for seqtype in ncbi_lvg.variants:
+        ncbi_variants = ncbi_variants + ncbi_lvg.variants[seqtype].keys()
+
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp.pos)
 
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
-                           gene_name=lex.gene_name)
+                           gene_name=lex.gene_name, ncbi_variants=ncbi_variants, hgnc_url=hgnc_url)
 
 
 @base.route('/examples')

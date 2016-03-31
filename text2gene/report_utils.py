@@ -26,3 +26,9 @@ def get_lovd_url(gene_name, position):
     else:
         return 'NOPE'
     return tmpl.format(pos=position)
+
+def get_hgnc_url_for_hgnc_id(gene_id):
+    return 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:{}'.format(gene_id)
+
+def get_hgnc_url_for_gene_name(gene_name):
+    return 'http://www.genenames.org/cgi-bin/search?search_type=all&search={}&submit=Submit'.format(gene_name)

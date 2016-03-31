@@ -13,6 +13,10 @@
         margin-left: 400px; /* Change this to whatever the width of your left column is*/
     }
 
+    .ncbi_tag
+    {
+        color: darkolivegreen;
+    }
     .clear
     {
       clear: both;
@@ -27,13 +31,16 @@
     <h1>{{ hgvs_text }}</h1>
     <h3><a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a></h3>
 
+    {% if hgnc_url %}<h3>Gene: <a href="{{hgnc_url}}">{{ gene_name }}</a></h3>{% else %}
     <h3>Gene: {{ gene_name }}</h3>
+    {% endif %}
 
     <h3>LVG Output</h3>
     <ul>
     {% for seqtype, hgvs_list in variants.iteritems() %}
     {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
-        <li>{{ hgvs_text }}</li>{% endfor %}{% endif %}
+        <li>{{ hgvs_text }}  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
+        {% endfor %}{% endif %}
     {% endfor %}
     </ul>
 </div>
