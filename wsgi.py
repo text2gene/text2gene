@@ -1,15 +1,12 @@
 from __future__ import absolute_import, print_function
 
-import os, logging
-from flask import Flask
+import os
 from werkzeug.contrib.fixers import ProxyFix
 
 from text2gene.app_config import app
 from text2gene.config import CFGDIR, ENV, PKGNAME, CONFIG
 
 app.wsgi_app = ProxyFix(app.wsgi_app) 
-
-logging.getLogger('hgvs_lexicon').addHandler(logging.StreamHandler())
 
 def show_envs():
     relevant_envs = [ '%s_ENV' % PKGNAME, 

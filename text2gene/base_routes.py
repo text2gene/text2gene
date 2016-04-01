@@ -81,10 +81,14 @@ def query(hgvs_text=''):
 
     found_in_clinvar_example_tables = get_clinvar_tables_containing_variant(hgvs_text)
 
+    #google_query = GoogleQuery(lex.seqvar)
+    google_query = None
+
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
                            gene_name=lex.gene_name, ncbi_variants=ncbi_variants, ncbi_gene_url=ncbi_gene_url,
-                           found_in_clinvar_example_tables = found_in_clinvar_example_tables)
+                           found_in_clinvar_example_tables = found_in_clinvar_example_tables,
+                           google_query=google_query)
 
 
 @base.route('/examples')

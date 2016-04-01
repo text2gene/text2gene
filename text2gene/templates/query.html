@@ -58,6 +58,7 @@
 </div>
 
 <div id="right">
+    <h3><a href="{{ google_query }}">Google Query</a></h3>
 
     <h3>Pubmed Sources</h3>
 
@@ -97,14 +98,17 @@
 
 
 <div class="clear">
-<hr />
+    <hr />
+    <h3>Google Query Expansion</h3>
+    <p>#TODO</p>
+
     {% if found_in_clinvar_example_tables %}<h3>Found in clinvar.hgvs_* tables:</h3>
+    <hr />
     <ul>{% for tname in found_in_clinvar_example_tables %}
     <li>{{ tname }}</li>
     {% endfor %}
     </ul>
     {% endif %}
-
 
 </div>
 <!--

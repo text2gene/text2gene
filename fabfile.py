@@ -1,4 +1,5 @@
 import os
+import logging
 
 from fabric.operations import put, local
 from fabric.decorators import task
@@ -9,6 +10,9 @@ from wsgi import show_envs, PKGNAME
 ENV = os.getenv('%s_SERVICES_ENV' % PKGNAME, 'dev')
 
 env.user = 'biomed'
+
+ch = logging.StreamHandler()
+logging.getLogger('hgvs_lexicon').addHandler(ch)
 
 @task
 def preset_envs():

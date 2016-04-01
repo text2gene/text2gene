@@ -49,7 +49,8 @@ class HgvsComponents(object):
     """
 
     def __init__(self, seqvar=None, **kwargs):
-        if seqvar:
+        self.seqvar = seqvar
+        if self.seqvar:
             self.seqtype, self.edittype, self.ref, self.pos, self.alt = self.parse(seqvar)
             #TODO: get FS_Pos and DupX out of seqvar when applicable.
         else:
@@ -150,4 +151,7 @@ class HgvsComponents(object):
         return self.__dict__
 
     def __str__(self):
+        return '%r' % self.__dict__
+
+    def __repr__(self):
         return '%r' % self.__dict__
