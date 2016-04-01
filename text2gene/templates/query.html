@@ -47,7 +47,11 @@
     <ul>
     {% for seqtype, hgvs_list in variants.iteritems() %}
     {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
+        {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') %}
+        <li><a href="/query/{{ hgvs_text }}">{{ hgvs_text }}</a>  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
+        {% else %}
         <li>{{ hgvs_text }}  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
+        {% endif %}
         {% endfor %}{% endif %}
     {% endfor %}
     </ul>

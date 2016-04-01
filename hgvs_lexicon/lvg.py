@@ -2,26 +2,20 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-import hgvs.dataproviders.uta as uta
 import hgvs.parser
 import hgvs.variantmapper
 from hgvs.exceptions import HGVSDataNotAvailableError, HGVSParseError
 
 from .hgvs_components import HgvsComponents
-from .config import UTACONNECTION, PKGNAME
+from .config import get_uta_connection, PKGNAME
 from .exceptions import CriticalHgvsError
 
 log = logging.getLogger(PKGNAME)
 
 # === UTA Connection setup. === #
-hgvs_parser = hgvs.parser.Parser()
-
-if UTACONNECTION == 'default':
-    uta = hgvs.dataproviders.uta.connect()
-else:
-    uta = hgvs.dataproviders.uta.connect(UTACONNECTION, pooling=True)
-
+uta = get_uta_connection()
 mapper = hgvs.variantmapper.EasyVariantMapper(uta)
+hgvs_parser = hgvs.parser.Parser()
 
 
 def _seqvar_map_func(in_type, out_type):
