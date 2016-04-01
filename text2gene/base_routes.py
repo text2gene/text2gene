@@ -11,6 +11,7 @@ from hgvs_lexicon.exceptions import CriticalHgvsError
 from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
 
+from .googlequery import GoogleQuery
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
 from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_ncbi_url_for_gene_id,
@@ -81,8 +82,7 @@ def query(hgvs_text=''):
 
     found_in_clinvar_example_tables = get_clinvar_tables_containing_variant(hgvs_text)
 
-    #google_query = GoogleQuery(lex.seqvar)
-    google_query = None
+    google_query = GoogleQuery(lex)
 
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,

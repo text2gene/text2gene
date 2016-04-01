@@ -32,6 +32,9 @@ amino_acid_map = { 'Ala': 'A',
 dna_nucleotides = ['A','C','T','G']
 #rna_nucleotides = ['A','C','U','G']
 
+official_to_slang_map = {'>': ['->', '-->', '/'],
+                        }
+
 class HgvsComponents(object):
 
     """
@@ -146,6 +149,24 @@ class HgvsComponents(object):
             outd['DupX'] = self.dupx
 
         return outd
+
+    @property
+    def posedit(self):
+        return '%s' % self.seqvar.posedit
+
+    @property
+    def posedit_slang(self):
+        """ !!! Only supports SUB edit type right now !!! """
+        # Examples based on input hgvs_text 'NM_014874.3:c.891C>T'
+        out = set()
+
+        # E.g. ["891C>T", "891C->T", "891C-->T", "891C/T"]
+        for slang_symbol in official_to_slang_map['>']:
+            out.add(self.posedit.replace('>', slang_symbol))
+
+        # E.g. "C891T"
+        out.add(self.ref + self.pos + self.alt)
+        return list(out)
 
     def to_dict(self):
         return self.__dict__

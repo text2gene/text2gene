@@ -58,7 +58,7 @@
 </div>
 
 <div id="right">
-    <h3><a href="{{ google_query }}">Google Query</a></h3>
+    <h3><a href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'>Google Query</a></h3>
 
     <h3>Pubmed Sources</h3>
 
@@ -96,11 +96,10 @@
 
 </div>
 
-
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>#TODO</p>
+    <p>{{ google_query }}</p>
 
     {% if found_in_clinvar_example_tables %}<h3>Found in clinvar.hgvs_* tables:</h3>
     <hr />
@@ -111,11 +110,6 @@
     {% endif %}
 
 </div>
-<!--
-<h3># TODO: Google Query</h3>
-
-<h3># TODO: HGMD Lookup</h3>
--->
 
 </body>
 </html>
