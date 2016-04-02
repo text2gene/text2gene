@@ -89,6 +89,8 @@
         <li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{pmid}}">{{pmid}}</a></li>
         {% endfor %}
         </ul>
+    {% elif ncbi.report == None %}
+        (NCBI Report unavailable for this variant)
     {% else %}
         (None)
     {% endif %}
