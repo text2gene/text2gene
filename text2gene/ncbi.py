@@ -58,7 +58,7 @@ def get_ncbi_variant_report(hgvs_text):
     response = requests.get("http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
 
     if 'Error' in response.text:
-        error_str = 'An error occurred when using the NCBI Variant Report Service: "{}"\n'.format(response.text)
+        error_str = 'The NCBI Variant Report Service returned an error: "{}"\n'.format(response.text)
         error_str += 'To reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text)
         raise NCBIRemoteError(error_str)
 
@@ -79,6 +79,9 @@ def get_ncbi_variant_report(hgvs_text):
             if len(outd.get('PMIDs', '')) > 0:
                 outd['PMIDs'] = outd['PMIDs'].replace(', ', ';').split(';')
             report.append(outd)
+
+    if report == []:
+        raise NCBIRemoteError('The NCBI Variant Report Service returned an empty report.\nTo reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text))
 
     return report
 
@@ -134,6 +137,7 @@ class NCBIEnrichedLVG(HgvsLVG):
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
         self.hgvs_text = '%s' % hgvs_text_or_seqvar
         self.seqvar = Variant(hgvs_text_or_seqvar)
+        self.ncbierror = None
         if self.seqvar is None:
             raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % self.hgvs_text)
         try:
@@ -141,6 +145,8 @@ class NCBIEnrichedLVG(HgvsLVG):
             self.variants = ncbi_report_to_variants(report)
         except NCBIRemoteError as error:
             log.debug('Skipping NCBI enrichment; %r' % error)
+            self.ncbierror = '%r' % error
+            self.error = ''
             self.variants = {'c': {}, 'g': {}, 'p': {}, 'n': {}}
             self.variants[self.seqvar.type][self.hgvs_text] = self.seqvar
 
