@@ -45,6 +45,5 @@ setup(
         'flask',  # web api
         'gunicorn',  # web api
         'fabric',  # web api
-        'ipython', # cli / debug tool
         ],
     )
