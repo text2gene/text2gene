@@ -51,10 +51,11 @@ def query(hgvs_text=''):
     except CriticalHgvsError as error:
         return render_template('home.html', error_msg='%r' % error)
 
+
     if lex.gene_name:
-        medgen_gene_url = get_medgen_url_for_gene_name(lex.gene_name)
+        gene_info = GeneInfo(gene_name=lex.gene_name)
     else:
-        medgen_gene_url = None
+        gene_info = None
 
     variants = {'c': lex.hgvs_c,
                 'g': lex.hgvs_g,
@@ -83,8 +84,6 @@ def query(hgvs_text=''):
     found_in_clinvar_example_tables = get_clinvar_tables_containing_variant(hgvs_text)
 
     google_query = GoogleQuery(lex)
-
-    gene_info = GeneInfo(gene_name = lex.gene_name)
 
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
