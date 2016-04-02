@@ -4,5 +4,5 @@ class Text2GeneError(Exception):
     pass
 
 class NCBIRemoteError(Text2GeneError):
-    """ Raised when NCBI fails to report on a variant for any reason (general mysterious/arbitrary ones. """
+    """ Raised when NCBI fails to report on a variant for any reason (often mysterious/arbitrary ones). """
     pass

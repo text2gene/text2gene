@@ -39,8 +39,10 @@
 <div id="left">
     <h3>{% if clinvar.url %}<a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a>{% else %} Clinvar Variation ID: unknown{% endif %}</h3>
 
-    {% if gene_info %}<h3>Gene: <a href="{{ gene_info.medgen_url }}">{{ gene_info.gene_name }}</a></h3>{% else %}
-    <h3>Gene: {{ gene_info.gene_name }}</h3>
+    {% if gene_info %}<h3>Gene: <a href="{{ gene_info.medgen_url }}">{{ gene_info.gene_name }}</a>
+      [<a href="{{ gene_info.gtr_url }}">GTR summary</a>] [<a href="{{ gene_info.gtr_pubmeds_url }}">GTR citations</a>]</h3>
+    {% else %}
+    <h3>Gene: unknown</h3>
     {% endif %}
 
     <h3>LVG Output</h3>
@@ -91,7 +93,6 @@
         (None)
     {% endif %}
 
-
     {% if lovd_url %}<h3><a href="{{lovd_url}}">LOVD Search</a></h3>{% endif %}
 
 </div>
@@ -101,8 +102,8 @@
     <h3>Google Query Expansion</h3>
     <p>{{ google_query }}</p>
 
-    {% if found_in_clinvar_example_tables %}<h3>Found in clinvar.hgvs_* tables:</h3>
-    <hr />
+    {% if found_in_clinvar_example_tables %}
+    <hr /><h3>Found in clinvar.hgvs_* tables:</h3>
     <ul>{% for tname in found_in_clinvar_example_tables %}
     <li>{{ tname }}</li>
     {% endfor %}
