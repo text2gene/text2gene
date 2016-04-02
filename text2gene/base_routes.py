@@ -14,8 +14,8 @@ from .config import ENV, CONFIG, PKGNAME
 from .googlequery import GoogleQuery
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
-from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_ncbi_url_for_gene_id,
-                           get_clinvar_tables_containing_variant)
+from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url, get_clinvar_tables_containing_variant)
+from .report_utils import GeneInfo
 
 fetch = PubMedFetcher()
 
@@ -52,9 +52,9 @@ def query(hgvs_text=''):
         return render_template('home.html', error_msg='%r' % error)
 
     if lex.gene_name:
-        ncbi_gene_url = get_ncbi_url_for_gene_id(GeneID(lex.gene_name))
+        medgen_gene_url = get_medgen_url_for_gene_name(lex.gene_name)
     else:
-        ncbi_gene_url = None
+        medgen_gene_url = None
 
     variants = {'c': lex.hgvs_c,
                 'g': lex.hgvs_g,
@@ -84,9 +84,11 @@ def query(hgvs_text=''):
 
     google_query = GoogleQuery(lex)
 
+    gene_info = GeneInfo(gene_name = lex.gene_name)
+
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
-                           gene_name=lex.gene_name, ncbi_variants=ncbi_variants, ncbi_gene_url=ncbi_gene_url,
+                           gene_name=lex.gene_name, ncbi_variants=ncbi_variants, gene_info=gene_info,
                            found_in_clinvar_example_tables = found_in_clinvar_example_tables,
                            google_query=google_query)
 

@@ -11,7 +11,7 @@ from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE
-from .exceptions import Text2GeneError
+from .exceptions import Text2GeneError, NCBIRemoteError
 
 log = logging.getLogger('text2gene.ncbi')
 
@@ -57,11 +57,10 @@ def get_ncbi_variant_report(hgvs_text):
     """
     response = requests.get("http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
 
-    # lifted from medgen.annotate.ncbi_variant.py
     if 'Error' in response.text:
-        error_str = 'An error occurred when using the NCBI Variant Report Service: "{}"\n'.format(res)
+        error_str = 'An error occurred when using the NCBI Variant Report Service: "{}"\n'.format(response.text)
         error_str += 'To reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text)
-        raise RuntimeError(error_str)
+        raise NCBIRemoteError(error_str)
 
     keys = []
     report = []
@@ -86,36 +85,71 @@ def get_ncbi_variant_report(hgvs_text):
 
 class NCBIHgvsLVG(object):
 
+    """ Creates a pseudo-LVG object with a bare-bones assortment of attributes, using data
+    drawn from an NCBIReport lookup. (Uses NCBI cache, but is not itself a cached LVG object.)
+
+        .hgvs_text      hgvs string representing input variant
+        .seqvar         SequenceVariant object representing input variant
+        .variants       dictionary resembling HgvsLVG.variants
+        .report         copy of NCBI report; safe since this is not a cached object
+        .kwargs         accepts arbitrary input kwargs to mimic the "real" LVG objects
+
+    Examples:
+        ncbi_lex = NCBIHgvsLVG('NM_000249.3:c.1958T>G')
+
+        seqvar = Variant('NM_000249.3:c.1958T>G')
+        ncbi_lex = NCBIHgvsLVG(seqvar)
+    """
+
     VERSION = '0.0.1'
     LVG_MODE = 'ncbi'
 
-    def __init__(self, hgvs_text, **kwargs):
-        self.hgvs_text = hgvs_text
-        self.seqvar = Variant(hgvs_text)
+    def __init__(self, hgvs_text_or_seqvar, **kwargs):
+        self.hgvs_text = '%s' % hgvs_text_or_seqvar
+        self.seqvar = Variant(hgvs_text_or_seqvar)
         if self.seqvar is None:
-            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
+            raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % self.hgvs_text)
         self.report = NCBIReport(self.hgvs_text)
         self.variants = ncbi_report_to_variants(self.report)
+        self.kwargs = kwargs
 
 
 class NCBIEnrichedLVG(HgvsLVG):
 
-    VERSION = '0.0.1'
+    """ Creates a true LVG object by subclassing from HgvsLVG and using data drawn from an NCBIReport
+    lookup.  See HgvsLVG (from hgvs_lexicon) for additional documentation.
+
+    *** ! To use the cached version of this object, use LVGEnriched ! ***
+
+    Examples:
+        lex = NCBIEnrichedLVG('NM_000249.3:c.1958T>G')
+
+        seqvar = Variant('NM_000249.3:c.1958T>G')
+        lex = NCBIEnrichedLVG(seqvar)
+    """
+
+    VERSION = '0.0.2'
     LVG_MODE = 'ncbi_enriched'
 
-    def __init__(self, hgvs_text, **kwargs):
-        self.seqvar = Variant(hgvs_text)
+    def __init__(self, hgvs_text_or_seqvar, **kwargs):
+        self.hgvs_text = '%s' % hgvs_text_or_seqvar
+        self.seqvar = Variant(hgvs_text_or_seqvar)
         if self.seqvar is None:
             raise CriticalHgvsError('Cannot create SequenceVariant from input %s (see hgvs_lexicon log)' % hgvs_text)
+        try:
+            report = NCBIReport(self.hgvs_text)
+            self.variants = ncbi_report_to_variants(report)
+        except NCBIRemoteError as error:
+            log.debug('Skipping NCBI enrichment; %r' % error)
+            self.variants = {'c': {}, 'g': {}, 'p': {}, 'n': {}}
+            self.variants[self.seqvar.type][self.hgvs_text] = self.seqvar
 
-        report = NCBIReport(hgvs_text)
-        self.variants = ncbi_report_to_variants(report)
-
-        super(NCBIEnrichedLVG, self).__init__(hgvs_text,
+        super(NCBIEnrichedLVG, self).__init__(self.hgvs_text,
                                               hgvs_c=self.hgvs_c,
                                               hgvs_g=self.hgvs_g,
                                               hgvs_p=self.hgvs_p,
-                                              hgvs_n=self.hgvs_n)
+                                              hgvs_n=self.hgvs_n,
+                                              kwargs=kwargs)
 
 
 class NCBIEnrichedLVGCachedQuery(SQLCache):

@@ -39,8 +39,8 @@
 <div id="left">
     <h3>{% if clinvar.url %}<a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a>{% else %} Clinvar Variation ID: unknown{% endif %}</h3>
 
-    {% if ncbi_gene_url %}<h3>Gene: <a href="{{ ncbi_gene_url }}">{{ gene_name }}</a></h3>{% else %}
-    <h3>Gene: {{ gene_name }}</h3>
+    {% if gene_info %}<h3>Gene: <a href="{{ gene_info.medgen_url }}">{{ gene_info.gene_name }}</a></h3>{% else %}
+    <h3>Gene: {{ gene_info.gene_name }}</h3>
     {% endif %}
 
     <h3>LVG Output</h3>

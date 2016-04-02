@@ -3,6 +3,39 @@ from __future__ import absolute_import, unicode_literals
 from MySQLdb import ProgrammingError
 
 from medgen.api import ClinvarVariationID, ClinVarDB
+from medgen.api import GeneID, GeneName
+
+
+class GeneInfo(object):
+
+    def __init__(self, gene_id=None, gene_name=None):
+        if gene_id:
+            self.gene_id = gene_id
+            self.gene_name = GeneName(gene_id)
+        elif gene_name:
+            self.gene_name = gene_name
+            self.gene_id = GeneID(gene_name)
+
+    @property
+    def ncbi_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/gene/{gene_id}'.format(gene_id=self.gene_id)
+
+    @property
+    def medgen_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/medgen?term={gene_name}%5BGene%5D'.format(gene_name=self.gene_name)
+
+    @property
+    def gtr_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/gtr/genes/{gene_id}'.format(gene_id=self.gene_id)
+
+    @property
+    def hgnc_url(self):
+        return 'http://www.genenames.org/cgi-bin/search?search_type=all&search={}&submit=Submit'.format(self.gene_name)
+
+    @property
+    def gtr_pubmeds_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/pubmed/?LinkName=gene_pubmed&from_uid={gene_id}'.format(gene_id=self.gene_id)
+
 
 def hgvs_to_clinvar_variationID(hgvs_text):
     var_ids = ClinvarVariationID(hgvs_text)
@@ -12,10 +45,10 @@ def hgvs_to_clinvar_variationID(hgvs_text):
         return None
 
 def get_variation_url(varID):
-    return 'http://www.ncbi.nlm.nih.gov/clinvar/variation/{}'.format(varID)
+    return 'http://www.ncbi.nlm.nih.gov/clinvar/variation/{var_id}'.format(var_id=varID)
 
 def get_pubmed_url(pmid):
-    return 'http://www.ncbi.nlm.nih.gov/pubmed/{}'.format(pmid)
+    return 'http://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=pmid)
 
 def get_pubtator_url(pmid):
     url_tmpl = 'http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={pmid}&searchtype=PubMed_Search&query={pmid}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax='
@@ -31,15 +64,6 @@ def get_lovd_url(gene_name, position):
     else:
         return None
     return tmpl.format(pos=position)
-
-def get_hgnc_url_for_hgnc_id(hgnc_id):
-    return 'http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:{}'.format(hgnc_id)
-
-def get_hgnc_url_for_gene_name(gene_name):
-    return 'http://www.genenames.org/cgi-bin/search?search_type=all&search={}&submit=Submit'.format(gene_name)
-
-def get_ncbi_url_for_gene_id(gene_id):
-    return 'http://www.ncbi.nlm.nih.gov/gene/{}'.format(gene_id)
 
 def get_clinvar_tables_containing_variant(hgvs_text):
     """ Return list of clinvar tables that contain this variant. """
@@ -59,6 +83,3 @@ def get_clinvar_tables_containing_variant(hgvs_text):
             # no such table
             pass
     return out
-
-#def get_variant_summary_for_variationID(variationID):
-#
