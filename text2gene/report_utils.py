@@ -65,21 +65,24 @@ def get_lovd_url(gene_name, position):
         return None
     return tmpl.format(pos=position)
 
-def get_clinvar_tables_containing_variant(hgvs_text):
-    """ Return list of clinvar tables that contain this variant. """
 
+def get_clinvar_tables_containing_variant(hgvs_text):
+    """ Return list of hgvs sample tables that contain this hgvs_text. """
+
+    db = ClinVarDB()
     out = []
-    clinvar_tables = ['hgvs_uncited_vus', 'hgvs_uncited_pathogenic', 'hgvs_uncited_likely_benign', 'hgvs_uncited_likely_pathogenic',
-                      'hgvs_examples', 'hgvs_citations', 'hgvs_citations_benign', 'hgvs_citations_likely_benign', 'hgvs_citations_vus',
-                      'hgvs_citations_pathogenic', 'hgvs_citations_likely_pathogenic']
+    tname_pattern = 'samples%'
+
+    sql = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = DATABASE() and TABLE_NAME LIKE '{}'".format(tname_pattern)
+    results = db.fetchall(sql)
+
+    tables = []
+    for row in results:
+        tables.append(row['TABLE_NAME'])
 
     sql_tmpl = 'select * from {tname} where hgvs_text = "{hgvs_text}"'
-    for tname in clinvar_tables:
-        try:
-            result = ClinVarDB().fetchall(sql_tmpl.format(tname=tname, hgvs_text=hgvs_text))
-            if result:
-                out.append(tname)
-        except ProgrammingError:
-            # no such table
-            pass
+    for tname in tables:
+        if db.fetchall(sql_tmpl.format(tname=tname, hgvs_text=hgvs_text)):
+            out.append(tname)
+
     return out
