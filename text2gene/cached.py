@@ -14,7 +14,7 @@ log = logging.getLogger('text2gene.cached')
 
 class ClinvarCachedQuery(SQLCache):
 
-    VERSION = '0.0.1'
+    VERSION = 0
 
     def __init__(self, granular=False, granular_table='clinvar_match'):
         self.granular = granular
@@ -43,7 +43,7 @@ class ClinvarCachedQuery(SQLCache):
         :return: list of PMIDs if found (result of Clinvar query)
         """
         if not skip_cache:
-            result = self.retrieve(lex)
+            result = self.retrieve(lex, version=self.VERSION)
             if result:
                 if force_granular:
                     self.store_granular(lex, result)
@@ -64,7 +64,7 @@ class ClinvarCachedQuery(SQLCache):
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
                   PMID int(11) default NULL,
-                  version varchar(10) default NULL)
+                  version int(11) default 0)
                   ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
@@ -73,7 +73,7 @@ class ClinvarCachedQuery(SQLCache):
 
 class PubtatorCachedQuery(SQLCache):
 
-    VERSION = '0.0.2'
+    VERSION = 0
 
     def __init__(self, granular=False, granular_table='pubtator_match'):
         self.granular = granular
@@ -102,7 +102,7 @@ class PubtatorCachedQuery(SQLCache):
         :return: list of PMIDs if found (result of Clinvar query)
         """
         if not skip_cache:
-            result = self.retrieve(lex)
+            result = self.retrieve(lex, version=self.VERSION)
             if result:
                 if force_granular:
                     self.store_granular(lex, result)
@@ -124,7 +124,7 @@ class PubtatorCachedQuery(SQLCache):
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
                   PMID int(11) default NULL,
-                  version varchar(10) default NULL)
+                  version int(11) default NULL)
                   ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
         sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)

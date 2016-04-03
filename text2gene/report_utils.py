@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-from MySQLdb import ProgrammingError
-
 from medgen.api import ClinvarVariationID, ClinVarDB
 from medgen.api import GeneID, GeneName
 

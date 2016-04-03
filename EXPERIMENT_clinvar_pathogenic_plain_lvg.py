@@ -7,8 +7,15 @@ fh = logging.FileHandler('%s.%i.log' % (experiment_name, iteration))
 log = logging.getLogger('text2gene.experiment')
 log.addHandler(fh)
 
+ch = logging.StreamHandler()
+
+sqlcache_log = logging.getLogger('text2gene.sqlcache')
+sqlcache_log.setLevel(logging.DEBUG)
+
 otherlog = logging.getLogger('text2gene')
-otherlog.addHandler(logging.StreamHandler())
+
+otherlog.addHandler(ch)
+sqlcache_log.addHandler(ch)
 
 from text2gene.training import Experiment
 exper = Experiment(experiment_name, lvg_mode='lvg', iteration=iteration,

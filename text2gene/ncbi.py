@@ -107,7 +107,7 @@ class NCBIHgvsLVG(object):
         ncbi_lex = NCBIHgvsLVG(seqvar)
     """
 
-    VERSION = '0.0.1'
+    VERSION = 0
     LVG_MODE = 'ncbi'
 
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
@@ -134,7 +134,7 @@ class NCBIEnrichedLVG(HgvsLVG):
         lex = NCBIEnrichedLVG(seqvar)
     """
 
-    VERSION = '0.0.2'
+    VERSION = 1
     LVG_MODE = 'ncbi_enriched'
 
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
@@ -163,7 +163,7 @@ class NCBIEnrichedLVG(HgvsLVG):
 
 class NCBIEnrichedLVGCachedQuery(SQLCache):
 
-    VERSION = '0.0.2'
+    VERSION = 1
 
     def __init__(self, granular=False, granular_table='ncbi_enriched_mappings'):
         self.granular = granular
@@ -188,7 +188,7 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
 
     def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:
                 lexobj = pickle.loads(self.retrieve(hgvs_text))
                 if force_granular:
@@ -229,7 +229,7 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
 
 class NCBIVariantPubmedsCachedQuery(SQLCache):
 
-    VERSION = '0.0.1'
+    VERSION = 0
 
     def __init__(self, granular=False, granular_table='ncbi_match'):
         self.granular = granular
@@ -245,7 +245,7 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
     def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:
                 if force_granular:
                     self.store_granular(hgvs_text, result)
@@ -276,7 +276,7 @@ class NCBIVariantPubmedsCachedQuery(SQLCache):
 
 class NCBIVariantReportCachedQuery(SQLCache):
 
-    VERSION = '0.0.1'
+    VERSION = 0
 
     MAXIMUM_REPORT_ENTRIES = 6
 
@@ -321,7 +321,7 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
     def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:
                 if force_granular:
                     self.store_granular(hgvs_text, result)

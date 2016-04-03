@@ -13,7 +13,7 @@ log = logging.getLogger('text2gene.lvg')
 
 class HgvsLVGCached(SQLCache):
 
-    VERSION = HgvsLVG.VERSION
+    VERSION = 0
 
     def __init__(self, granular=False, granular_table='lvg_mappings'):
         self.granular = granular
@@ -38,7 +38,7 @@ class HgvsLVGCached(SQLCache):
 
     def query(self, hgvs_text, skip_cache=False, force_granular=False):
         if not skip_cache:
-            result = self.retrieve(hgvs_text)
+            result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:
                 lexobj = pickle.loads(self.retrieve(hgvs_text))
                 if force_granular:
@@ -67,7 +67,7 @@ class HgvsLVGCached(SQLCache):
               hgvs_c varchar(255) default NULL,
               hgvs_n varchar(255) default NULL,
               hgvs_p varchar(255) default NULL,
-              version varchar(10) default NULL
+              version int(11) default NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)
 

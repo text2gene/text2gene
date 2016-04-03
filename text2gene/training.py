@@ -73,7 +73,7 @@ class Experiment(SQLCache):
     If neither source of HGVS examples is supplied, a Text2Gene error is raised in complaint.
     """
 
-    VERSION = "0.0.1"
+    VERSION = 0
 
     def __init__(self, experiment_name, **kwargs):
         self.experiment_name = experiment_name

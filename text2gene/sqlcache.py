@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import hashlib
 import pickle
 import json
+import logging
 from datetime import datetime
 
 import MySQLdb as mdb
@@ -11,6 +12,7 @@ from medgen.config import config as medgen_config
 
 from pubtatordb.sqldata import SQLData, SQLdatetime
 
+log = logging.getLogger('text2gene.sqlcache')
 
 class SQLCache(SQLData):
     """ Subclass of SQLData that stores simple key-value pairs on a unique-key-indexed
@@ -26,6 +28,7 @@ class SQLCache(SQLData):
 
     TABLENAME_FORMAT = '{}_cache'
 
+    VERSION = 0
 
     def __init__(self, servicename, *args, **kwargs):
         self._db_host = self.DBHOST
@@ -69,7 +72,7 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions and json serialization errors
         """
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value) }
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value), 'version': self.VERSION}
 
         try:
             self.insert(self.tablename, fv_dict)
@@ -86,15 +89,25 @@ class SQLCache(SQLData):
         sql = 'delete from {db.tablename} where cache_key="{key}"'.format(db=self, key=self.get_cache_key(querydict))
         self.execute(sql)
 
-    def retrieve(self, querydict):
+    def retrieve(self, querydict, version=0):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.
 
+        If requested version number is GREATER THAN OR EQUAL TO version number of existing data, older version will be
+        destroyed so that newer version can be created in its place.
+
+        Thus, supplying version=0 allows returns from cache from *any* version of data that has ever been stored.
+
         :param querydict:
+        :param version: (int) only return results from cache with greater than or equal version number [default: 0]
         :return: value at this cache location, or None
         """
         row = self.get_row(querydict)
         if row:
-            return json.loads(row['cache_value'])
+            if row['version'] >= version:
+                return json.loads(row['cache_value'])
+            else:
+                log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(querydict))
+                self.delete(querydict)
         return None
 
     def get_row(self, querydict):
@@ -123,7 +136,8 @@ class SQLCache(SQLData):
         sql = """CREATE TABLE {} (
                 cache_key varchar(255) primary key not null,
                 cache_value text default NULL,
-                date_created datetime default NULL
+                date_created datetime default NULL,
+                version int(11) default 0
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(self.tablename)
 
         try:
