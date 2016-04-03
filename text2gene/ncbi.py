@@ -26,17 +26,19 @@ def ncbi_report_to_variants(report):
     :return: dict as per structure above
     """
     variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
-    for seqtype in variants.keys():
-        hgvs_text = report[0].get('Hgvs_%s' % seqtype, '').strip()
-        if hgvs_text:
-            # set up data structure just like HgvsLVG object, i.e.:
-            # {seqtype: { 'hgvs_string': SequenceVariant object }
-            seqvar = Variant(hgvs_text)
-            if seqvar:
-                # Sometimes NCBI has variant strings that do not parse. Variant() function returns None in these cases.
-                variants[seqvar.type][str(seqvar)] = seqvar
+    for rep_part in report:
+        for seqtype in variants.keys():
+            hgvs_text = rep_part.get('Hgvs_%s' % seqtype, '').strip()
+            if hgvs_text:
+                # set up data structure just like HgvsLVG object, i.e.:
+                # {seqtype: { 'hgvs_string': SequenceVariant object }
+                seqvar = Variant(hgvs_text)
+                if seqvar:
+                    # Sometimes NCBI has variant strings that do not parse. Variant() function returns None in these cases.
+                    variants[seqvar.type][str(seqvar)] = seqvar
 
     return variants
+
 
 def ncbi_report_to_pubmeds(report):
     """ Parses PMIDs from NCBI report and returns as list of strings.
@@ -45,6 +47,7 @@ def ncbi_report_to_pubmeds(report):
     :return: list of pubmeds found in report
     """
     return [int(item) for item in report[0]['PMIDs']]
+
 
 def get_ncbi_variant_report(hgvs_text):
     """
@@ -160,7 +163,7 @@ class NCBIEnrichedLVG(HgvsLVG):
 
 class NCBIEnrichedLVGCachedQuery(SQLCache):
 
-    VERSION = '0.0.1'
+    VERSION = '0.0.2'
 
     def __init__(self, granular=False, granular_table='ncbi_enriched_mappings'):
         self.granular = granular
@@ -275,6 +278,8 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
     VERSION = '0.0.1'
 
+    MAXIMUM_REPORT_ENTRIES = 6
+
     def __init__(self, granular=False, granular_table='ncbi_mappings'):
         self.granular = granular
         self.granular_table = granular_table
@@ -282,6 +287,23 @@ class NCBIVariantReportCachedQuery(SQLCache):
 
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
+
+    def _limit_report(self, report):
+        """ Limit length of report to MAXIMUM_REPORT_ENTRIES records.
+
+        Usually doesn't matter (most reports have at most 2 entries), but there are some
+        freaks with 60+ (!).
+
+        See tests/demo_NCBI_long_report_examples.py
+
+        We find that the last usual location of unique variant info is at report index 5.
+        If we try to keep these huge reports at full size, we can't cache them in SQL tables.
+
+        :param: report (list of dictionaries)
+        :return: report (list of dictionaries) possibly reduced in length.
+        """
+        if len(report) > self.MAXIMUM_REPORT_ENTRIES:
+            return report[0:self.MAXIMUM_REPORT_ENTRIES]
 
     def _store_granular_hgvs_type(self, hgvs_text, hgvs_vars, seqtype):
         entry_pairs = [{'hgvs_text': hgvs_text,
@@ -305,11 +327,11 @@ class NCBIVariantReportCachedQuery(SQLCache):
                     self.store_granular(hgvs_text, result)
                 return result
 
-        result = get_ncbi_variant_report(hgvs_text)
-        self.store(hgvs_text, result)
+        report = self._limit_report(get_ncbi_variant_report(hgvs_text))
+        self.store(hgvs_text, report)
         if force_granular or self.granular:
-            self.store_granular(hgvs_text, result)
-        return result
+            self.store_granular(hgvs_text, report)
+        return report
 
     def create_granular_table(self):
         tname = self.granular_table
