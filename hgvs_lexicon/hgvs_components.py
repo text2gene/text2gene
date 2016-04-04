@@ -174,6 +174,13 @@ class HgvsComponents(object):
         # E.g. '4964_4982del'
         return [self.pos + 'del']
 
+    def _posedit_slang_DUP(self):
+        """ Handles the Duplication case for generating posedit slang from Components. """
+        # Examples based on input hgvs_text 'NM_025114.3:c.6869dupA'
+        #
+        # E.g. '6869dup'
+        return [self.pos + 'dup']
+
     @property
     def posedit_slang(self):
         """ If supported, returns slang for  """
