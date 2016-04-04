@@ -154,9 +154,8 @@ class HgvsComponents(object):
     def posedit(self):
         return '%s' % self.seqvar.posedit
 
-    @property
-    def posedit_slang(self):
-        """ !!! Only supports SUB edit type right now !!! """
+    def _posedit_slang_SUB(self):
+        """ Handles the Substitution case for generating posedit slang from Components. """
         # Examples based on input hgvs_text 'NM_014874.3:c.891C>T'
         out = set()
 
@@ -167,6 +166,22 @@ class HgvsComponents(object):
         # E.g. "C891T"
         out.add(self.ref + self.pos + self.alt)
         return list(out)
+
+    def _posedit_slang_DEL(self):
+        """ Handles the Deletion case for generating posedit slang from Components. """
+        # Examples based on input hgvs_text 'NM_007294.3:c.4964_4982delCTGGCCTGACCCCAGAAGA'
+        #
+        # E.g. '4964_4982del'
+        return [self.pos + 'del']
+
+    @property
+    def posedit_slang(self):
+        """ If supported, returns slang for  """
+        try:
+            slang_method = getattr(self, '_posedit_slang_%s' % self.edittype)
+            return slang_method()
+        except AttributeError:
+            raise NotImplementedError('Cannot currently handle EditType %s' % self.edittype)
 
     def to_dict(self):
         return self.__dict__
