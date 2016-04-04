@@ -38,8 +38,9 @@ def GoogleQuery(lex):
             print(error)
             continue
 
-        # 1) Offical
-        posedits.add('"%s"' % comp.posedit)
+        # 1) Official
+        official_term = '"%s"' % comp.posedit.replace('(', '').replace(')')
+        posedits.add(official_term)
 
         # 2) Slang
         try:
