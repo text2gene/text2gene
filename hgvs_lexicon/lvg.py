@@ -213,6 +213,15 @@ class HgvsLVG(object):
     def hgvs_n(self):
         return self.variants['n'].keys()
 
+    @property
+    def seqvars(self):
+        """ returns a flat list of all SequenceVariant objects contained in
+        the self.variants dictionary """
+        out = []
+        for seqvar_dict in (self.variants.values()):
+            out = out + list(seqvar_dict.values())
+        return out
+
     def to_dict(self, with_gene_name=True):
         """Returns contents of object as a 2-level dictionary.
 
