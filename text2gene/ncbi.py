@@ -303,7 +303,9 @@ class NCBIVariantReportCachedQuery(SQLCache):
         :return: report (list of dictionaries) possibly reduced in length.
         """
         if len(report) > self.MAXIMUM_REPORT_ENTRIES:
-            return report[0:self.MAXIMUM_REPORT_ENTRIES]
+            return report[:self.MAXIMUM_REPORT_ENTRIES]
+        else:
+            return report
 
     def _store_granular_hgvs_type(self, hgvs_text, hgvs_vars, seqtype):
         entry_pairs = [{'hgvs_text': hgvs_text,
