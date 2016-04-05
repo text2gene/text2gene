@@ -52,8 +52,8 @@ def get_uta_connection():
                 socket.create_connection((host, port), timeout=timeout)
                 log.info('Connected to UTA host %s on port %i', host, port)
                 return hgvs.dataproviders.uta.connect(uta_cnxn_tmpl.format(host=host), pooling=True)
-            except socket.timeout:
-                log.info('Could not connect to UTA host %s on port %i.', host, port)
+            except Exception as error:
+                log.info('Could not connect to UTA host %s on port %i: %r', host, port, error)
 
     # if we get this far and nothing can be reached, return the biocommons default UTA host
     return hgvs.dataproviders.uta.connect()
