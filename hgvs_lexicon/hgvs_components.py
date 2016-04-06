@@ -33,6 +33,7 @@ dna_nucleotides = ['A','C','T','G']
 #rna_nucleotides = ['A','C','U','G']
 
 official_to_slang_map = {'>': ['->', '-->', '/'],
+                         'Ter': ['*', 'X'],
                         }
 
 class HgvsComponents(object):
@@ -152,7 +153,19 @@ class HgvsComponents(object):
 
     @property
     def posedit(self):
+        """ Returns the official lexeme representing this variant's position and edit information. """
         return '%s' % self.seqvar.posedit
+
+    def _posedit_slang_protein(self):
+        out = set()
+        posedit = self.posedit.replace('(', '').replace(')', '')
+        for item in official_to_slang_map['Ter']:
+            out.add(posedit.replace('Ter', item))
+
+        fs_pos = posedit.find('fs')
+        if fs_pos > -1:
+            out.add(posedit[:fs_pos + len('fs')])
+        return list(out)
 
     def _posedit_slang_SUB(self):
         """ Handles the Substitution case for generating posedit slang from Components. """
@@ -183,7 +196,10 @@ class HgvsComponents(object):
 
     @property
     def posedit_slang(self):
-        """ If supported, returns slang for  """
+        """ If supported, returns alternative lexeme that may represent this variant's position and edit info in the wild. """
+        if self.seqtype == 'p':
+            return self._posedit_slang_protein()
+
         try:
             slang_method = getattr(self, '_posedit_slang_%s' % self.edittype)
             return slang_method()
