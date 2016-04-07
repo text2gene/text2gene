@@ -31,19 +31,19 @@
 
 <div class="clear">
     <h1>{{ hgvs_text }}</h1>
-    <h3>Gene: {% if gene_info %}{{ gene_info.gene_name }}{% else %}unknown{% endif %}</h3>
+    <h4>Gene: {% if gene_info %}{{ gene_info.gene_name }}
+        <a href="{{ gene_info.gtr_url }}"><button>GTR</button></a>
+        <a href="{{ gene_info.medgen_url }}"><button>MedGen</button></a>
+        <a href="{{ gene_info.pubmed_clinical_query_url }}"><button>Clinical Query</button></a>
+        {% else %}(unknown){% endif %}</h4>
+    <h4>Variant in ClinVar: {% if clinvar.url %}<a href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
+                                   {% else %}(unknown){% endif %}</h4>
     <span class="error">{{ error_msg }}</span>
 </div>
 
 <hr />
 
 <div id="left">
-    <h3>Variant: {% if clinvar.url %}<a href="{{ clinvar.url }}">ClinVar Variation ID: {{ clinvar.variationID }}</a>{% else %} ClinVar Variation ID: unknown{% endif %}</h3>
-
-    <h3>Gene Info: {% if gene_info %}<a href="{{ gene_info.gtr_url }}">GTR</a>
-        <a href="{{ gene_info.medgen_url }}">MedGen</a>
-        <a href="{{ gene_info.pubmed_clinical_query_url }}">Clinical Query</a>{% endif %}</h3>
-
     <h3>LVG Output</h3>
     <ul>
     {% for seqtype, hgvs_list in variants.iteritems() %}
@@ -85,7 +85,7 @@
     <p><strong>NCBI Variation Reporter</strong></p>
     {% if ncbi.pmids %}
         <ul>{% for pmid in ncbi.pmids %}
-        <li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{pmid}}">{{pmid}}</a></li>
+        <li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
         {% endfor %}
         </ul>
     {% elif ncbi.report == None %}
@@ -94,7 +94,7 @@
         (None)
     {% endif %}
 
-    {% if lovd_url %}<h3><a href="{{lovd_url}}">LOVD Search</a></h3>{% endif %}
+    {% if lovd_url %}<h3><a href="{{ lovd_url }}">LOVD Search</a></h3>{% endif %}
 
 </div>
 

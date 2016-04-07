@@ -31,7 +31,7 @@ def get_posedits_for_seqvar(seqvar):
         comp = HgvsComponents(seqvar)
     except RejectedSeqVar as error:
         log.debug(error)
-        return None
+        return []
 
     # 1) Official
     official_term = quoted_posedit(comp)
@@ -70,10 +70,10 @@ def get_posedits_for_lex(lex):
     for seqtype in ['c', 'p', 'g', 'n']:
         for seqvar in lex.variants[seqtype].values():
             try:
-                official_term = quoted_posedit(HgvsComponents(seqvar))        #HgvsComponents(seqvar).posedit.replace('(', '').replace(')', '')
-                if official_term not in used:
-                    posedits = posedits + get_posedits_for_seqvar(seqvar)
-                    used.add(official_term)
+                for syn in get_posedits_for_seqvar(seqvar):
+                    if syn not in used:
+                        posedits.append(syn)
+                        used.add(syn)
             except RejectedSeqVar as error:
                 log.debug(error)
 
