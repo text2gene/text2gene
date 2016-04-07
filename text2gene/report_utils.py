@@ -31,8 +31,12 @@ class GeneInfo(object):
         return 'http://www.genenames.org/cgi-bin/search?search_type=all&search={}&submit=Submit'.format(self.gene_name)
 
     @property
-    def gtr_pubmeds_url(self):
+    def gene_pubmeds_url(self):
         return 'http://www.ncbi.nlm.nih.gov/pubmed/?LinkName=gene_pubmed&from_uid={gene_id}'.format(gene_id=self.gene_id)
+
+    @property
+    def pubmed_clinical_query_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/pubmed/clinical?term={}[Gene]#clincat=Diagnosis,Narrow;medgen=Genetic'.format(self.gene_name)
 
 
 def hgvs_to_clinvar_variationID(hgvs_text):

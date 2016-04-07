@@ -31,19 +31,18 @@
 
 <div class="clear">
     <h1>{{ hgvs_text }}</h1>
+    <h3>Gene: {% if gene_info %}{{ gene_info.gene_name }}{% else %}unknown{% endif %}</h3>
     <span class="error">{{ error_msg }}</span>
 </div>
 
 <hr />
 
 <div id="left">
-    <h3>{% if clinvar.url %}<a href="{{ clinvar.url }}">Clinvar Variation ID: {{ clinvar.variationID }}</a>{% else %} Clinvar Variation ID: unknown{% endif %}</h3>
+    <h3>Variant: {% if clinvar.url %}<a href="{{ clinvar.url }}">ClinVar Variation ID: {{ clinvar.variationID }}</a>{% else %} ClinVar Variation ID: unknown{% endif %}</h3>
 
-    {% if gene_info %}<h3>Gene: <a href="{{ gene_info.medgen_url }}">{{ gene_info.gene_name }}</a>
-      [<a href="{{ gene_info.gtr_url }}">GTR summary</a>] [<a href="{{ gene_info.gtr_pubmeds_url }}">GTR citations</a>]</h3>
-    {% else %}
-    <h3>Gene: unknown</h3>
-    {% endif %}
+    <h3>Testing: {% if gene_info %}<a href="{{ gene_info.gtr_url }}">[ GTR ]</a>{% endif %}</h3>
+    <h3>Genetics: {% if gene_info %}<a href="{{ gene_info.medgen_url }}">[ MedGen ]{% endif %}</a>
+    <h3>Counseling: {% if gene_info %}[ <a href="{{ gene_info.pubmed_clinical_query_url }}">Clinical Query</a> ]{% endif %}</h3>
 
     <h3>LVG Output</h3>
     <ul>

@@ -65,6 +65,7 @@ def get_posedits_for_lex(lex):
 
     # start with the originating seqvar that created the LVG.
     posedits = get_posedits_for_seqvar(lex.seqvar)
+    used.add(quoted_posedit(HgvsComponents(lex.seqvar)))
 
     for seqtype in ['c', 'p', 'g', 'n']:
         for seqvar in lex.variants[seqtype].values():
@@ -120,12 +121,19 @@ class GoogleQuery(object):
 
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
 
-    def build_query(self):
+    def build_query(self, term_limit=30):
+        """ Generate string query from instantiating information.
+
+        :param term_limit: (int) max number of synonyms to return in built query
+        :return: (str) built query
+        """
         if self.lex:
             posedits = get_posedits_for_lex(self.lex)
 
         else:
             posedits = get_posedits_for_seqvar(seqvar)
+
+        posedits = posedits[:term_limit]
 
         posedit_clause = '(%s)' % '|'.join(posedits)
         return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
