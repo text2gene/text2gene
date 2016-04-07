@@ -68,7 +68,7 @@ class HgvsComponents(object):
             self.dupx = kwargs.get('DupX', '').strip()
 
         if self.edittype.upper() == 'DELINS':
-            # normalize DELINS to INDEL (these are synonyms)
+            # normalize DELINS to INDEL (synonymous)
             self.edittype = 'INDEL'
 
         if not self.seqtype:
@@ -114,7 +114,7 @@ class HgvsComponents(object):
             alt = seqvar.posedit.edit.alt
         except AttributeError as error:
             # hmm.
-            log.warn('SequenceVariant %s: %s' % error)
+            log.warn('SequenceVariant %s: %s', seqvar, error)
 
         # if alt is a '*' it represents a Ter (STOP) sequence, which PubTator represents as an 'X'.
         if alt == '*':

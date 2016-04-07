@@ -37,4 +37,12 @@ class TestHgvsLVG(unittest.TestCase):
 
     def test_bad_hgvs_text_raises_CriticalHgvsError(self):
         bad_hgvs_text = 'NM_004628.4:c.621_622ins83'
-        self.assertRaises(HgvsLVG(bad_hgvs_text), CriticalHgvsError)
+    
+        with self.assertRaises(CriticalHgvsError):
+            HgvsLVG(bad_hgvs_text)
+
+    def test_gene_name(self):
+        hgvs_text = 'NM_000548.3:c.826_827del'
+        lex = HgvsLVG(hgvs_text)
+        assert lex.gene_name == 'TSC2'
+
