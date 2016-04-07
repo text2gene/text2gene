@@ -90,7 +90,7 @@ def query(hgvs_text=''):
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp.pos)
 
-    google_query = GoogleQuery(lex)
+    google_query = GoogleQuery(lex).build_query()
 
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,

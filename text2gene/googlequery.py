@@ -41,8 +41,9 @@ def get_posedits_for_seqvar(seqvar):
     # 2) Slang
     try:
         for slang_term in comp.posedit_slang:
-            if slang_term not in posedits:
-                posedits.append('"%s"' % slang_term)
+            slang_term = '"%s"' % slang_term
+            if slang_term != official_term:
+                posedits.append(slang_term)
     except NotImplementedError as error:
         # silently omit (but log) any seqvar with an edittype we don't currently support
         log.debug(error)
@@ -68,7 +69,7 @@ def get_posedits_for_lex(lex):
     for seqtype in ['c', 'p', 'g', 'n']:
         for seqvar in lex.variants[seqtype].values():
             try:
-                official_term = HgvsComponents(seqvar).posedit.replace('(', '').replace(')', '')
+                official_term = quoted_posedit(HgvsComponents(seqvar))        #HgvsComponents(seqvar).posedit.replace('(', '').replace(')', '')
                 if official_term not in used:
                     posedits = posedits + get_posedits_for_seqvar(seqvar)
                     used.add(official_term)

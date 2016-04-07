@@ -84,7 +84,7 @@ def pubtator_results_for_seqvar(seqvar_or_hgvs_text, gene_id):
         { hgvs_text: [ <dictionaries representing matching results from pubtator> ] }
 
     :param seqvar_or_hgvs_text: hgvs_text or SequenceVariant object
-    :oaram gene_id: id of gene associated with variant (required)
+    :param gene_id: id of gene associated with variant (required)
     :return: dictionary of results
     :raises: RejectedSeqVar, PubtatorDBError
     """
