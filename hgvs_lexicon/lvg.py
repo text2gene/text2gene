@@ -161,15 +161,13 @@ class HgvsLVG(object):
 
     @property
     def gene_name(self):
-        "lazy-loaded gene name based on hgvs lookup and Gene database select."
-        if self._gene_name is None:     # and self.seqvar.type != 'p':
-            if self.variants['c']:
-                chosen_one = list(self.variants['c'].values())[0]
-            elif self.variants['n']:
-                chosen_one = list(self.variants['n'].values())[0]
-            else:
-                chosen_one = list(self.variants['p'].values())[0]
-            self._gene_name = variant_to_gene_name(chosen_one)
+        """ Lazy-loaded gene name based on hgvs lookup. """
+        if self._gene_name is None:
+            for seqvar in self.variants['c'].values() + self.variants['n'].values() + self.variants['p'].values():
+                name = variant_to_gene_name(seqvar)
+                if name:
+                    self._gene_name = name
+                    break
         return self._gene_name
 
     @staticmethod

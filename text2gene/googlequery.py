@@ -5,7 +5,7 @@ import logging
 
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
-from .exceptions import Text2GeneError
+from .exceptions import Text2GeneError, GoogleQueryMissingGeneName
 
 log = logging.getLogger('text2gene.googlequery')
 
@@ -117,7 +117,7 @@ class GoogleQuery(object):
             self.gene_name = kwargs.get('gene_name', None)
 
         if self.gene_name is None:
-            raise Text2GeneError('GoogleQuery: Missing gene_name from supplied information. (You may need to supply `gene_name` at instantiation.)')
+            raise GoogleQueryMissingGeneName('Information supplied with variant %s is missing gene name.' % self.seqvar)
 
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
 
@@ -137,6 +137,9 @@ class GoogleQuery(object):
 
         posedit_clause = '(%s)' % '|'.join(posedits)
         return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
+
+    def __str__(self):
+        return self.build_query()
 
 
 if __name__ == '__main__':

@@ -59,7 +59,9 @@
 </div>
 
 <div id="right">
-    <h3><a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'>Google Query</a></h3>
+    <h3>{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><button>Google Query</button></a>
+        {% else %}Cannot build Google Query without gene name{% endif %}
+    </h3>
 
     <h3>Pubmed Sources</h3>
 
@@ -101,7 +103,7 @@
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>{{ google_query }}</p>
+    <p>{% if google_query %}{{ google_query }}{% else %}(Cannot build without gene name){% endif %}</p>
 
     {% if found_in_clinvar_example_tables %}
     <hr /><h3>Found in Clinvar hgvs sample tables:</h3>

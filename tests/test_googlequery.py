@@ -4,7 +4,10 @@ import unittest
 
 from text2gene.api import GoogleQuery, 
 
-from .hgvs_examples import supported_edittypes, hgvs_c, hgvs_g, hgvs_p, hgvs_n
+import hgvs_examples.hgvs_c
+import hgvs_examples.hgvs_g
+import hgvs_examples.hgvs_p
+import hgvs_examples.hgvs_n
 
 
 class TestGoogleQuery(unittest.TestCase):
@@ -42,6 +45,9 @@ class TestGoogleQuery(unittest.TestCase):
 
     def test_dup_intronic(self):
         hgvs_text = "NM_000722.2:c.355-5dupT"
-        query = GoogleQuery(hgvs_text)
+        lex = LVG(hgvs_text)
+        query = GoogleQuery(lex).build_query
         assert query == '"CACNA2D1" ("355-5dupT"|"355-5dup"|"611-5dupU"|"611-5dup")'
+
+
 

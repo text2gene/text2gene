@@ -2,6 +2,7 @@
 import unittest
 
 from hgvs_lexicon import HgvsLVG
+from hgvs_lexicon.exceptions import CriticalHgvsError
 
 class TestHgvsLVG(unittest.TestCase):
 
@@ -35,7 +36,5 @@ class TestHgvsLVG(unittest.TestCase):
         hgvs_text = 'NM_194248.1:c.158C>T'
 
     def test_bad_hgvs_text_raises_CriticalHgvsError(self):
-        #TODO
         bad_hgvs_text = 'NM_004628.4:c.621_622ins83'
-        lex = HgvsLVG(bad_hgvs_text)
-
+        self.assertRaises(HgvsLVG(bad_hgvs_text), CriticalHgvsError)

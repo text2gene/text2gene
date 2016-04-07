@@ -2,7 +2,6 @@ from __future__ import print_function, absolute_import
 
 from flask import Blueprint, render_template, redirect, request
 
-from medgen.api import GeneID
 from metapub import PubMedFetcher
 
 from hgvs_lexicon import HgvsComponents
@@ -12,7 +11,7 @@ from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
 
 from .googlequery import GoogleQuery
-from .exceptions import NCBIRemoteError
+from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
 from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url,
@@ -90,7 +89,11 @@ def query(hgvs_text=''):
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp.pos)
 
-    google_query = GoogleQuery(lex).build_query()
+    try:
+        google_query = '%s' % GoogleQuery(lex)
+    except GoogleQueryMissingGeneName as error:
+        print(error)
+        google_query = None
 
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
