@@ -112,9 +112,9 @@ class HgvsComponents(object):
         try:
             ref = seqvar.posedit.edit.ref
             alt = seqvar.posedit.edit.alt
-        except AttributeError:
+        except AttributeError as error:
             # hmm.
-            log.warn('SequenceVariant %s edit information incomplete or invalid.' % seqvar.ac)
+            log.warn('SequenceVariant %s: %s' % error)
 
         # if alt is a '*' it represents a Ter (STOP) sequence, which PubTator represents as an 'X'.
         if alt == '*':
@@ -193,6 +193,20 @@ class HgvsComponents(object):
         #
         # E.g. '6869dup'
         return [self.pos + 'dup']
+
+    def _posedit_slang_INDEL(self):
+        """ Handles the Insertion case for generating posedit slang from Components.
+
+        Returns an empty list (no slang terms known).
+        """
+        return []
+
+    def _posedit_slang_INS(self):
+        """ Handles the Insertion case for generating posedit slang from Components.
+
+        Returns an empty list (no slang terms known).
+        """
+        return []
 
     @property
     def posedit_slang(self):

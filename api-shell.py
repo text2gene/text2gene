@@ -13,7 +13,7 @@ with warnings.catch_warnings():
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
-from text2gene import *
+from text2gene.api import *
 
 import hgvs.dataproviders.uta
 import hgvs.parser

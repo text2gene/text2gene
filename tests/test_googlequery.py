@@ -40,6 +40,8 @@ class TestGoogleQuery(unittest.TestCase):
         var_c = Variant(hgvs_c['INS'])
         pass
 
-    
-
+    def test_dup_intronic(self):
+        hgvs_text = "NM_000722.2:c.355-5dupT"
+        query = GoogleQuery(hgvs_text)
+        assert query == '"CACNA2D1" ("355-5dupT"|"355-5dup"|"611-5dupU"|"611-5dup")'
 

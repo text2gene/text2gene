@@ -32,11 +32,11 @@
 <div class="clear">
     <h1>{{ hgvs_text }}</h1>
     <h4>Gene: {% if gene_info %}{{ gene_info.gene_name }}
-        <a href="{{ gene_info.gtr_url }}"><button>GTR</button></a>
-        <a href="{{ gene_info.medgen_url }}"><button>MedGen</button></a>
-        <a href="{{ gene_info.pubmed_clinical_query_url }}"><button>Clinical Query</button></a>
+        <a href="{{ gene_info.gtr_url }}" target="_blank"><button>GTR</button></a>
+        <a href="{{ gene_info.medgen_url }}" target="_blank"><button>MedGen</button></a>
+        <a href="{{ gene_info.pubmed_clinical_query_url }} target="_blank""><button>Clinical Query</button></a>
         {% else %}(unknown){% endif %}</h4>
-    <h4>Variant in ClinVar: {% if clinvar.url %}<a href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
+    <h4>Variant in ClinVar: {% if clinvar.url %}<a target="_blank" href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
                                    {% else %}(unknown){% endif %}</h4>
     <span class="error">{{ error_msg }}</span>
 </div>
@@ -59,13 +59,13 @@
 </div>
 
 <div id="right">
-    <h3><a href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'>Google Query</a></h3>
+    <h3><a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'>Google Query</a></h3>
 
     <h3>Pubmed Sources</h3>
 
     <p><strong>ClinVar</strong></p>
     {% if clinvar.pmids %}
-        <ul>{% for pmid in clinvar.pmids %}<li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
+        <ul>{% for pmid in clinvar.pmids %}<li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
            {% endfor %}
         </ul>
     {% else %}
@@ -75,7 +75,7 @@
     <p><strong>Pubtator</strong></p>
     {% if pubtator.pmids %}
         <ul>{% for pmid in pubtator.pmids %}
-        <li><a href="http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={{pmid}}&searchtype=PubMed_Search&query={{pmid}}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax=">{{pmid}}</a></li>
+        <li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={{pmid}}&searchtype=PubMed_Search&query={{pmid}}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax=">{{pmid}}</a></li>
         {% endfor %}
         </ul>
     {% else %}
@@ -85,7 +85,7 @@
     <p><strong>NCBI Variation Reporter</strong></p>
     {% if ncbi.pmids %}
         <ul>{% for pmid in ncbi.pmids %}
-        <li><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
+        <li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
         {% endfor %}
         </ul>
     {% elif ncbi.report == None %}
@@ -94,7 +94,7 @@
         (None)
     {% endif %}
 
-    {% if lovd_url %}<h3><a href="{{ lovd_url }}">LOVD Search</a></h3>{% endif %}
+    {% if lovd_url %}<h3><a target="_blank" href="{{ lovd_url }}">LOVD Search</a></h3>{% endif %}
 
 </div>
 
