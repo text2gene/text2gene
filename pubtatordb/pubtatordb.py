@@ -34,5 +34,8 @@ class PubtatorDB(SQLData):
             sql = "select distinct M.* from gene2pubtator G, m2p_{comp.edittype} M where G.PMID = M.PMID and G.GeneID = {gene_id} and Pos = '{comp.pos}' and SeqType='p' and Ref = '{comp.ref}'".format(comp=comp, gene_id=gene_id)
         else:
             sql = "select distinct * from m2p_{comp.edittype} where SeqType = '{comp.seqtype}' and Pos = '{comp.pos}' and SeqType='p' and Ref = '{comp.ref}'".format(comp=comp)
-        return self._fetchall_or_raise_pubtatordberror(sql, comp)
 
+        if strict:
+            sql += " and Alt = '{comp.Alt}'".format(comp=comp)
+
+        return self._fetchall_or_raise_pubtatordberror(sql, comp)

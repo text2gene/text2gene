@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 
 supported_edittypes = ['SUB', 'DEL', 'FS', 'INDEL', 'DUP', 'INS']
 
@@ -17,22 +18,23 @@ hgvs_g = {'SUB': 'NC_000019.9:g.1399792C>T',        # GAMT / unknown protein eff
           'FS': '',
           'INDEL': 'NC_000009.11:g.135147145_135147147delCAAinsAT', # SETX / NM_015046.5:c.7149_7151delinsAT / NM_015046.5:c.7149_7151delTTGinsAT
           'DUP': 'NC_000003.11:g.15685815dupT',     # SCN1A / NP_008851.3:p.Leu331PhefsTer
-          'INS': '',
+          'INS': 'NC_000002.11:g.113520105_113520106insAA',   # CKAP2L / NM_152515.4:c.78_79insTT
         }
           
 hgvs_p = {'SUB': '',
           'DEL': 'NP_009225.1:p.Glu1000_Glu1001del', # BRCA1 / NM_007300.3:n.3230_3235delGAGGAA
           'FS': 'NP_009225.1:p.Ser1655TyrfsTer',    # BRCA1 / NM_007294.3:c.4964_4982delCTGGCCTGACCCCAGAAGA
           'INDEL': 'NP_000116.2:p.Cys447Ala',       # ESR1 / NM_001122742.1:c.1339_1340delTGinsGC
-          'DUP': '',
+          'DUP': 'NP_004983.1:p.Asp15SerfsTer',     # MECP2 / NM_004992.3:c.35_42dupAGTCAGAA
           'INS': '',
         }
           
 hgvs_n = {'SUB': 'NM_138924.2:n.421G>A',        # GAMT / unknown protein effects
           'DEL': 'NM_007300.3:n.3230_3235delGAGGAA',    # BRCA1 / NP_009225.1:p.Glu1000_Glu1001del
           'FS': '',
-          'INDEL': '',
+          'INDEL': 'NM_001291230.1:n.1563_1564delTGinsGC',          # ESR1 / NM_000125.3:c.1339_1340delTGinsGC
           'DUP': 'NM_001202435.1:n.1219dupT',   # SCN1A / NP_008851.3:p.Leu331PhefsTer
           'INS': '',
+          'INV': 'NM_001085425.2:n.581_582invTC',   # ARSA / NM_000487.5:c.292_293delTCinsCT
         }
 
