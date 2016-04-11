@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db={gene}&action=search_unique&search_Variant%2FDNA={pos}',
+LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db={gene}&action=search_unique&search_Variant%2FDNA=c.{pos}',
                          'genes': ['ACTA1', 'ANKRD1', 'ANO5', 'B3GNT1', 'BAG3', 'BANF1',
                                    'BIN1', 'CAPN3', 'CAV3', 'CCDC78', 'CCT5', 'CFL2',
                                    'CHAT', 'CHKB', 'CHRNA1', 'CHRNB1', 'CHRND', 'CHRNE',
@@ -24,7 +24,7 @@ LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db=
                                     'ZMPSTE24'],
                           },
 
-              'chromium.lovd.nl': {'url': 'http://chromium.lovd.nl/LOVD2/variants.php?select_db={gene}&action=search_unique&search_Variant%2FDNA={pos}',
+              'chromium.lovd.nl': {'url': 'http://chromium.lovd.nl/LOVD2/variants.php?select_db={gene}&action=search_unique&search_Variant%2FDNA=c.{pos}',
                                    'genes': ['ABCA13', 'ARG1', 'ASL', 'ASS1',
                                              'ATM', 'ATP1A2', 'CACNA1A', 'CACNA1S',
                                              'CDKN2A', 'CLCN1', 'CPS1', 'CREBBP',
@@ -35,7 +35,7 @@ LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db=
                                    }
 }
 
-LOVD_NL_URL = 'http://databases.lovd.nl/shared/variants/{gene}/unique#object_id=VariantOnTranscriptUnique%2CVariantOnGenome&id={gene}&search_VariantOnTranscript/DNA={pos}'
+LOVD_NL_URL = 'http://databases.lovd.nl/shared/variants/{gene}/unique#object_id=VariantOnTranscriptUnique%2CVariantOnGenome&id={gene}&search_VariantOnTranscript/DNA=c.{pos}'
 
 def get_lovd_url(gene_name, position):
     for host in LOVD_LISTS.keys():
