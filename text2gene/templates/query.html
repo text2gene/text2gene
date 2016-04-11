@@ -30,7 +30,9 @@
 <body>
 
 <div class="clear">
+
     <h1>{{ hgvs_text }}</h1>
+    <div class="left">
     <h4>Gene: {% if gene_info %}{{ gene_info.gene_name }}
         <a href="{{ gene_info.gtr_url }}" target="_blank"><button>GTR</button></a>
         <a href="{{ gene_info.medgen_url }}" target="_blank"><button>MedGen</button></a>
@@ -38,32 +40,32 @@
         {% else %}(unknown){% endif %}</h4>
     <h4>Variant in ClinVar: {% if clinvar.url %}<a target="_blank" href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
                                    {% else %}(unknown){% endif %}</h4>
-    <span class="error">{{ error_msg }}</span>
+
+    </div>
+
+    <div class="right">{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><button>Google Query</button></a>
+        {% else %}Cannot build Google Query without gene name{% endif %}
+    {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
+
+    </div>
 </div>
+<div class="clear">
+<span class="error">{{ error_msg }}</span>
 
 <hr />
-
-<div id="left">
-    <h3>LVG Output</h3>
-    <ul>
-    {% for seqtype, hgvs_list in variants.iteritems() %}
-    {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
-        {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') %}
-        <li><a href="/query/{{ hgvs_text }}">{{ hgvs_text }}</a>  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
-        {% else %}
-        <li>{{ hgvs_text }}  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
-        {% endif %}
-        {% endfor %}{% endif %}
-    {% endfor %}
-    </ul>
-</div>
-
-<div id="right">
-    <h3>{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><button>Google Query</button></a>
-        {% else %}Cannot build Google Query without gene name{% endif %}
-    </h3>
-
     <h3>Pubmed Sources</h3>
+    <table>
+        <tr><th>PMID</th><th>Citation</th><th>ClinVar</th><th>NCBI</th><th>Pubtator</th></tr>
+        {% for citation in citation_table %}
+        <tr><td>{{ citation.pmid }}</td>
+            <td>{{ citation.title }}</td>
+            <td>{{ citation.in_clinvar }}</td>
+            <td>{{ citation.in_ncbi }}</td>
+            <td>{{ citation.in_pubtator }}</td>
+        </tr>{% endfor %}
+    </table>
+
+    <hr />
 
     <p><strong>ClinVar</strong></p>
     {% if clinvar.pmids %}
@@ -96,9 +98,27 @@
         (None)
     {% endif %}
 
-    {% if lovd_url %}<h3><a target="_blank" href="{{ lovd_url }}">LOVD Search</a></h3>{% endif %}
 
 </div>
+
+    <hr />
+
+
+<div class="clear">
+    <h3>LVG Output</h3>
+    <ul>
+    {% for seqtype, hgvs_list in variants.iteritems() %}
+    {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
+        {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') %}
+        <li><a href="/query/{{ hgvs_text }}">{{ hgvs_text }}</a>  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
+        {% else %}
+        <li>{{ hgvs_text }}  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
+        {% endif %}
+        {% endfor %}{% endif %}
+    {% endfor %}
+    </ul>
+</div>
+
 
 <div class="clear">
     <hr />
