@@ -4,7 +4,7 @@ import unittest
 
 from hgvs_lexicon import Variant, HgvsComponents
 
-from .hgvs_examples import hgvs_c, hgvs_g, hgvs_p, hgvs_n
+from hgvs_lexicon.hgvs_samples import hgvs_c, hgvs_g, hgvs_p, hgvs_n
 
 
 class TestHgvsComponents(unittest.TestCase):

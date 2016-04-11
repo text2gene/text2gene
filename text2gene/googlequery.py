@@ -65,7 +65,8 @@ def get_posedits_for_lex(lex):
 
     # start with the originating seqvar that created the LVG.
     posedits = get_posedits_for_seqvar(lex.seqvar)
-    used.add(quoted_posedit(HgvsComponents(lex.seqvar)))
+    for syn in posedits:
+        used.add(syn)
 
     for seqtype in ['c', 'p', 'g', 'n']:
         for seqvar in lex.variants[seqtype].values():
