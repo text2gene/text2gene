@@ -83,10 +83,10 @@
         <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstracts</th><th>Citation</th><th>PDF</th></tr>
         {% for citation in citations %}
         <tr class="{{ loop.cycle('positive', 'negative') }}">
-            <td><a href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
-            <td>{% if citation.in_clinvar %}<img src="/greenlight.png" />{% endif %}</td>
+            <td><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
+            <td>{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
             <td>{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
-            <td>{% if citation.in_pubtator %}<img src="/greenlight.png" />{% endif %}</td>
+            <td>{% if citation.in_pubtator %}<a target="_blank" href="{{ citation.pubtator_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
             <td>({{ citation.pma.year }}) {{ citation.pma.title }}</td>
             <td>{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
         </tr>{% endfor %}
