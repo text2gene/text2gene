@@ -67,13 +67,34 @@ def query(hgvs_text=''):
                 'n': lex.hgvs_n
                 }
 
-    clinvar_varID = hgvs_to_clinvar_variationID(hgvs_text)
+    citation_table = {}
 
+    # CLINVAR RESULTS
+    clinvar_varID = hgvs_to_clinvar_variationID(hgvs_text)
     clinvar_results = {'pmids': ClinvarHgvs2Pmid(lex),
                        'variationID': hgvs_to_clinvar_variationID(hgvs_text),
                        'url': get_variation_url(clinvar_varID) if clinvar_varID else ''}
 
+    for pmid in ClinvarHgvs2Pmid(lex):
+        try:
+            cit = citation_table[pmid]
+            cit.in_clinvar = True
+        except KeyError:
+            citation_table[pmid] = Citation(pmid, clinvar=True)
+
+
+    # PUBTATOR RESULTS
     pubtator_results = {'pmids': PubtatorHgvs2Pmid(lex)}
+
+    for pmid in PubtatorHgvs2Pmid(lex):
+        try:
+            cit = citation_table[pmid]
+            cit.in_pubtator = True
+        except KeyError:
+            citation_table[pmid] = Citation(pmid, pubtator=True)
+
+
+    # NCBI RESULTS
 
     ncbi_variants = []
     ncbi_results = {'pmids': [], 'report': None}
@@ -81,9 +102,18 @@ def query(hgvs_text=''):
     try:
         ncbi_results = {'pmids': NCBIHgvs2Pmid(hgvs_text),
                         'report': NCBIReport(hgvs_text)}
+
         ncbi_lvg = NCBIHgvsLVG(hgvs_text)
         for seqtype in ncbi_lvg.variants:
             ncbi_variants = ncbi_variants + ncbi_lvg.variants[seqtype].keys()
+
+        for pmid in ncbi_results['pmids']:
+            try:
+                cit = citation_table[pmid]
+                cit.in_ncbi = True
+            except KeyError:
+                citation_table[pmid] = Citation(pmid, ncbi=True)
+
     except NCBIRemoteError:
         pass
 
@@ -96,11 +126,17 @@ def query(hgvs_text=''):
         print(error)
         google_query = None
 
+
+    # recompose citation_table as a list of Citations, reverse-sorted by PMID (newest first).
+    citations = []
+    for key in sorted(citation_table.keys(), reverse=True):
+        citations.append(citation_table[key])
+
     return render_template('query.html', hgvs_text=hgvs_text, variants=variants, ncbi=ncbi_results,
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
                            gene_name=lex.gene_name, ncbi_variants=ncbi_variants, gene_info=gene_info,
                            found_in_clinvar_example_tables=get_clinvar_tables_containing_variant(hgvs_text),
-                           google_query=google_query)
+                           google_query=google_query, citations=citations)
 
 
 @base.route('/examples')

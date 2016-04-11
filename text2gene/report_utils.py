@@ -7,12 +7,12 @@ from metapub import PubMedFetcher, FindIt
 
 fetch = PubMedFetcher()
 
+
 class Citation(object):
 
-    def __init__(self, pmid, hgvs_text, **kwargs):
+    def __init__(self, pmid, **kwargs):
 
         self.pmid = pmid
-        self.hgvs_text = hgvs_text
         self.pma = fetch.article_by_pmid(pmid)
 
         self.in_pubtator = kwargs.get('pubtator', False)

@@ -25,6 +25,14 @@
                 clear: both;
             }
 
+            .positive {
+                background-color: lightgreen;
+            }
+
+            .negative {
+                background-color: whitesmoke;
+            }
+
             button {
                 font-weight: bold;
                 color: green;
@@ -59,17 +67,20 @@
 
 <hr />
     <h3>Pubmed Sources</h3>
-    <table>
-        <tr><th>PMID</th><th>Citation</th><th>ClinVar</th><th>NCBI</th><th>Pubtator</th></tr>
-        {% for citation in citation_table %}
-        <tr><td>{{ citation.pmid }}</td>
-            <td>{{ citation.title }}</td>
-            <td>{{ citation.in_clinvar }}</td>
-            <td>{{ citation.in_ncbi }}</td>
-            <td>{{ citation.in_pubtator }}</td>
+    <table id="pubmed_sources">
+        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstracts</th><th>Citation</th><th>PDF</th></tr>
+        {% for citation in citations %}
+        <tr class="{{ loop.cycle('positive', 'negative') }}"><td><a href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
+            <td>{% if citation.in_clinvar %} x {% endif %}</td>
+            <td>{% if citation.in_ncbi %} x {% endif %}</td>
+            <td>{% if citation.in_pubtator %} x {% endif %}</td>
+            <td>({{ citation.pma.year }}) {{ citation.pma.title }}</td>
+            <td>{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
         </tr>{% endfor %}
     </table>
 
+
+    <!--
     <hr />
 
     <p><strong>ClinVar</strong></p>
@@ -103,6 +114,7 @@
         (None)
     {% endif %}
 
+    --> 
 
 </div>
 
