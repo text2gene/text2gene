@@ -7,6 +7,8 @@ from metapub import PubMedFetcher, FindIt
 
 fetch = PubMedFetcher()
 
+GENEREVIEWS_URL = 'http://www.ncbi.nlm.nih.gov/books/{bookid}/'
+
 
 class Citation(object):
 
@@ -23,7 +25,15 @@ class Citation(object):
         self._pdf_src = None
 
     @property
+    def citation(self):
+        return self.pma.citation
+
+    @property
     def pdf_url(self):
+        if self.pma.journal.lower().startswith('genereviews'):
+            #TODO: make book_url a @property in metapub PubMedArticle
+            return GENEREVIEWS_URL.format(bookid = self.pma.book_accession_id)
+
         if not self._pdf_src:
             self._pdf_src = FindIt(self.pmid, verify=False)
         return self._pdf_src.url
