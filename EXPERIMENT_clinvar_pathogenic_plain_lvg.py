@@ -17,7 +17,7 @@ otherlog = logging.getLogger('text2gene')
 otherlog.addHandler(ch)
 sqlcache_log.addHandler(ch)
 
-from text2gene.training import Experiment
+from text2gene.experiment import Experiment
 exper = Experiment(experiment_name, lvg_mode='lvg', iteration=iteration,
                         hgvs_examples_table = 'hgvs_citations_pathogenic',
                         hgvs_examples_db = 'clinvar',

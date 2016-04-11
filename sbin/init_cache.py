@@ -3,7 +3,7 @@ import sys
 from text2gene.cached import ClinvarCachedQuery, PubtatorCachedQuery 
 from text2gene.ncbi import NCBIVariantReportCachedQuery, NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
 from text2gene.lvg_cached import HgvsLVGCached
-from text2gene.training import Experiment
+from text2gene.experiment import Experiment
 
 try:
     reset = sys.argv[1].lower()

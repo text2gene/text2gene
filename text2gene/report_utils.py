@@ -49,7 +49,7 @@ class Citation(object):
 
     @property
     def clinvar_url(self):
-        url_tmpl = 'http://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid=10735580'
+        url_tmpl = 'http://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid={pmid}'
         return url_tmpl.format(pmid=self.pmid)
 
 

@@ -11,6 +11,7 @@ from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
 from .lvg_cached import HgvsLVGCached
 from .exceptions import Text2GeneError
+from .report_utils import hgvs_to_clinvar_variationID
 
 log = logging.getLogger('text2gene.experiment')
 log.setLevel(logging.DEBUG)
@@ -117,6 +118,11 @@ class Experiment(SQLCache):
         tname_tmpl = '{expname}_{iteration}_results'
         return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration)
 
+    @property
+    def summary_table_name(self):
+        tname_tmpl = '{expname}_{iteration}_summary'
+        return tname_tmpl.format(expname=self.experiment_name, iteration=self.iteration)
+
     def get_table_name(self, module_name):
         """ Produce a table name for given module_name, based on this Experiment's experiment_name and iteration.
 
@@ -191,25 +197,41 @@ class Experiment(SQLCache):
             else:
                 raise Text2GeneError('Problem creating Experiment results table %s: %r' % (self.results_table_name, error))
 
+    def _create_experiment_summary_table(self):
+        tablename = self.summary_table_name
+        log.debug('EXPERIMENT %s: creating Experiment summary table %s', self.experiment_name, tablename)
+        self.execute('drop table if exists %s' % self.summary_table_name)
+        sql = '''create table {} (
+                  hgvs_text       varchar(255) not null,
+                  VariationID     int default null,
+                  PMID            int default null,
+                  match_clinvar   boolean default 0,
+                  match_ncbi      boolean default 0,
+                  match_pubtator  boolean default 0,
+                  match_google    boolean default 0
+                )'''.format(tablename)
+        try:
+            self.execute(sql)
+        except mdb.OperationalError as error:
+            if error[0] == 1050:
+                pass
+            else:
+                raise Text2GeneError('Problem creating Experiment results table %s: %r' % (self.results_table_name, error))
+
     def _delete_tables(self):
+        """ Still a little risky to use! """
         for mod in self.search_modules:
             tablename = self.get_table_name(mod)
             log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, tablename)
-            self.execute('drop table %s' % tablename)
+            self.drop_table(tablename)
 
         tablename = self.get_mapping_table_name(self.lvg_mode)
         log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, tablename)
-        self.execute('drop table %s' % tablename)
+        self.drop_table(tablename)
 
-        try:
-            log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, self.results_table_name)
-            self.execute('drop table %s' % self.results_table_name)
-        except mdb.OperationalError as error:
-            if error[0] == 1051:
-                #it never got created, so that's fine.
-                pass
-            else:
-                raise Text2GeneError('Problem deleting Experiment results table %s: %r' % (self.results_table_name, error))
+        log.info('EXPERIMENT [%s.%i] !!! DROPPING TABLE %s', self.experiment_name, self.iteration, self.results_table_name)
+        self.drop_table(self.results_table_name)
+        self.drop_table(self.summary_table_name)
 
     def _load_examples(self):
         sql = 'select distinct(hgvs_text) from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
@@ -227,6 +249,7 @@ class Experiment(SQLCache):
     def run(self):
         # create table to track experiment progress and aggregate results from all search modules.
         self._create_experiment_results_table()
+        self._create_experiment_summary_table()
 
         if not self.hgvs_examples:
             # don't store a long list in memory after running, if we don't have to.
@@ -251,7 +274,9 @@ class Experiment(SQLCache):
 
             pmids = set()
             errors = []
+            summary_table = {}
             for mod in self.search_modules:
+                summary_table[mod] = []
                 result = []
                 try:
                     if mod == 'clinvar':
@@ -271,18 +296,40 @@ class Experiment(SQLCache):
 
                 for pmid in result:
                     pmids.add(pmid)
+                    summary_table[mod].append(pmid)
 
             log.info('EXPERIMENT [%s.%i]: [%s] All PMIDs found: %r', self.experiment_name, self.iteration, hgvs_text, pmids)
             if errors:
                 log.info('EXPERIMENT [%s.%i]: [%s] %r', self.experiment_name, self.iteration, hgvs_text, errors)
 
             self.store_result(hgvs_text, pmids, errors=errors)
+            self.store_summary(hgvs_text, summary_table, pmids)
 
-    def evaluate(self):
-        """ Performs a series of MySQL queries on the match results tables to produce quantitative analysis.
+    def get_all_results(self):
+        return self.fetchall('select * from {}'.format(self.results_table_name))
 
-        :return: dict of results
-        """
-        # select count(*) as cnt, count(distinct hgvs_text), count(distinct PMID) from clinvar_match;
+    def get_results_for_search_module(self, hgvs_text, mod):
+        tablename = self.get_table_name(mod)
+        return self.fetchall('select * from {} where hgvs_text="{}"'.format(tablename, hgvs_text))
 
+    def store_summary(self, hgvs_text, summary_table, pmids):
+        # Summary Table: { mod_name: [list of pmids] }
         #
+        varID = hgvs_to_clinvar_variationID(hgvs_text)
+
+        row_tmpl = {'hgvs_text': hgvs_text,
+                    'PMID': None,
+                    'VariationID': varID,
+                    'match_pubtator': False,
+                    'match_ncbi': False,
+                    'match_clinvar': False,
+                    'match_google': False
+                    }
+
+        for pmid in pmids:
+            row = row_tmpl.copy()
+            row['PMID'] = pmid
+            for mod in self.search_modules:
+                if pmid in summary_table[mod]:
+                    row['match_%s' % mod] = True
+            self.insert(self.summary_table_name, row)
