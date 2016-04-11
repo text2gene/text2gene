@@ -3,7 +3,46 @@ from __future__ import absolute_import, unicode_literals
 from medgen.api import ClinvarVariationID, ClinVarDB
 from medgen.api import GeneID, GeneName
 
-from .lsdb.lovd import get_lovd_url
+from metapub import PubMedFetcher, FindIt
+
+fetch = PubMedFetcher()
+
+class Citation(object):
+
+    def __init__(self, pmid, hgvs_text, **kwargs):
+
+        self.pmid = pmid
+        self.hgvs_text = hgvs_text
+        self.pma = fetch.article_by_pmid(pmid)
+
+        self.in_pubtator = kwargs.get('pubtator', False)
+        self.in_ncbi = kwargs.get('ncbi', False)
+        self.in_clinvar = kwargs.get('clinvar', False)
+
+        # placeholder for FindIt lookup of link to article PDF (if available)
+        self._pdf_src = None
+
+    @property
+    def pdf_url(self):
+        if not self._pdf_src:
+            self._pdf_src = FindIt(self.pmid, verify=False)
+        return self._pdf_src.url
+
+    @property
+    def pubmed_url(self):
+        return 'http://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=self.pmid)
+
+    @property
+    def pubtator_url(self):
+        url_tmpl = 'http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={pmid}&searchtype=PubMed_Search&query={pmid}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax='
+        return url_tmpl.format(pmid=self.pmid)
+
+    @property
+    def clinvar_url(self):
+        url_tmpl = 'http://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid=10735580'
+        return url_tmpl.format(pmid=self.pmid)
+
+
 
 class GeneInfo(object):
 
@@ -50,15 +89,6 @@ def hgvs_to_clinvar_variationID(hgvs_text):
 
 def get_variation_url(varID):
     return 'http://www.ncbi.nlm.nih.gov/clinvar/variation/{var_id}'.format(var_id=varID)
-
-
-def get_pubmed_url(pmid):
-    return 'http://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=pmid)
-
-
-def get_pubtator_url(pmid):
-    url_tmpl = 'http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={pmid}&searchtype=PubMed_Search&query={pmid}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax='
-    return url_tmpl.format(pmid=pmid)
 
 
 def get_clinvar_tables_containing_variant(hgvs_text):

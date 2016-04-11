@@ -14,9 +14,10 @@ from .googlequery import GoogleQuery
 from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
 from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
-from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url, get_lovd_url,
+from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url,
                            get_clinvar_tables_containing_variant)
-from .report_utils import GeneInfo
+from .report_utils import GeneInfo, Citation
+from .lsdb.lovd import get_lovd_url
 
 fetch = PubMedFetcher()
 
@@ -87,7 +88,7 @@ def query(hgvs_text=''):
         pass
 
     comp = HgvsComponents(lex.seqvar)
-    lovd_url = get_lovd_url(lex.gene_name, comp.pos)
+    lovd_url = get_lovd_url(lex.gene_name, comp)
 
     try:
         google_query = '%s' % GoogleQuery(lex)

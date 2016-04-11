@@ -37,12 +37,34 @@ LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db=
 
 LOVD_NL_URL = 'http://databases.lovd.nl/shared/variants/{gene}/unique#object_id=VariantOnTranscriptUnique%2CVariantOnGenome&id={gene}&search_VariantOnTranscript/DNA=c.{pos}'
 
-def get_lovd_url(gene_name, position):
+def get_lovd_url(gene_name, comp):
+    """ Takes gene_name and HgvsComponents object for sequence variant, composes a LOVD
+    search url if possible.
+
+    Only supports c.DNA for now.
+
+    :param gene_name: (str)
+    :param comp: HgvsComponents object
+    """
+    # simplify the position to loosen the search constraints; only use first number
+    # in position elements such as "8-20" (8) and "3779_3782" (3779).
+
+    position = comp.pos
+    if comp.seqtype != 'c':
+        return None
+
+    if position.find('-') > 0:  # intentional; we don't want to perform surgery on a position like "-8" or "+120"
+        position = position.split()[0]
+    elif position.find('_') > -1:
+        position = position.split('_')[0]
+    elif position.find('+') > 0:
+        position = position.split('+')[0]
+
     for host in LOVD_LISTS.keys():
         if gene_name in LOVD_LISTS[host]['genes']:
-            return LOVD_LISTS[host]['url'].format(gene=gene_name, pos=position)
+            return LOVD_LISTS[host]['url'].format(gene=gene_name, seqtype=comp.seqtype, pos=position)
         else:
-            return LOVD_NL_URL.format(gene=gene_name, pos=position)
+            return LOVD_NL_URL.format(gene=gene_name, seqtype=comp.seqtype, pos=position)
 
 
 def extract_gene_names_from_LOVD_html(options_list_html):
