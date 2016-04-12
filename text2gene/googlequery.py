@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import re
 import logging
 #import requests
 
@@ -92,8 +93,7 @@ class GoogleQuery(object):
 
         Keywords:
 
-            gene_name: should be supplied when instantiated with seqvar or hgvs_text
-
+            gene_name: should be supplied when instantiated with seqvar= or hgvs_text=
         """
         if lex:
             self.lex = lex
@@ -126,17 +126,9 @@ class GoogleQuery(object):
     def _count_terms_in_term(term):
         if term is None or term.strip() == '':
             return 0
-        count = 1
-        for sep in ['-->', '--', '->', '>', '/', '-', '+']:
-            if term.startswith(sep):
-                term = term.strip(sep)
-            try:
-                term.split(sep)[1]
-                term.replace(sep, '')
-                count += 1
-            except IndexError:
-                pass
-        return count
+
+        term = re.sub('[+\->\/]+', ' ', term)
+        return len(term.strip().split())
 
     def build_query(self, term_limit=31):
         """ Generate string query from instantiating information.
