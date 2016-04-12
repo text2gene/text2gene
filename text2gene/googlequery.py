@@ -122,7 +122,8 @@ class GoogleQuery(object):
 
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
 
-    def _count_terms_in_term(self, term):
+    @staticmethod
+    def _count_terms_in_term(term):
         if term is None or term.strip() == '':
             return 0
         count = 1
@@ -137,8 +138,14 @@ class GoogleQuery(object):
                 pass
         return count
 
-    def build_query(self, term_limit=30):
+    def build_query(self, term_limit=31):
         """ Generate string query from instantiating information.
+
+        Max term limit set to 31 by default, since Google cuts off queries at 32 terms.
+
+        Note that Google counts lexemes separated by special characters as multiple terms,
+        so "6-8dupT" is counted as 2 terms.  "+6-8dupT" would be 2 terms as well (the "+"
+        is effectively ignored).
 
         :param term_limit: (int) max number of synonyms to return in built query
         :return: (str) built query
@@ -148,18 +155,17 @@ class GoogleQuery(object):
         else:
             posedits = get_posedits_for_seqvar(seqvar)
 
-        # Count how many terms Google will ding us for. Terms separated by "-" or "_" are two "terms".
+        # Count how many terms Google will ding us for.
+        terms = []
         term_count = 0
+
         for posedit in posedits:
+            if term_count == term_limit:
+                break
+            terms.append(posedit)
             term_count += self._count_terms_in_term(posedit)
 
-        if term_count > term_limit:
-            term_limit = term_limit - (term_count - term_limit)
-            print(term_count)
-
-        posedits = posedits[:term_limit]
-
-        posedit_clause = '(%s)' % '|'.join(posedits)
+        posedit_clause = '(%s)' % '|'.join(terms)
         return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
     def __str__(self):
