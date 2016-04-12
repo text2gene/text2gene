@@ -7,10 +7,12 @@
 
 <div id="top_error">{{ error_msg }}</div>
 
-<p>Input an HGVS string (NM_ or NC_ only):</p>
+<h3>Variant Summary Page</h3>
+<p>Input an HGVS string:</p>
 
 <form action="/query" method="POST">
    <input type="text" name="hgvs_text" />
+   <button type="submit">submit</button>
 </form>
 
 <h3>API Examples</h3>
