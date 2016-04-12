@@ -21,6 +21,10 @@ class Citation(object):
         self.in_ncbi = kwargs.get('ncbi', False)
         self.in_clinvar = kwargs.get('clinvar', False)
 
+        self.pubtator_mention = kwargs.get('pubtator_mention', None)
+        self.pubtator_components = kwargs.get('pubtator_components', None)
+
+
         # placeholder for FindIt lookup of link to article PDF (if available)
         self._pdf_src = None
 

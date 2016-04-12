@@ -92,7 +92,7 @@ class GoogleQuery(object):
 
         Keywords:
 
-            gene_name: should be supplied with seqvar or hgvs_text
+            gene_name: should be supplied when instantiated with seqvar or hgvs_text
 
         """
         if lex:
@@ -122,6 +122,21 @@ class GoogleQuery(object):
 
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
 
+    def _count_terms_in_term(self, term):
+        if term is None or term.strip() == '':
+            return 0
+        count = 1
+        for sep in ['-->', '--', '->', '>', '/', '-', '+']:
+            if term.startswith(sep):
+                term = term.strip(sep)
+            try:
+                term.split(sep)[1]
+                term.replace(sep, '')
+                count += 1
+            except IndexError:
+                pass
+        return count
+
     def build_query(self, term_limit=30):
         """ Generate string query from instantiating information.
 
@@ -130,9 +145,17 @@ class GoogleQuery(object):
         """
         if self.lex:
             posedits = get_posedits_for_lex(self.lex)
-
         else:
             posedits = get_posedits_for_seqvar(seqvar)
+
+        # Count how many terms Google will ding us for. Terms separated by "-" or "_" are two "terms".
+        term_count = 0
+        for posedit in posedits:
+            term_count += self._count_terms_in_term(posedit)
+
+        if term_count > term_limit:
+            term_limit = term_limit - (term_count - term_limit)
+            print(term_count)
 
         posedits = posedits[:term_limit]
 

@@ -114,7 +114,7 @@ def pubtator_results_for_lex(lex):
                      }
         }
 
-    :param lex: lexical variant object (see above options)
+    :param lex: lexical variant object (HgvsLVG, NCBIHgvsLVG, NCBIEnrichedLVG)
     :return: dictionary of results
     """
     try:

@@ -13,7 +13,8 @@ from .config import ENV, CONFIG, PKGNAME
 from .googlequery import GoogleQuery
 from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
 from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
-from .api import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
+from .api import ClinvarHgvs2Pmid
+from .pmid_lookups import pubtator_results_for_lex
 from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url,
                            get_clinvar_tables_containing_variant)
 from .report_utils import GeneInfo, Citation
@@ -84,14 +85,20 @@ def query(hgvs_text=''):
 
 
     # PUBTATOR RESULTS
-    pubtator_results = {'pmids': PubtatorHgvs2Pmid(lex)}
+    pubtator_results = pubtator_results_for_lex(lex)
 
-    for pmid in PubtatorHgvs2Pmid(lex):
-        try:
-            cit = citation_table[pmid]
-            cit.in_pubtator = True
-        except KeyError:
-            citation_table[pmid] = Citation(pmid, pubtator=True)
+    for hgvs_text in pubtator_results:
+        for row in pubtator_results[hgvs_text]:
+            pmid = row['PMID']
+            try:
+                cit = citation_table[pmid]
+                cit.in_pubtator = True
+                cit.pubtator_mention = row['Mentions']
+                cit.pubtator_components = row['Components']
+            except KeyError:
+                citation_table[pmid] = Citation(pmid, pubtator=True,
+                                                pubtator_mention=row['Mentions'],
+                                                pubtator_components=row['Components'])
 
 
     # NCBI RESULTS

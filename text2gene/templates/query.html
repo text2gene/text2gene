@@ -44,7 +44,6 @@
             #pubmed_sources tr td img {
                 width: 25px;
             }
-
             td.pmid {
                 font-weight: bold;
             }
@@ -54,10 +53,19 @@
             td.pmid a:hover {
                 text-decoration: underline;
             }
-
             button {
                 font-weight: bold;
                 color: green;
+            }
+            .mention {
+                background-color: lightpink;
+                padding: 5px;
+            }
+            .mention a {
+                text-decoration: none;
+            }
+            .mention a:hover {
+                text-decoration: dotted;
             }
     </style>
 </head>
@@ -66,19 +74,19 @@
 
 <div class="clear">
 
-    <h1>{{ hgvs_text }}</h1>
+    <h1>{{ hgvs_text|e }}</h1>
     <div class="left">
     <h4>Gene: {% if gene_info %}{{ gene_info.gene_name }}
         <a href="{{ gene_info.gtr_url }}" target="_blank"><button>GTR</button></a>
         <a href="{{ gene_info.medgen_url }}" target="_blank"><button>MedGen</button></a>
-        <a href="{{ gene_info.pubmed_clinical_query_url }} target="_blank""><button>Clinical Query</button></a>
+        <a href="{{ gene_info.pubmed_clinical_query_url }}" target="_blank"><button>Clinical Query</button></a>
         {% else %}(unknown){% endif %}</h4>
     <h4>Variant in ClinVar: {% if clinvar.url %}<a target="_blank" href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
                                    {% else %}(unknown){% endif %}</h4>
 
     </div>
 
-    <div class="right">{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><button>Google Query</button></a>
+    <div class="right">{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><img width="50px" src="/google_button.png"></a>
         {% else %}Cannot build Google Query without gene name{% endif %}
     {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
 
@@ -90,13 +98,13 @@
 <hr />
     <h3>Pubmed Sources</h3>
     <table id="pubmed_sources">
-        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstracts</th><th>Citation</th><th>PDF</th></tr>
+        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Citation</th><th>PDF</th></tr>
         {% for citation in citations %}
         <tr class="{{ loop.cycle('positive', 'negative') }}">
             <td class="pmid"><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
             <td>{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
             <td>{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
-            <td>{% if citation.in_pubtator %}<a target="_blank" href="{{ citation.pubtator_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
+            <td>{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
             <td class="citation">{{ citation.citation }}</td>
             <td class="pdf">{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
         </tr>{% endfor %}
@@ -162,7 +170,7 @@
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>{% if google_query %}{{ google_query }}{% else %}(Cannot build without gene name){% endif %}</p>
+    <p>{% if google_query %}{{ google_query|e }}{% else %}(Cannot build without gene name){% endif %}</p>
 
     {% if found_in_clinvar_example_tables %}
     <hr /><h3>Found in Clinvar hgvs sample tables:</h3>
