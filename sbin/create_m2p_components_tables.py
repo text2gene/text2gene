@@ -5,7 +5,7 @@ import math
 import re
 import sys
 
-from pubtatordb import SQLData
+from pubtatordb.sqldata import SQLData
 from hgvs_lexicon import HgvsComponents
 
 from pubtatordb.config import get_data_log

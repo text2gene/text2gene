@@ -18,7 +18,7 @@ for entry in hgvs_examples:
     hgvs_text = entry['hgvs_text']
     dmesg(hgvs_text, 'collecting')
     try:
-        report = NCBIReport(hgvs_text, force_granular=True)
+        report = NCBIReport(hgvs_text)
         pmids = NCBIHgvs2Pmid(hgvs_text)
         dmesg(hgvs_text, 'PMIDs: %r' % pmids)
     except Exception as error:
