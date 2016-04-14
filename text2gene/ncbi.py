@@ -25,7 +25,7 @@ def ncbi_report_to_variants(report):
     :param report: list of strings representing NCBI Variation Reporter output
     :return: dict as per structure above
     """
-    variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}}
+    variants = {'p': {}, 'c': {}, 'g': {}, 'n': {}, 'm': {}, 'r': {}}
     for rep_part in report:
         for seqtype in variants.keys():
             hgvs_text = rep_part.get('Hgvs_%s' % seqtype, '').strip()

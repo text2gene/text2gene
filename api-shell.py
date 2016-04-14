@@ -1,15 +1,6 @@
 #!/usr/bin/env python
 
-import warnings
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    try:
-        import IPython
-    except ImportError:
-        import os
-        os.popen('pip install ipython')
-        import IPython
+import IPython
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
