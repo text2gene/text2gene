@@ -74,7 +74,7 @@ class Experiment(SQLCache):
     If neither source of HGVS examples is supplied, a Text2Gene error is raised in complaint.
     """
 
-    VERSION = 0
+    VERSION = 1
 
     def __init__(self, experiment_name, **kwargs):
         self.experiment_name = experiment_name
@@ -186,6 +186,7 @@ class Experiment(SQLCache):
         sql = '''create table {} (
                   id int(11) primary key auto_increment,
                   hgvs_text varchar(255) unique,
+                  gene_name varchar(255) default NULL,
                   num_pmids INT default NULL,
                   errors text default NULL
               )'''.format(tablename)
@@ -204,6 +205,7 @@ class Experiment(SQLCache):
         sql = '''create table {} (
                   hgvs_text       varchar(255) not null,
                   VariationID     int default null,
+                  gene_name       varchar(50) default null,
                   PMID            int default null,
                   match_clinvar   boolean default 0,
                   match_ncbi      boolean default 0,
@@ -239,9 +241,10 @@ class Experiment(SQLCache):
             sql += ' limit %i' % self.hgvs_examples_limit
         return self.fetchall(sql)
 
-    def store_result(self, hgvs_text, pmids, errors=None):
+    def store_result(self, hgvs_text, pmids, gene_name=None, errors=None):
         row = {'hgvs_text': hgvs_text,
                'num_pmids': len(pmids),
+               'gene_name': gene_name,
                'errors': None if errors is None else json.dumps(errors)
                }
         self.insert(self.results_table_name, row)
@@ -302,8 +305,8 @@ class Experiment(SQLCache):
             if errors:
                 log.info('EXPERIMENT [%s.%i]: [%s] %r', self.experiment_name, self.iteration, hgvs_text, errors)
 
-            self.store_result(hgvs_text, pmids, errors=errors)
-            self.store_summary(hgvs_text, summary_table, pmids)
+            self.store_result(hgvs_text, pmids, gene_name=lex.gene_name, errors=errors)
+            self.store_summary(hgvs_text, summary_table, pmids, lex.gene_name)
 
     def get_all_results(self):
         return self.fetchall('select * from {}'.format(self.results_table_name))
@@ -312,7 +315,7 @@ class Experiment(SQLCache):
         tablename = self.get_table_name(mod)
         return self.fetchall('select * from {} where hgvs_text="{}"'.format(tablename, hgvs_text))
 
-    def store_summary(self, hgvs_text, summary_table, pmids):
+    def store_summary(self, hgvs_text, summary_table, pmids, gene_name=None):
         # Summary Table: { mod_name: [list of pmids] }
         #
         varID = hgvs_to_clinvar_variationID(hgvs_text)
@@ -320,6 +323,7 @@ class Experiment(SQLCache):
         row_tmpl = {'hgvs_text': hgvs_text,
                     'PMID': None,
                     'VariationID': varID,
+                    'gene_name': gene_name,
                     'match_pubtator': False,
                     'match_ncbi': False,
                     'match_clinvar': False,
