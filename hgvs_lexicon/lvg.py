@@ -108,7 +108,10 @@ class HgvsLVG(object):
         for input_hgvs_p in kwargs.get('hgvs_p', []):
             self.variants['p'][str(input_hgvs_p)] = Variant(input_hgvs_p)
 
-        self.variants[self.seqvar.type][str(self.seqvar)] = self.seqvar
+        try:
+            self.variants[self.seqvar.type][str(self.seqvar)] = self.seqvar
+        except KeyError:
+            raise CriticalHgvsError('SequenceVariant type "%s" is not supported (input was %s).' % (self.seqvar.type, self.seqvar))
 
         if self.variants['c']:
             # attempt to derive all 4 types of SequenceVariants from all available 'c'.
