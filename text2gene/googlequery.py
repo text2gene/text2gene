@@ -52,10 +52,15 @@ def get_posedits_for_seqvar(seqvar):
     return posedits
 
 
-def get_posedits_for_lex(lex):
-    """ Quick-and-dirty git 'er done google query expansion.
+def get_posedits_for_lex(lex, seqtypes=['c', 'p', 'g', 'n']):
+    """ The real Google Query Expansion workhorse behind the GoogleQuery object.
+
+    Supply seqtypes argument to restrict query expansion to particular SequenceVariant type(s), e.g.:
+
+        get_posedits_for_lex(lex, seqtypes=['p'])
 
     :param lex: *LVG* instance (HgvsLVG | NCBIEnrichedLVG | LVGEnriched | LVG object)
+    :param seqtypes: list of strings indicating SequenceVariant "type" order [default: ['c', 'p', 'g', 'n']
     :returns: string containing expanded google query for variant
     """
     if not lex.gene_name:
@@ -63,13 +68,15 @@ def get_posedits_for_lex(lex):
         return None
 
     used = set()
+    posedits = []
 
     # start with the originating seqvar that created the LVG.
-    posedits = get_posedits_for_seqvar(lex.seqvar)
-    for syn in posedits:
-        used.add(syn)
+    if lex.seqvar.type in seqtypes:
+        posedits = get_posedits_for_seqvar(lex.seqvar)
+        for syn in posedits:
+            used.add(syn)
 
-    for seqtype in ['c', 'p', 'g', 'n']:
+    for seqtype in seqtypes:
         for seqvar in lex.variants[seqtype].values():
             try:
                 for syn in get_posedits_for_seqvar(seqvar):
@@ -130,7 +137,29 @@ class GoogleQuery(object):
         term = re.sub('[+\->\/]+', ' ', term)
         return len(term.strip().split())
 
-    def build_query(self, term_limit=31):
+    def _query_seqtype(self, seqtype, term_limit):
+        if not self.lex:
+            if self.seqvar.type != seqtype:
+                return None
+        return self.build_query(seqtype, term_limit)
+
+    def query_c(self, term_limit=31):
+        """ Generate string query from instantiating information for HGVS c. DNA variants only. """
+        return self._query_seqtype(seqtype='c', term_limit=term_limit)
+
+    def query_p(self, term_limit=31):
+        """ Generate string query from instantiating information for HGVS p. protein variants only. """
+        return self._query_seqtype(seqtype='p', term_limit=term_limit)
+
+    def query_g(self, term_limit=31):
+        """ Generate string query from instantiating information for HGVS g. DNA variants only. """
+        return self._query_seqtype(seqtype='g', term_limit=term_limit)
+
+    def query_n(self, term_limit=31):
+        """ Generate string query from instantiating information for HGVS n. RNA variants only. """
+        return self._query_seqtype(seqtype='n', term_limit=term_limit)
+
+    def build_query(self, seqtypes=['c', 'p', 'g', 'n'], term_limit=31):
         """ Generate string query from instantiating information.
 
         Max term limit set to 31 by default, since Google cuts off queries at 32 terms.
@@ -143,9 +172,9 @@ class GoogleQuery(object):
         :return: (str) built query
         """
         if self.lex:
-            posedits = get_posedits_for_lex(self.lex)
+            posedits = get_posedits_for_lex(self.lex, seqtypes)
         else:
-            posedits = get_posedits_for_seqvar(seqvar)
+            posedits = get_posedits_for_seqvar(self.seqvar)
 
         # Count how many terms Google will ding us for.
         terms = []

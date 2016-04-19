@@ -10,10 +10,23 @@ from text2gene.api import GoogleQuery, LVG, LVGEnriched
 class TestGoogleQuery(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.test_lex = LVGEnriched('NM_000125.3:c.1339_1340delTGinsGC')
+        self.test_gq = GoogleQuery(self.test_lex) 
 
     def tearDown(self):
         pass
+
+    def test_query_c(self):
+        assert self.test_gq.query_c() == '"ESR1" ("1339_1340delTGinsGC"|"1345_1346delTGinsGC"|"1336_1337delTGinsGC")' 
+
+    def test_query_g(self):
+        assert self.test_gq.query_g() == '"ESR1" ("152382229_152382230delTGinsGC")'
+
+    def test_query_p(self):
+        assert self.test_gq.query_p() == '"ESR1" ("Cys447Ala"|"C447A"|"Cys446Ala"|"C446A"|"Cys449Ala"|"C449A")'
+
+    def test_query_n(self):
+        assert self.test_gq.query_n() == '"ESR1" ("1600_1601delTGinsGC"|"1557_1558delTGinsGC"|"1573_1574delTGinsGC"|"1563_1564delTGinsGC"|"1709_1710delTGinsGC"|"1554_1555delTGinsGC")'
 
     def test_simple_substitution_case(self):
         var_c = Variant(hgvs_c['SUB'])

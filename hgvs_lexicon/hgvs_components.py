@@ -165,6 +165,9 @@ class HgvsComponents(object):
         fs_pos = posedit.find('fs')
         if fs_pos > -1:
             out.add(posedit[:fs_pos + len('fs')])
+        else:
+            # e.g. Lys2569Gly produces "K2569G"
+            out.add('%s%s%s' % (self.ref, self.pos, self.alt))
         return list(out)
 
     def _posedit_slang_SUB(self):
