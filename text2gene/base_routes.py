@@ -127,8 +127,14 @@ def query(hgvs_text=''):
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp)
 
+
     try:
-        google_query = '%s' % GoogleQuery(lex)
+        gq = GoogleQuery(lex)
+        google_query = '%s' % gq
+        google_query_c = gq.query_c()
+        google_query_g = gq.query_g()
+        google_query_p = gq.query_p()
+        google_query_n = gq.query_n()
     except GoogleQueryMissingGeneName as error:
         print(error)
         google_query = None
@@ -143,7 +149,9 @@ def query(hgvs_text=''):
                            clinvar=clinvar_results, pubtator=pubtator_results, lovd_url=lovd_url,
                            gene_name=lex.gene_name, ncbi_variants=ncbi_variants, gene_info=gene_info,
                            found_in_clinvar_example_tables=get_clinvar_tables_containing_variant(hgvs_text),
-                           google_query=google_query, citations=citations)
+                           google_query=google_query, citations=citations,
+                           google_query_c=google_query_c, google_query_g=google_query_g,
+                           google_query_n=google_query_n, google_query_p=google_query_p)
 
 
 @base.route('/examples')

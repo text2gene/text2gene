@@ -169,7 +169,16 @@
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>{% if google_query %}{{ google_query|e }}{% else %}(Cannot build without gene name){% endif %}</p>
+    <p>{% if google_query %}{{ google_query|e }}
+    <ul>
+        <li>c.: {{ google_query_c }}</li>
+        <li>p.: {{ google_query_p }}</li>
+        <li>g.: {{ google_query_g }}</li>
+        <li>n.: {{ google_query_n }}</li>
+    </ul>
+
+
+    {% else %}(Cannot build without gene name){% endif %}</p>
 
     {% if found_in_clinvar_example_tables %}
     <hr /><h3>Found in Clinvar hgvs sample tables:</h3>

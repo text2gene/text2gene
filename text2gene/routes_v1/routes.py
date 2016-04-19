@@ -9,6 +9,7 @@ from flask import Blueprint
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from ..lvg_cached import LVG
+from ..googlequery import GoogleQuery, query_cse_return_items
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -118,5 +119,19 @@ def lvg(hgvs_text):
 @routes_v1.route('/v1/google/<hgvs_text>')
 def google_query(hgvs_text):
     """ Outputs a Google Query link for given hgvs_text string. """
-    baseurl = 'https://www.google.com/?gws_rd=ssl#q=%s'
-    return HTTP200(baseurl % hgvs_text)
+
+    outd = {'action': 'google', 'hgvs_text': hgvs_text, 'cse': 'whitelist',
+            'seqtypes': ['c','p','g','n'],
+            'query': '',
+            'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if 'hgvs_text' not in hgvs_text:
+        try:
+            lex = LVGEnriched(hgvs_text)
+        except Exception as error:
+            return HTTP400(error, 'Error before building query: could not build LVG object for %s.' % hgvs_text)
+
+        outd['query'] = GoogleQuery(lex).build_query(outd['seqtypes'])
+        outd['response'] = query_cse_return_items(outd['query'])
+
+    return HTTP200(outd)

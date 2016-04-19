@@ -2,8 +2,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 import logging
-#import requests
+import requests
 
+#from metapub.text_mining import get_nature_doi_from_link
+
+
+from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
 from .exceptions import Text2GeneError, GoogleQueryMissingGeneName
@@ -16,8 +20,35 @@ API_KEY = 'AIzaSyBbzzCZbm5ccB6MC1e0y_tRFeNBdeoutPo'
 # Google query API endpoint
 CSE_URL = "https://www.googleapis.com/customsearch/v1"
 
-# query example:
-#  GET https://www.googleapis.com/customsearch/v1?key=INSERT_YOUR_API_KEY&cx=017576662512468239146:omuauf_lfve&q=lectures
+# Google CSE engine ID ("cx") -- whitelisted journals (list of relevant science publishers, NIH, etc)
+CSE_CX_WHITELIST = '003914143621252222636:gtzu3oichua'
+
+# Google CSE engine ID ("cx") -- whitelisted schemas (ScholarlyArticle only)
+CSE_CX_SCHEMA = '003914143621252222636:-mop04_esug'
+
+# Google CSE query templates -- one per engine.
+CSE_QUERY_TEMPLATES = {'whitelist': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_WHITELIST + '&q={}',
+                        'schema': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_SCHEMA + '&q={}',
+                       }
+
+
+
+def query_cse_return_items(qstring, cse='whitelist'):
+    """ Query the Google Custom Search Engine for provided query string.
+
+    :param qstring: (str)
+    :param cse: (str) name of preconfigured CSE ('whitelist' or 'schema') [default: 'whitelist']
+    :return items: (list) list of dictionaries representing google CSE hits for query.
+    """
+    query = CSE_QUERY_TEMPLATES[cse].format(qstring)
+    response = requests.get(query)
+
+    if not response.ok:
+        raise Text2GeneError('Google CSE query returned not-ok state: %i' % response.status_code)
+    try:
+        return response.json()['items']
+    except KeyError:
+        return []
 
 
 def quoted_posedit(comp):
@@ -91,7 +122,7 @@ def get_posedits_for_lex(lex, seqtypes=['c', 'p', 'g', 'n']):
 
 class GoogleQuery(object):
 
-    GQUERY_TMPL = '"{gene_name}" {posedit_clause}'
+    GQUERY_TMPL = '{gene_name} {posedit_clause}'
 
     def __init__(self, lex=None, seqvar=None, hgvs_text=None, **kwargs):
         """ Requires either an LVG object (lex=) or a Sequence Variant object (seqvar=) or an hgvs_text string (hgvs_text=)
@@ -128,6 +159,7 @@ class GoogleQuery(object):
             raise GoogleQueryMissingGeneName('Information supplied with variant %s is missing gene name.' % self.seqvar)
 
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
+        self.gene_synonyms = GeneSynonyms(self.gene_name)
 
     @staticmethod
     def _count_terms_in_term(term):
@@ -159,7 +191,7 @@ class GoogleQuery(object):
         """ Generate string query from instantiating information for HGVS n. RNA variants only. """
         return self._query_seqtype(seqtype='n', term_limit=term_limit)
 
-    def build_query(self, seqtypes=['c', 'p', 'g', 'n'], term_limit=31):
+    def build_query(self, seqtypes=['c', 'p', 'g', 'n'], term_limit=31, use_gene_synonyms=True):
         """ Generate string query from instantiating information.
 
         Max term limit set to 31 by default, since Google cuts off queries at 32 terms.
@@ -168,7 +200,9 @@ class GoogleQuery(object):
         so "6-8dupT" is counted as 2 terms.  "+6-8dupT" would be 2 terms as well (the "+"
         is effectively ignored).
 
+        :param seqtypes: (list) one-letter strings indicating priority order of sequence types to use for query
         :param term_limit: (int) max number of synonyms to return in built query
+        :param use_gene_synonyms: (bool) [default: True]
         :return: (str) built query
         """
         if self.lex:
@@ -187,18 +221,11 @@ class GoogleQuery(object):
             term_count += self._count_terms_in_term(posedit)
 
         posedit_clause = '(%s)' % '|'.join(terms)
-        return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
+        if not use_gene_synonyms:
+            return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
+        else:
+            gene_clause = '(%s)' % '|'.join(self.gene_synonyms)
+            return self.GQUERY_TMPL.format(gene_name=gene_clause, posedit_clause=posedit_clause)
 
     def __str__(self):
         return self.build_query()
-
-
-if __name__ == '__main__':
-    test_sub = "NM_014874.3:c.891C>T"
-    sub_expected = '"MFN2" ("891C>T"|"891C->T"|"891C-->T"|"891C/T"|"C891T"|"1344C>U"|"1344C->U"|"1344C-->U"|"1344C/U"|"C1344U")'
-
-    test_del = 'NM_007294.3:c.4964_4982delCTGGCCTGACCCCAGAAGA'
-    del_expected = '"BRCA1" ("4964_4982delCTGGCCTGACCCCAGAAGA"|"4964_4982del"|"5196_5214delCUGGCCUGACCCCAGAAGA"|"5196_5214del"|"Ser1655TyrfsTer16"|"4823_4841delCTGGCCTGACCCCAGAAGA"|"4823_4841del"|"5104_5122delCUGGCCUGACCCCAGAAGA"|"5104_5122del"|"Ser1608TyrfsTer16"|"1652_1670delCTGGCCTGACCCCAGAAGA"|"1652_1670del"|"1846_1864delCUGGCCUGACCCCAGAAGA"|"1846_1864del"|"Ser551TyrfsTer16"|"1671_1689delCUGGCCUGACCCCAGAAGA"|"1671_1689del"|"5027_5045delCTGGCCTGACCCCAGAAGA"|"5027_5045del"|"5259_5277delCUGGCCUGACCCCAGAAGA"|"5259_5277del"|"Ser1676TyrfsTer16")'
-
-    test_dup = 'NM_025114.3:c.6869dupA'
-    dup_expected = '"CEP290" ("6869dupA"|"6869dup"|"7213dupA"|"7213dup"|"Asn2290LysfsTer6")'
