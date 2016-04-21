@@ -51,6 +51,43 @@ def query_cse_return_items(qstring, cse='whitelist'):
         return []
 
 
+class GoogleCSEResult(object):
+
+    def __init__(self, item, **kwargs):
+        # item
+        self.title = item.get('title', None)
+        self.url = item.get('link', None)
+        self.mime = item.get('mime', None)
+        self.snippet = item.get('snippet', None)
+        self.htmlSnippet = item.get('htmlSnippet', None)
+
+        self.doi = None
+        self.pmid = None
+
+    def to_dict(self):
+        return self.__dict__
+
+        #{
+        #    snippet: "Sep 22, 2006 ... Results: We analysed 99 hMLH1 and hMSH2 missense mutations with six different algorithms. ... altering splicing in the MLH1 gene whose mutations are responsible ..... in exon inclusion only in HeLa cells, while T1958G and.",
+        #    htmlSnippet: "Sep 22, 2006 <b>...</b> Results: We analysed 99 <b>hMLH1</b> and hMSH2 missense mutations with six <br> different algorithms. ... altering splicing in the <b>MLH1</b> gene whose mutations are <br> responsible ..... in exon inclusion only in HeLa cells, while <b>T1958G</b> and.",
+        #    link: "http://link.springer.com/content/pdf/10.1186/1471-2164-7-243.pdf",
+        #    mime: "application/pdf",
+        #    fileFormat: "PDF/Adobe Acrobat"
+        #}
+
+
+def parse_cse_items(cse_items):
+    """ Extract important pieces of information from Google CSE query results.
+
+    :param cse_items: list of dictionaries
+    :return: list of GoogleCSEResult objects
+    """
+    reslist = []
+    for item in cse_items:
+        reslist.append(GoogleCSEResult(item))
+    return reslist
+
+
 def quoted_posedit(comp):
     posedit = '"%s"' % comp.posedit
     return posedit.replace('(', '').replace(')', '')
