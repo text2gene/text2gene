@@ -4,7 +4,7 @@ API_INDICATOR = 'v1'
 
 import logging
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
@@ -116,12 +116,34 @@ def lvg(hgvs_text):
     return HTTP200(outd)
 
 
-@routes_v1.route('/v1/google/<hgvs_text>')
-def google_query(hgvs_text):
-    """ Outputs a Google Query link for given hgvs_text string. """
+@routes_v1.route('/v1/google', methods=['POST'])
+@routes_v1.route('/v1/google/<hgvs_text>', methods=['GET'])
+def google_query(hgvs_text='<hgvs_text>', **kwargs):
+    """ Performs LVG and GoogleQuery for given hgvs_text string.
 
-    outd = {'action': 'google', 'hgvs_text': hgvs_text, 'cse': 'whitelist',
-            'seqtypes': ['c','p','g','n'],
+    Available keywords:
+            cse: 'whitelist' or 'schema'
+            seqtypes: any combination of c,p,g,n (comma-separated list)
+
+    :return: json including text of built query and structured data of Google response
+    """
+
+    if request.method == 'POST':
+        hgvs_text = request.form.get('hgvs_text')
+        seqtypes = request.form.getlist('seqtypes')
+        cse = request.form.get('cse')
+        log.debug('POST form contained: hgvs_text=%s, seqtypes=%s, cse=%s' % (hgvs_text, ','.join(seqtypes), cse))
+        return redirect(
+            '/%s/google/%s?seqtypes=%s&types=%s&cse=%s' % (API_INDICATOR, hgvs_text, ','.join(seqtypes), cse), code=302)
+
+    else:
+        hgvs_text = hgvs_text.strip()
+        seqtypes = request.args.get('seqtypes', 'c,p,g,n').split(',')
+        cse = request.args.get('cse', 'whitelist')
+
+
+    outd = {'action': 'google', 'hgvs_text': hgvs_text, 'cse': cse,
+            'seqtypes': seqtypes,
             'query': '',
             'response': 'Change <hgvs_text> in url to HGVS string.'}
 
@@ -131,7 +153,12 @@ def google_query(hgvs_text):
         except Exception as error:
             return HTTP400(error, 'Error before building query: could not build LVG object for %s.' % hgvs_text)
 
-        outd['query'] = GoogleQuery(lex).build_query(outd['seqtypes'])
-        outd['response'] = query_cse_return_items(outd['query'])
+        gq = GoogleQuery(lex)
+
+        outd['query'] = gq.build_query(outd['seqtypes'])
+
+        outd['response'] = []
+        for res in gq.query(outd['query']):
+            outd['response'].append(res.to_dict())
 
     return HTTP200(outd)

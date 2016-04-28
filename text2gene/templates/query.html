@@ -171,10 +171,10 @@
     <h3>Google Query Expansion</h3>
     <p>{% if google_query %}{{ google_query|e }}
     <ul>
-        <li>c.: {{ google_query_c }}</li>
-        <li>p.: {{ google_query_p }}</li>
-        <li>g.: {{ google_query_g }}</li>
-        <li>n.: {{ google_query_n }}</li>
+        <li>c.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_c }}'>{{ google_query_c }}</a></li>
+        <li>p.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_p }}'>{{ google_query_p }}</a></li>
+        <li>g.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_g }}'>{{ google_query_g }}</a></li>
+        <li>n.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_n }}'>{{ google_query_n }}</a></li>
     </ul>
 
 

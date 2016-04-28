@@ -189,7 +189,7 @@ class Experiment(SQLCache):
                   gene_name varchar(255) default NULL,
                   num_pmids INT default NULL,
                   errors text default NULL
-              )'''.format(tablename)
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci'''.format(tablename)
         try:
             self.execute(sql)
         except mdb.OperationalError as error:
@@ -211,7 +211,7 @@ class Experiment(SQLCache):
                   match_ncbi      boolean default 0,
                   match_pubtator  boolean default 0,
                   match_google    boolean default 0
-                )'''.format(tablename)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci'''.format(tablename)
         try:
             self.execute(sql)
         except mdb.OperationalError as error:

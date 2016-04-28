@@ -2,10 +2,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 import logging
+from urlparse import urlparse
+
 import requests
 
-#from metapub.text_mining import get_nature_doi_from_link
-
+from metapub.urlreverse import UrlReverse
+#from metapub.convert import doi2pmid
 
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
@@ -30,7 +32,6 @@ CSE_CX_SCHEMA = '003914143621252222636:-mop04_esug'
 CSE_QUERY_TEMPLATES = {'whitelist': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_WHITELIST + '&q={}',
                         'schema': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_SCHEMA + '&q={}',
                        }
-
 
 
 def query_cse_return_items(qstring, cse='whitelist'):
@@ -198,6 +199,9 @@ class GoogleQuery(object):
         self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
         self.gene_synonyms = GeneSynonyms(self.gene_name)
 
+        # choice of Google CSE ("cx") -- "whitelist" or "schema" [default: whitelist]
+        self.cse = kwargs.get('cse', 'whitelist')
+
     @staticmethod
     def _count_terms_in_term(term):
         if term is None or term.strip() == '':
@@ -263,6 +267,10 @@ class GoogleQuery(object):
         else:
             gene_clause = '(%s)' % '|'.join(self.gene_synonyms)
             return self.GQUERY_TMPL.format(gene_name=gene_clause, posedit_clause=posedit_clause)
+
+    def query(self, qstring):
+        items = query_cse_return_items(qstring=qstring, cse=self.cse)
+        return parse_cse_items(items)
 
     def __str__(self):
         return self.build_query()
