@@ -2,12 +2,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 import logging
-from urlparse import urlparse
+import urllib
 
 import requests
 
 from metapub.urlreverse import UrlReverse
-#from metapub.convert import doi2pmid
+from metapub.convert import doi2pmid
 
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
@@ -58,23 +58,43 @@ class GoogleCSEResult(object):
         # item
         self.title = item.get('title', None)
         self.url = item.get('link', None)
+
+        if self.url:
+            self.url = urllib.unquote_plus(self.url)
+
         self.mime = item.get('mime', None)
         self.snippet = item.get('snippet', None)
         self.htmlSnippet = item.get('htmlSnippet', None)
 
-        self.doi = None
+        self.doi = self._get_doi_if_found(item)
+
         self.pmid = None
+        self.urlreverse = None
+
+        if not self.doi:
+            self.urlreverse = UrlReverse(self.url)
+            self.doi = self.urlreverse.doi
+            self.pmid = self.urlreverse.pmid
+
+        else:
+            self.pmid = doi2pmid(self.doi)
 
     def to_dict(self):
-        return self.__dict__
+        return {'url': self.url,
+                'pmid': self.pmid,
+                'mime': self.mime,
+                'snippet': self.snippet,
+                'htmlSnippet': self.htmlSnippet,
+                'doi': self.doi,
+                }
 
-        #{
-        #    snippet: "Sep 22, 2006 ... Results: We analysed 99 hMLH1 and hMSH2 missense mutations with six different algorithms. ... altering splicing in the MLH1 gene whose mutations are responsible ..... in exon inclusion only in HeLa cells, while T1958G and.",
-        #    htmlSnippet: "Sep 22, 2006 <b>...</b> Results: We analysed 99 <b>hMLH1</b> and hMSH2 missense mutations with six <br> different algorithms. ... altering splicing in the <b>MLH1</b> gene whose mutations are <br> responsible ..... in exon inclusion only in HeLa cells, while <b>T1958G</b> and.",
-        #    link: "http://link.springer.com/content/pdf/10.1186/1471-2164-7-243.pdf",
-        #    mime: "application/pdf",
-        #    fileFormat: "PDF/Adobe Acrobat"
-        #}
+    def _get_doi_if_found(self, item):
+        if item.get('pagemap', None):
+            if item['pagemap'].get('metatags', None):
+                for tag in item['pagemap']['metatags']:
+                    if tag.get('citation_doi'):
+                        return tag['citation_doi'].replace('doi:', '')
+        return None
 
 
 def parse_cse_items(cse_items):
@@ -121,7 +141,7 @@ def get_posedits_for_seqvar(seqvar):
     return posedits
 
 
-def get_posedits_for_lex(lex, seqtypes=['c', 'p', 'g', 'n']):
+def get_posedits_for_lex(lex, seqtypes=None):
     """ The real Google Query Expansion workhorse behind the GoogleQuery object.
 
     Supply seqtypes argument to restrict query expansion to particular SequenceVariant type(s), e.g.:
@@ -132,6 +152,9 @@ def get_posedits_for_lex(lex, seqtypes=['c', 'p', 'g', 'n']):
     :param seqtypes: list of strings indicating SequenceVariant "type" order [default: ['c', 'p', 'g', 'n']
     :returns: string containing expanded google query for variant
     """
+    if not seqtypes:
+        seqtypes = ['c', 'p', 'g', 'n']
+
     if not lex.gene_name:
         log.debug('No gene_name for SequenceVariant %s', lex.seqvar)
         return None
@@ -232,7 +255,7 @@ class GoogleQuery(object):
         """ Generate string query from instantiating information for HGVS n. RNA variants only. """
         return self._query_seqtype(seqtype='n', term_limit=term_limit)
 
-    def build_query(self, seqtypes=['c', 'p', 'g', 'n'], term_limit=31, use_gene_synonyms=True):
+    def build_query(self, seqtypes=None, term_limit=31, use_gene_synonyms=True):
         """ Generate string query from instantiating information.
 
         Max term limit set to 31 by default, since Google cuts off queries at 32 terms.
@@ -246,6 +269,9 @@ class GoogleQuery(object):
         :param use_gene_synonyms: (bool) [default: True]
         :return: (str) built query
         """
+        if not seqtypes:
+            seqtypes = ['c', 'p', 'g', 'n']
+
         if self.lex:
             posedits = get_posedits_for_lex(self.lex, seqtypes)
         else:
@@ -255,7 +281,7 @@ class GoogleQuery(object):
         terms = []
         term_count = 0
 
-        for posedit in posedits:
+        for posedit in list(posedits):
             if term_count == term_limit:
                 break
             terms.append(posedit)
