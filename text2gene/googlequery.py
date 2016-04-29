@@ -288,11 +288,11 @@ class GoogleQuery(object):
             term_count += self._count_terms_in_term(posedit)
 
         posedit_clause = '(%s)' % '|'.join(terms)
-        if not use_gene_synonyms:
-            return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
-        else:
+        if use_gene_synonyms and self.gene_synonyms != []:
             gene_clause = '(%s)' % '|'.join(self.gene_synonyms)
             return self.GQUERY_TMPL.format(gene_name=gene_clause, posedit_clause=posedit_clause)
+        else:
+            return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
     def query(self, qstring):
         items = query_cse_return_items(qstring=qstring, cse=self.cse)

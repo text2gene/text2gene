@@ -127,7 +127,6 @@ def query(hgvs_text=''):
     comp = HgvsComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp)
 
-
     try:
         gq = GoogleQuery(lex)
         google_query = '%s' % gq
@@ -139,6 +138,16 @@ def query(hgvs_text=''):
         print(error)
         google_query = None
 
+    #if google_query:
+    #    cse_results = gq.query(google_query)
+    #    for cseres in cse_results:
+    #        if cseres.pmid:
+    #            try:
+    #                cit = citation_table[cseres.pmid]
+    #                cit.in_google = True
+    #                cit.google_cse_result = cseres
+    #            except KeyError:
+    #                citation_table[pmid] = Citation(pmid, google=True, google_cse_result=cseres)
 
     # recompose citation_table as a list of Citations, reverse-sorted by PMID (newest first).
     citations = []

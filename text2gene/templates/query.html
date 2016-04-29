@@ -98,13 +98,14 @@
 <hr />
     <h3>Pubmed Sources</h3>
     <table id="pubmed_sources">
-        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Citation</th><th>PDF</th></tr>
+        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Google</th><th>Citation</th><th>PDF</th></tr>
         {% for citation in citations %}
         <tr class="{{ loop.cycle('positive', 'negative') }}">
             <td class="pmid"><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
             <td>{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
             <td>{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
             <td>{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
+            <td>{% if citation.in_google %}<span class="google_mention"><a href="_blank" href="{{ citation.google_url }}">{{ citation.htmlSnippet }}</a></span>{% endif %}</td>
             <td class="citation">{{ citation.citation }}</td>
             <td class="pdf">{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
         </tr>{% endfor %}

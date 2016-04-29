@@ -24,6 +24,8 @@ class Citation(object):
         self.pubtator_mention = kwargs.get('pubtator_mention', None)
         self.pubtator_components = kwargs.get('pubtator_components', None)
 
+        self.in_google = kwargs.get('google', False)
+        self.google_cse_result = kwargs.get('google_cse_result', None)
 
         # placeholder for FindIt lookup of link to article PDF (if available)
         self._pdf_src = None
@@ -56,6 +58,15 @@ class Citation(object):
         url_tmpl = 'http://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid={pmid}'
         return url_tmpl.format(pmid=self.pmid)
 
+    @property
+    def google_url(self):
+        if self.google_cse_result:
+            return self.google_cse_result.url
+
+    @property
+    def google_htmlSnippet(self):
+        if self.google_cse_result:
+            return self.google_cse_result.htmlSnippet
 
 
 class GeneInfo(object):
