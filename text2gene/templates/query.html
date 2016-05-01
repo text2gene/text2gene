@@ -67,6 +67,24 @@
             .mention a:hover {
                 text-decoration: dotted;
             }
+            .citation {
+                width: 350px;
+            }
+            .green_dot {
+                width: 50px;
+            }
+            .pubtator {
+                width: 80px;
+            }
+            .google {
+                width: 350px;
+            }
+            .snippet a {
+                text-decoration: none;
+            }
+            .snippet a:hover {
+                text-decoration: underline;
+            }
     </style>
 </head>
 
@@ -74,23 +92,25 @@
 
 <div class="clear">
 
-    <h1>{{ hgvs_text|e }}</h1>
+    <h1>{{ lex.hgvs_text|e }}</h1>
     <div class="left">
-    <h4>Gene: {% if gene_info %}{{ gene_info.gene_name }}
-        <a href="{{ gene_info.gtr_url }}" target="_blank"><button>GTR</button></a>
-        <a href="{{ gene_info.medgen_url }}" target="_blank"><button>MedGen</button></a>
-        <a href="{{ gene_info.pubmed_clinical_query_url }}" target="_blank"><button>Clinical Query</button></a>
+    <h4>Gene: {% if gene %}{{ gene.gene_name }}
+        <a href="{{ gene.gtr_url }}" target="_blank"><button>GTR</button></a>
+        <a href="{{ gene.medgen_url }}" target="_blank"><button>MedGen</button></a>
+        <a href="{{ gene.pubmed_clinical_query_url }}" target="_blank"><button>Clinical Query</button></a>
         {% else %}(unknown){% endif %}</h4>
+
     <h4>Variant in ClinVar: {% if clinvar.url %}<a target="_blank" href="{{ clinvar.url }}"><button>{{ clinvar.variationID }}</button></a>
                                    {% else %}(unknown){% endif %}</h4>
 
     </div>
 
-    <div class="right">{% if google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query }}'><img width="50px" src="/google_button.png"></a>
+    <div class="right">{% if citation_table.google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query }}'><img width="50px" src="/google_button.png"></a>
         {% else %}Cannot build Google Query without gene name{% endif %}
     {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
 
     </div>
+
 </div>
 <div class="clear">
 <span class="error">{{ error_msg }}</span>
@@ -98,65 +118,29 @@
 <hr />
     <h3>Pubmed Sources</h3>
     <table id="pubmed_sources">
-        <tr><th>PMID</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Google</th><th>Citation</th><th>PDF</th></tr>
-        {% for citation in citations %}
+        <tr><th>PMID</th><th>Citation</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Google</th><th>PDF</th></tr>
+        {% for citation in citation_table.citations %}
         <tr class="{{ loop.cycle('positive', 'negative') }}">
             <td class="pmid"><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
-            <td>{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
-            <td>{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
-            <td>{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
-            <td>{% if citation.in_google %}<span class="google_mention"><a href="_blank" href="{{ citation.google_url }}">{{ citation.htmlSnippet }}</a></span>{% endif %}</td>
             <td class="citation">{{ citation.citation }}</td>
+            <td class="green_dot">{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
+            <td class="green_dot">{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
+            <td class="pubtator">{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
+            <td class="google">{% if citation.in_google %}<span class="snippet"><a target="_blank" href="{{ citation.google_url }}">{{ citation.htmlSnippet }}</a></span>{% endif %}</td>
             <td class="pdf">{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
         </tr>{% endfor %}
     </table>
-    <!--
-    <hr />
-
-    <p><strong>ClinVar</strong></p>
-    {% if clinvar.pmids %}
-        <ul>{% for pmid in clinvar.pmids %}<li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
-           {% endfor %}
-        </ul>
-    {% else %}
-        (None)
-    {% endif %}
-
-    <p><strong>Pubtator</strong></p>
-    {% if pubtator.pmids %}
-        <ul>{% for pmid in pubtator.pmids %}
-        <li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={{pmid}}&searchtype=PubMed_Search&query={{pmid}}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax=">{{pmid}}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        (None)
-    {% endif %}
-
-    <p><strong>NCBI Variation Reporter</strong></p>
-    {% if ncbi.pmids %}
-        <ul>{% for pmid in ncbi.pmids %}
-        <li><a target="_blank" href="http://www.ncbi.nlm.nih.gov/pubmed/{{ pmid }}">{{pmid}}</a></li>
-        {% endfor %}
-        </ul>
-    {% elif ncbi.report == None %}
-        (NCBI Report unavailable for this variant)
-    {% else %}
-        (None)
-    {% endif %}
-
-    -->
 
 </div>
 
     <hr />
 
-
 <div class="clear">
     <h3>LVG Output</h3>
     <ul>
-    {% for seqtype, hgvs_list in variants.iteritems() %}
+    {% for seqtype, hgvs_list in lex.variants.iteritems() %}
     {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
-        {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') %}
+        {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') or hgvs_text.startswith('NP_') %}
         <li><a href="/query/{{ hgvs_text }}">{{ hgvs_text }}</a>  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
         {% else %}
         <li>{{ hgvs_text }}  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
@@ -170,12 +154,12 @@
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>{% if google_query %}{{ google_query|e }}
+    <p>{% if citation_table.google_query %}{{ citation_table.google_query|e }}
     <ul>
-        <li>c.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_c }}'>{{ google_query_c }}</a></li>
-        <li>p.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_p }}'>{{ google_query_p }}</a></li>
-        <li>g.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_g }}'>{{ google_query_g }}</a></li>
-        <li>n.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ google_query_n }}'>{{ google_query_n }}</a></li>
+        <li>c.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_c }}'>{{ citation_table.google_query_c }}</a></li>
+        <li>p.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_p }}'>{{ citation_table.google_query_p }}</a></li>
+        <li>g.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_g }}'>{{ citation_table.google_query_g }}</a></li>
+        <li>n.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_n }}'>{{ citation_table.google_query_n }}</a></li>
     </ul>
 
 

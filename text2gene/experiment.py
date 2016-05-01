@@ -152,7 +152,7 @@ class Experiment(SQLCache):
         :return: True if successful, False otherwise
         """
         querydict = self.to_dict()
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': pickle(self)}
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': pickle.dumps(self)}
 
         try:
             self.insert(self.tablename, fv_dict)

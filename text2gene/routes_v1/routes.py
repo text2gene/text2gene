@@ -4,12 +4,12 @@ API_INDICATOR = 'v1'
 
 import logging
 
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect
 
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from ..lvg_cached import LVG
-from ..googlequery import GoogleQuery, query_cse_return_items
+from ..googlequery import GoogleQuery
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -134,7 +134,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
         cse = request.form.get('cse')
         log.debug('POST form contained: hgvs_text=%s, seqtypes=%s, cse=%s' % (hgvs_text, ','.join(seqtypes), cse))
         return redirect(
-            '/%s/google/%s?seqtypes=%s&types=%s&cse=%s' % (API_INDICATOR, hgvs_text, ','.join(seqtypes), cse), code=302)
+            '/v1/google/%s?seqtypes=%s&cse=%s' % (hgvs_text, ','.join(seqtypes), cse), code=302)
 
     else:
         hgvs_text = hgvs_text.strip()
@@ -158,7 +158,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
         outd['query'] = gq.build_query(outd['seqtypes'])
 
         outd['response'] = []
-        for res in gq.query(outd['query']):
+        for res in gq.send_query(outd['query']):
             outd['response'].append(res.to_dict())
 
     return HTTP200(outd)

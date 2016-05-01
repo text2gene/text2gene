@@ -5,9 +5,140 @@ from medgen.api import GeneID, GeneName
 
 from metapub import PubMedFetcher, FindIt
 
+from flask import Markup
+
+from .googlequery import GoogleQuery
+from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
+from .ncbi import NCBIHgvs2Pmid
+from .cached import ClinvarHgvs2Pmid
+from .pmid_lookups import pubtator_results_for_lex
+
+
 fetch = PubMedFetcher()
 
 GENEREVIEWS_URL = 'http://www.ncbi.nlm.nih.gov/books/{bookid}/'
+
+
+class CitationTable(object):
+    """ Given an LVG object ("lex"), collect citations from all specified functions, configurable
+    through keyword arguments.
+
+    By default, all available search modules are used.  They can be disabled by supplying
+    <search_module_name> = False at instantiation.  Available modules:
+
+        * clinvar
+        * ncbi
+        * pubtator
+        * google
+
+    Citations are keyed to PMID via the .pmid2citation attribute, i.e.:
+        {<pmid>: <Citation instance>}
+
+    The magic .citations property returns a flat list of Citations sorted by PMID, highest-numbered
+    (most recent) PMIDs first.
+    """
+
+    def __init__(self, lex, **kwargs):
+        self.lex = lex
+        self.pmid2citation = {}
+
+        self.clinvar_results = None
+
+        if kwargs.get('clinvar', True):
+            self._load_clinvar()
+
+        self.pubtator_results = None
+
+        if kwargs.get('pubtator', True):
+            self._load_pubtator()
+
+        self.ncbi_results = None
+
+        if kwargs.get('ncbi', True):
+            self._load_ncbi()
+
+        self.google_cse = None
+        self.google_results = None
+
+        if kwargs.get('google', True):
+            self._load_google()
+
+    @property
+    def citations(self):
+        """ Recompose pmid2citation table as a list of Citations, reverse-sorted by PMID.
+
+        :return: list of Citation objects sorted by PMID (highest first)
+        """
+        citations = []
+        for key in sorted(self.pmid2citation.keys(), reverse=True):
+            citations.append(self.pmid2citation[key])
+        return citations
+
+    def _load_clinvar(self):
+        # CLINVAR RESULTS
+        self.clinvar_results = ClinvarHgvs2Pmid(self.lex)
+
+        for pmid in self.clinvar_results:
+            try:
+                cit = self.pmid2citation[pmid]
+                cit.in_clinvar = True
+            except KeyError:
+                self.pmid2citation[pmid] = Citation(pmid, clinvar=True)
+
+    def _load_pubtator(self):
+        # PUBTATOR RESULTS
+        self.pubtator_results = pubtator_results_for_lex(self.lex)
+
+        for hgvs_text in self.pubtator_results:
+            for row in self.pubtator_results[hgvs_text]:
+                pmid = row['PMID']
+                try:
+                    cit = self.pmid2citation[pmid]
+                    cit.in_pubtator = True
+                    cit.pubtator_mention = row['Mentions']
+                    cit.pubtator_components = row['Components']
+                except KeyError:
+                    self.pmid2citation[pmid] = Citation(pmid, pubtator=True,
+                                                    pubtator_mention=row['Mentions'],
+                                                    pubtator_components=row['Components'])
+
+    def _load_ncbi(self):
+        # NCBI RESULTS
+        try:
+            self.ncbi_results = NCBIHgvs2Pmid(self.lex.hgvs_text)
+        except NCBIRemoteError:
+            pass
+
+        if self.ncbi_results:
+            for pmid in self.ncbi_results:
+                try:
+                    cit = self.pmid2citation[pmid]
+                    cit.in_ncbi = True
+                except KeyError:
+                    self.pmid2citation[pmid] = Citation(pmid, ncbi=True)
+
+    def _load_google(self):
+        try:
+            self.google_cse = GoogleQuery(self.lex)
+            self.google_query = '%s' % self.google_cse
+            self.google_query_c = self.google_cse.query_c()
+            self.google_query_g = self.google_cse.query_g()
+            self.google_query_p = self.google_cse.query_p()
+            self.google_query_n = self.google_cse.query_n()
+        except GoogleQueryMissingGeneName as error:
+            print(error)
+
+        if self.google_cse:
+            # TODO: allow configuration of seqtype array for send_query
+            self.google_results = self.google_cse.send_query()
+            for cseresult in self.google_results:
+                if cseresult.pmid:
+                    try:
+                        cit = self.pmid2citation[cseresult.pmid]
+                        cit.in_google = True
+                        cit.google_result = cseresult
+                    except KeyError:
+                        self.pmid2citation[cseresult.pmid] = Citation(cseresult.pmid, google=True, google_result=cseresult)
 
 
 class Citation(object):
@@ -25,7 +156,7 @@ class Citation(object):
         self.pubtator_components = kwargs.get('pubtator_components', None)
 
         self.in_google = kwargs.get('google', False)
-        self.google_cse_result = kwargs.get('google_cse_result', None)
+        self.google_result = kwargs.get('google_result', None)
 
         # placeholder for FindIt lookup of link to article PDF (if available)
         self._pdf_src = None
@@ -60,13 +191,20 @@ class Citation(object):
 
     @property
     def google_url(self):
-        if self.google_cse_result:
-            return self.google_cse_result.url
+        if self.google_result:
+            return self.google_result.url
 
     @property
-    def google_htmlSnippet(self):
-        if self.google_cse_result:
-            return self.google_cse_result.htmlSnippet
+    def htmlSnippet(self):
+        if self.google_result:
+            return Markup(self.google_result.htmlSnippet)
+
+
+class ClinVarInfo(object):
+
+    def __init__(self, hgvs_text):
+        self.variationID = hgvs_to_clinvar_variationID(hgvs_text)
+        self.url = get_variation_url(self.variationID if self.variationID else '')
 
 
 class GeneInfo(object):

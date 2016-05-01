@@ -65,18 +65,28 @@ class GoogleCSEResult(object):
         self.mime = item.get('mime', None)
         self.snippet = item.get('snippet', None)
         self.htmlSnippet = item.get('htmlSnippet', None)
+        self.title = item.get('title', None)
+        self.htmlTitle = item.get('htmlTitle', None)
 
-        self.doi = self._get_doi_if_found(item)
+        # attributes that may or may not be filled in by the item dict
+        self.doi = None
+        self.citation_title = None
+        self.metatags = None
 
+        # PMID attribute will hopefully become filled by some means...
         self.pmid = None
-        self.urlreverse = None
 
+        # Inspect the dictionary and fill what variables we find.
+        self._fill_variables_from_cse_result(item)
+
+        # Now try to get the PMID!
         if not self.doi:
             self.urlreverse = UrlReverse(self.url)
             self.doi = self.urlreverse.doi
             self.pmid = self.urlreverse.pmid
 
         else:
+            self.urlreverse = None
             self.pmid = doi2pmid(self.doi)
 
     def to_dict(self):
@@ -86,15 +96,20 @@ class GoogleCSEResult(object):
                 'snippet': self.snippet,
                 'htmlSnippet': self.htmlSnippet,
                 'doi': self.doi,
+                'citation_title': self.citation_title,
+                'title': self.title,
+                'htmlTitle': self.htmlTitle,
                 }
 
-    def _get_doi_if_found(self, item):
+    def _fill_variables_from_cse_result(self, item):
         if item.get('pagemap', None):
             if item['pagemap'].get('metatags', None):
+                self.metatags = item['pagemap']['metatags']
                 for tag in item['pagemap']['metatags']:
                     if tag.get('citation_doi'):
-                        return tag['citation_doi'].replace('doi:', '')
-        return None
+                        self.doi = tag['citation_doi'].replace('doi:', '')
+                    if tag.get('citation_title'):
+                        self.citation_title = tag['citation_title']
 
 
 def parse_cse_items(cse_items):
@@ -294,7 +309,11 @@ class GoogleQuery(object):
         else:
             return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
-    def query(self, qstring):
+    def send_query(self, qstring=None, seqtypes=None):
+        if seqtypes is None:
+            seqtypes = ['c', 'p', 'g', 'n']
+        if qstring is None:
+            qstring = self.build_query(seqtypes=seqtypes)
         items = query_cse_return_items(qstring=qstring, cse=self.cse)
         return parse_cse_items(items)
 
