@@ -304,7 +304,7 @@ class GoogleQuery(object):
 
         posedit_clause = '(%s)' % '|'.join(terms)
         if use_gene_synonyms and self.gene_synonyms != []:
-            gene_clause = '(%s)' % '|'.join(self.gene_synonyms)
+            gene_clause = '(%s)' % '|'.join('"%s"' % gene for gene in self.gene_synonyms)
             return self.GQUERY_TMPL.format(gene_name=gene_clause, posedit_clause=posedit_clause)
         else:
             return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)

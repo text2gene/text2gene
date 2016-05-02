@@ -156,12 +156,11 @@
     <h3>Google Query Expansion</h3>
     <p>{% if citation_table.google_query %}{{ citation_table.google_query|e }}
     <ul>
-        <li>c.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_c }}'>{{ citation_table.google_query_c }}</a></li>
-        <li>p.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_p }}'>{{ citation_table.google_query_p }}</a></li>
-        <li>g.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_g }}'>{{ citation_table.google_query_g }}</a></li>
-        <li>n.: <a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query_n }}'>{{ citation_table.google_query_n }}</a></li>
+        <li>c.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=c'>{{ citation_table.google_query_c }}</a></li>
+        <li>p.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=p'>{{ citation_table.google_query_p }}</a></li>
+        <li>g.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=g'>{{ citation_table.google_query_g }}</a></li>
+        <li>n.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=n'>{{ citation_table.google_query_n }}</a></li>
     </ul>
-
 
     {% else %}(Cannot build without gene name){% endif %}</p>
 

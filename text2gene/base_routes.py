@@ -10,13 +10,9 @@ from hgvs_lexicon.exceptions import CriticalHgvsError
 from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
 
-from .googlequery import GoogleQuery
-from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
-from .ncbi import LVGEnriched, NCBIHgvs2Pmid, NCBIReport, NCBIHgvsLVG
-from .api import ClinvarHgvs2Pmid
-from .pmid_lookups import pubtator_results_for_lex
-from .report_utils import (hgvs_to_clinvar_variationID, get_variation_url,
-                           get_clinvar_tables_containing_variant)
+from .exceptions import NCBIRemoteError
+from .ncbi import LVGEnriched, NCBIHgvsLVG
+from .report_utils import get_clinvar_tables_containing_variant
 from .report_utils import GeneInfo, CitationTable, ClinVarInfo
 from .lsdb.lovd import get_lovd_url
 
