@@ -34,22 +34,23 @@ CSE_QUERY_TEMPLATES = {'whitelist': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_C
                        }
 
 
-def query_cse_return_items(qstring, cse='whitelist'):
+def query_cse_return_response(qstring, cse='whitelist', start_index=None):
     """ Query the Google Custom Search Engine for provided query string.
 
     :param qstring: (str)
     :param cse: (str) name of preconfigured CSE ('whitelist' or 'schema') [default: 'whitelist']
-    :return items: (list) list of dictionaries representing google CSE hits for query.
+    :return response: (dict) Google CSE response to query.
     """
-    query = CSE_QUERY_TEMPLATES[cse].format(qstring)
+    if start_index:
+        query = CSE_QUERY_TEMPLATES[cse].format(qstring) + '&start=%i' % start_index
+    else:
+        query = CSE_QUERY_TEMPLATES[cse].format(qstring)
+
     response = requests.get(query)
 
     if not response.ok:
         raise Text2GeneError('Google CSE query returned not-ok state: %i' % response.status_code)
-    try:
-        return response.json()['items']
-    except KeyError:
-        return []
+    return response.json()
 
 
 class GoogleCSEResult(object):
@@ -309,13 +310,38 @@ class GoogleQuery(object):
         else:
             return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
-    def send_query(self, qstring=None, seqtypes=None):
+    def send_query(self, qstring=None, seqtypes=None, pages=2):
+        """ Sends query to the Google Custom Search Engine specified in this object's 'cse' attribute
+        ('whitelist' by default).  Any arbitrary `qstring` can be supplied; if not supplied, this function
+        composes a query string using self.build_query(), informed by the optional `seqtypes` parameter
+        (default: all seqtypes).
+
+        This function retrieves up to `pages` of Google CSE results (default: 2).
+
+        :param qstring: (str)
+        :param seqtypes: (list)
+        :param pages: (int)
+        :return: list of CSEResult items (or empty list if no results)
+        """
         if seqtypes is None:
             seqtypes = ['c', 'p', 'g', 'n']
         if qstring is None:
             qstring = self.build_query(seqtypes=seqtypes)
-        items = query_cse_return_items(qstring=qstring, cse=self.cse)
-        return parse_cse_items(items)
+
+        cse_results = []
+        response = query_cse_return_response(qstring=qstring, cse=self.cse)
+        num_results = int(response['queries']['request'][0]['totalResults'])
+        if num_results == 0:
+            return []
+
+        for start_index in range(11, (pages + 1) * 10 + 1, 10):
+
+            try:
+                cse_results = cse_results + parse_cse_items(response['items'])
+            except KeyError:
+                break
+
+        return cse_results
 
     def __str__(self):
         return self.build_query()
