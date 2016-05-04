@@ -105,8 +105,6 @@
 
     </div>
 
-    <div class="right">{% if citation_table.google_query %}<a target="_blank" href='https://www.google.com/?gws_rd=ssl#q={{ citation_table.google_query }}'><img width="50px" src="/google_button.png"></a>
-        {% else %}Cannot build Google Query without gene name{% endif %}
     {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
 
     </div>
