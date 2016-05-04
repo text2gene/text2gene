@@ -90,6 +90,12 @@ class GoogleCSEResult(object):
             self.urlreverse = None
             self.pmid = doi2pmid(self.doi)
 
+        # coerce to int if we got one.
+        try:
+            self.pmid = int(self.pmid)
+        except TypeError:
+            pass
+
     def to_dict(self):
         return {'url': self.url,
                 'pmid': self.pmid,
@@ -310,13 +316,13 @@ class GoogleQuery(object):
         else:
             return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
-    def send_query(self, qstring=None, seqtypes=None, pages=2):
+    def send_query(self, qstring=None, seqtypes=None, pages=1):
         """ Sends query to the Google Custom Search Engine specified in this object's 'cse' attribute
         ('whitelist' by default).  Any arbitrary `qstring` can be supplied; if not supplied, this function
         composes a query string using self.build_query(), informed by the optional `seqtypes` parameter
         (default: all seqtypes).
 
-        This function retrieves up to `pages` of Google CSE results (default: 2).
+        This function retrieves up to `pages` of Google CSE results (default: 1).
 
         :param qstring: (str)
         :param seqtypes: (list)
@@ -331,15 +337,14 @@ class GoogleQuery(object):
         cse_results = []
         response = query_cse_return_response(qstring=qstring, cse=self.cse)
         num_results = int(response['queries']['request'][0]['totalResults'])
-        if num_results == 0:
-            return []
-
-        for start_index in range(11, (pages + 1) * 10 + 1, 10):
-
-            try:
-                cse_results = cse_results + parse_cse_items(response['items'])
-            except KeyError:
-                break
+        if num_results != 0:
+            cse_results = cse_results + parse_cse_items(response['items'])
+            # generate start_index in series like [11, 21, 31]
+            for start_index in range(11, pages * 10 + 1, 10):
+                try:
+                    cse_results = cse_results + parse_cse_items(response['items'])
+                except KeyError:
+                    break
 
         return cse_results
 

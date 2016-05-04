@@ -29,7 +29,7 @@ def clinvar_lex_to_pmid(lex):
                 continue
 
             for pmid in ClinvarPubmeds('%s' % seqvar):
-                pmids.add(pmid)
+                pmids.add(int(pmid))
     return list(pmids)
     
 
@@ -70,7 +70,7 @@ def pubtator_lex_to_pmid(lex):
                 else:
                     results = pubtator_db.search_m2p(components, gene_id)
                 for res in results:
-                    pmids.add(res['PMID'])
+                    pmids.add(int(res['PMID']))
             except PubtatorDBError as error:
                 log.info('[%s] (%s) %r', lex.seqvar, seqvar, error)
 

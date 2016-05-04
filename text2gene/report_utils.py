@@ -91,7 +91,7 @@ class CitationTable(object):
 
         for hgvs_text in self.pubtator_results:
             for row in self.pubtator_results[hgvs_text]:
-                pmid = row['PMID']
+                pmid = int(row['PMID'])
                 try:
                     cit = self.pmid2citation[pmid]
                     cit.in_pubtator = True
@@ -204,7 +204,12 @@ class ClinVarInfo(object):
 
     def __init__(self, hgvs_text):
         self.variationID = hgvs_to_clinvar_variationID(hgvs_text)
-        self.url = get_variation_url(self.variationID if self.variationID else '')
+        self.url = ''
+        self.clinical_significance = ''
+
+        if self.variationID:
+            self.url = get_variation_url(self.variationID)
+            #self.clinical_significance = get_variation_clinical_significance(self.variationID)
 
 
 class GeneInfo(object):
