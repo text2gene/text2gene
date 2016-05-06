@@ -113,8 +113,9 @@ class HgvsComponents(object):
             ref = seqvar.posedit.edit.ref
             alt = seqvar.posedit.edit.alt
         except AttributeError as error:
-            # hmm.
-            log.warn('SequenceVariant %s: %s', seqvar, error)
+            # We expect a 'dup' variant not to have an alt. warn us if this is a different situation.
+            if not seqvar.posedit.edit.type == 'dup':
+                log.warn('SequenceVariant %s: %s', seqvar, error)
 
         # if alt is a '*' it represents a Ter (STOP) sequence, which PubTator represents as an 'X'.
         if alt == '*':

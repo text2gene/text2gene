@@ -8,6 +8,7 @@ import requests
 
 from metapub.urlreverse import UrlReverse
 from metapub.convert import doi2pmid
+from metapub.exceptions import MetaPubError
 
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
@@ -88,13 +89,18 @@ class GoogleCSEResult(object):
 
         else:
             self.urlreverse = None
-            self.pmid = doi2pmid(self.doi)
+            try:
+                self.pmid = doi2pmid(self.doi)
+            except MetaPubError as error:
+                log.debug(error)
+                self.pmid = None
 
         # coerce to int if we got one.
         try:
             self.pmid = int(self.pmid)
-        except TypeError:
-            pass
+        except (ValueError, TypeError):
+            log.debug('PMID was a monster! Got %s (doi: %s) (url: %s)' % (self.pmid, self.doi, self.url))
+            self.pmid = None
 
     def to_dict(self):
         return {'url': self.url,
