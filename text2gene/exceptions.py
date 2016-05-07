@@ -10,3 +10,8 @@ class NCBIRemoteError(Text2GeneError):
 class GoogleQueryMissingGeneName(Text2GeneError):
     """ Raised when GoogleQuery object is missing a gene name for the supplied variant(s). """
     pass
+
+class GoogleQueryRemoteError(Text2GeneError):
+    """ Raised when Google CSE query fails. Message should contain status code and text of query. """
+    pass
+

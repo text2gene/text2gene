@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
+
 from medgen.api import ClinvarVariationID, ClinVarDB
 from medgen.api import GeneID, GeneName
 
@@ -8,11 +10,12 @@ from metapub import PubMedFetcher, FindIt
 from flask import Markup
 
 from .googlequery import GoogleQuery
-from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName
+from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .ncbi import NCBIHgvs2Pmid
 from .cached import ClinvarHgvs2Pmid
 from .pmid_lookups import pubtator_results_for_lex
 
+log = logging.getLogger('text2gene')
 
 fetch = PubMedFetcher()
 
@@ -106,8 +109,8 @@ class CitationTable(object):
         # NCBI RESULTS
         try:
             self.ncbi_results = NCBIHgvs2Pmid(self.lex.hgvs_text)
-        except NCBIRemoteError:
-            pass
+        except NCBIRemoteError as error:
+            log.warn(error)
 
         if self.ncbi_results:
             for pmid in self.ncbi_results:
@@ -130,7 +133,13 @@ class CitationTable(object):
 
         if self.google_cse:
             # TODO: allow configuration of seqtype array for send_query
-            self.google_results = self.google_cse.send_query()
+            try:
+                self.google_results = self.google_cse.send_query()
+            except GoogleQueryRemoteError as error:
+                self.google_results = []
+                log.warn(error)
+                return
+
             for cseresult in self.google_results:
                 if cseresult.pmid:
                     try:

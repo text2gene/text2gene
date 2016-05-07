@@ -337,3 +337,4 @@ class Experiment(SQLCache):
                 if pmid in summary_table[mod]:
                     row['match_%s' % mod] = True
             self.insert(self.summary_table_name, row)
+

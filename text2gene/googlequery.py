@@ -8,12 +8,12 @@ import requests
 
 from metapub.urlreverse import UrlReverse
 from metapub.convert import doi2pmid
-from metapub.exceptions import MetaPubError
+from metapub.exceptions import MetaPubError 
 
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
-from .exceptions import Text2GeneError, GoogleQueryMissingGeneName
+from .exceptions import Text2GeneError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
 
 log = logging.getLogger('text2gene.googlequery')
 
@@ -50,7 +50,7 @@ def query_cse_return_response(qstring, cse='whitelist', start_index=None):
     response = requests.get(query)
 
     if not response.ok:
-        raise Text2GeneError('Google CSE query returned not-ok state: %i' % response.status_code)
+        raise GoogleQueryRemoteError('Google CSE query returned not-ok state: %i (query string: %s)' % (response.status_code, query))
     return response.json()
 
 
