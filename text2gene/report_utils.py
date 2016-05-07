@@ -44,6 +44,7 @@ class CitationTable(object):
     def __init__(self, lex, **kwargs):
         self.lex = lex
         self.pmid2citation = {}
+        self.errors = []
 
         self.clinvar_results = None
 
@@ -110,6 +111,7 @@ class CitationTable(object):
         try:
             self.ncbi_results = NCBIHgvs2Pmid(self.lex.hgvs_text)
         except NCBIRemoteError as error:
+            self.errors.append('%r' % error)
             log.warn(error)
 
         if self.ncbi_results:
@@ -129,7 +131,7 @@ class CitationTable(object):
             self.google_query_p = self.google_cse.query_p()
             self.google_query_n = self.google_cse.query_n()
         except GoogleQueryMissingGeneName as error:
-            print(error)
+            self.errors.append('%r' % error)
 
         if self.google_cse:
             # TODO: allow configuration of seqtype array for send_query
@@ -137,6 +139,7 @@ class CitationTable(object):
                 self.google_results = self.google_cse.send_query()
             except GoogleQueryRemoteError as error:
                 self.google_results = []
+                self.errors.append('%r' % error)
                 log.warn(error)
                 return
 
