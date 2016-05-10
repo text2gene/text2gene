@@ -115,6 +115,7 @@ class GoogleCSEResult(object):
                 'citation_title': self.citation_title,
                 'title': self.title,
                 'htmlTitle': self.htmlTitle,
+                'urlreverse': self.urlreverse.to_dict(),
                 }
 
     def _fill_variables_from_cse_result(self, item):
@@ -127,6 +128,18 @@ class GoogleCSEResult(object):
                     if tag.get('citation_title'):
                         self.citation_title = tag['citation_title']
 
+    def __str__(self):
+        out = 'Link: %s\n' % self.url
+        out += '  PMID: %r\n' % self.pmid
+        out += '  DOI: %r\n' % self.doi
+        if self.urlreverse:
+            out += '  Steps:\n'
+            for step in self.urlreverse.steps:
+                out += '\t * %s\n' % step
+        return out
+
+    def __repr__(self):
+        return '<text2gene.googlequery.GoogleCSEResult:%s (pmid: %r) (doi: %r)>' % (self.url, self.pmid, self.doi)
 
 def parse_cse_items(cse_items):
     """ Convert list of Google CSE "items" into list of GoogleCSEResult objects.
