@@ -78,6 +78,9 @@ class GoogleCSEResult(object):
         self.citation_title = None
         self.metatags = None
 
+        # in case we run into a problem loading UrlReverse
+        self.error = None
+
         # PMID attribute will hopefully become filled by some means...
         self.pmid = None
 
@@ -86,7 +89,12 @@ class GoogleCSEResult(object):
 
         # Now try to get the PMID!
         if not self.doi:
-            self.urlreverse = UrlReverse(self.url)
+            try:
+                self.urlreverse = UrlReverse(self.url)
+            except Exception as error:
+                self.urlreverse = None
+                self.error = '%r' % error
+
             self.doi = self.urlreverse.doi
             self.pmid = self.urlreverse.pmid
 
@@ -115,7 +123,7 @@ class GoogleCSEResult(object):
                 'citation_title': self.citation_title,
                 'title': self.title,
                 'htmlTitle': self.htmlTitle,
-                'urlreverse': self.urlreverse.to_dict(),
+                'urlreverse': None if not self.urlreverse else self.urlreverse.to_dict(),
                 }
 
     def _fill_variables_from_cse_result(self, item):
