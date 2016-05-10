@@ -9,7 +9,7 @@ from flask import Blueprint, request, redirect
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from ..lvg_cached import LVG
-from ..googlequery import GoogleQuery
+from ..googlequery import GoogleQuery, GoogleCSEngine
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -153,12 +153,12 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
         except Exception as error:
             return HTTP400(error, 'Error before building query: could not build LVG object for %s.' % hgvs_text)
 
-        gq = GoogleQuery(lex)
+        outd['query'] = GoogleCSEngine(lex).build_query(seqtypes)
 
-        outd['query'] = gq.build_query(outd['seqtypes'])
+        cse_results = GoogleQuery(lex, seqtypes=seqtypes)
 
         outd['response'] = []
-        for res in gq.send_query(outd['query']):
+        for res in cse_results:
             outd['response'].append(res.to_dict())
 
     return HTTP200(outd)
