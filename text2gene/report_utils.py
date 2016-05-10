@@ -80,6 +80,7 @@ class CitationTable(object):
 
     def _load_clinvar(self):
         # CLINVAR RESULTS
+        log.info('[%s] Getting ClinVar results...', self.lex.hgvs_text)
         self.clinvar_results = ClinvarHgvs2Pmid(self.lex)
 
         for pmid in self.clinvar_results:
@@ -91,6 +92,7 @@ class CitationTable(object):
 
     def _load_pubtator(self):
         # PUBTATOR RESULTS
+        log.info('[%s] Getting PubTator results...', self.lex.hgvs_text)
         self.pubtator_results = pubtator_results_for_lex(self.lex)
 
         for hgvs_text in self.pubtator_results:
@@ -108,6 +110,7 @@ class CitationTable(object):
 
     def _load_ncbi(self):
         # NCBI RESULTS
+        log.info('[%s] Getting NCBI results...', self.lex.hgvs_text)
         try:
             self.ncbi_results = NCBIHgvs2Pmid(self.lex.hgvs_text)
         except NCBIRemoteError as error:
@@ -123,6 +126,7 @@ class CitationTable(object):
                     self.pmid2citation[pmid] = Citation(pmid, ncbi=True)
 
     def _load_google(self):
+        log.info('[%s] Getting Google results...', self.lex.hgvs_text)
         try:
             self.google_cse = GoogleQuery(self.lex)
             self.google_query = '%s' % self.google_cse

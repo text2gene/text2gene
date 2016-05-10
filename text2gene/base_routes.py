@@ -21,7 +21,7 @@ fetch = PubMedFetcher()
 base = Blueprint('base', __name__, template_folder='templates')
 
 HGVS_SAMPLES = ['NM_194248.1:c.158C>T',
-                'NM_014855.2:c.333G>C',
+                'NM_006206.4:c.1700C>T',
                 'NM_001126115.1:c.318T>G',
                 'NM_005228.3:c.2240_2257del18'
                 ]

@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import re
 import logging
 import urllib
+import hashlib
 
 import requests
 
@@ -14,6 +15,7 @@ from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
 from .exceptions import Text2GeneError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
+from .sqlcache import SQLCache
 
 log = logging.getLogger('text2gene.googlequery')
 
@@ -209,7 +211,7 @@ def get_posedits_for_lex(lex, seqtypes=None):
     return posedits
 
 
-class GoogleQuery(object):
+class GoogleCSEngine(object):
 
     GQUERY_TMPL = '{gene_name} {posedit_clause}'
 
@@ -337,6 +339,7 @@ class GoogleQuery(object):
         """
         if seqtypes is None:
             seqtypes = ['c', 'p', 'g', 'n']
+
         if qstring is None:
             qstring = self.build_query(seqtypes=seqtypes)
 
@@ -356,3 +359,55 @@ class GoogleQuery(object):
 
     def __str__(self):
         return self.build_query()
+
+
+class GoogleCachedQuery(SQLCache):
+
+    def __init__(self, granular=False, granular_table='google_match'):
+        self.granular = granular
+        self.granular_table = granular_table
+        super(self.__class__, self).__init__('google_hgvs2pmid')
+
+    def get_cache_key(self, qstring):
+        """ Returns a cache_key for the supplied Google query string.
+
+        :param qstring: (str) Google query string
+        :return: md5 hash of query string
+        """
+        return hashlib.md5(qstring).hexdigest()
+
+    #def store_granular(self, lex, result):
+    #    entry_pairs = [{'hgvs_text': lex.hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
+    #    self.batch_insert(self.granular_table, entry_pairs)
+
+    def query(self, lex, seqtypes=None, term_limit=31, use_gene_synonyms=True, skip_cache=False, force_granular=False):
+        """
+        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param skip_cache: whether to force reloading the data by skipping the cache
+        :return: list of PMIDs if found (result of Clinvar query)
+        """
+        if seqtypes is None:
+            seqtypes = ['c', 'p', 'g', 'n']
+
+        gcse = GoogleCSEngine(lex)
+        qstring = gcse.build_query(seqtypes, term_limit=term_limit, use_gene_synonyms=use_gene_synonyms)
+
+        if not skip_cache:
+            result = self.retrieve(qstring, version=self.VERSION)
+            if result:
+                if force_granular:
+                    self.store_granular(qstring, result)
+                return result
+        #json_result =
+
+        #self.
+
+        self.store(lex, result)
+        if (force_granular or self.granular) and result:
+            self.store_granular(lex, result)
+        return result
+
+
+
+
+GoogleQuery = GoogleCSEngine
