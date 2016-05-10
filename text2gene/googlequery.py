@@ -14,8 +14,9 @@ from metapub.exceptions import MetaPubError
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
-from .exceptions import Text2GeneError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
+from .exceptions import GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .sqlcache import SQLCache
+from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.googlequery')
 
@@ -128,7 +129,7 @@ class GoogleCSEResult(object):
 
 
 def parse_cse_items(cse_items):
-    """ Extract important pieces of information from Google CSE query results.
+    """ Convert list of Google CSE "items" into list of GoogleCSEResult objects.
 
     :param cse_items: list of dictionaries
     :return: list of GoogleCSEResult objects
@@ -137,6 +138,19 @@ def parse_cse_items(cse_items):
     for item in cse_items:
         reslist.append(GoogleCSEResult(item))
     return reslist
+
+
+def googlecse2pmid(cse_results):
+    """ Given a list of GoogleCSEResult items, return a list of the unique PMIDs found.
+
+    :param cse_results: (list)
+    :return: list of PMIDs or empty list
+    """
+    pmids = set()
+    for cseres in cse_results:
+        if cseres.pmid:
+            pmids.add(cseres.pmid)
+    return list(pmids)
 
 
 def quoted_posedit(comp):
@@ -324,18 +338,18 @@ class GoogleCSEngine(object):
         else:
             return self.GQUERY_TMPL.format(gene_name=self.gene_name, posedit_clause=posedit_clause)
 
-    def send_query(self, qstring=None, seqtypes=None, pages=1):
+    def send_query(self, qstring=None, seqtypes=None, pages=2):
         """ Sends query to the Google Custom Search Engine specified in this object's 'cse' attribute
         ('whitelist' by default).  Any arbitrary `qstring` can be supplied; if not supplied, this function
         composes a query string using self.build_query(), informed by the optional `seqtypes` parameter
         (default: all seqtypes).
 
-        This function retrieves up to `pages` of Google CSE results (default: 1).
+        This function retrieves up to `pages` of Google CSE results (default: 2).
 
         :param qstring: (str)
         :param seqtypes: (list)
         :param pages: (int)
-        :return: list of CSEResult items (or empty list if no results)
+        :return: list of dictionaries
         """
         if seqtypes is None:
             seqtypes = ['c', 'p', 'g', 'n']
@@ -343,19 +357,18 @@ class GoogleCSEngine(object):
         if qstring is None:
             qstring = self.build_query(seqtypes=seqtypes)
 
-        cse_results = []
         response = query_cse_return_response(qstring=qstring, cse=self.cse)
         num_results = int(response['queries']['request'][0]['totalResults'])
-        if num_results != 0:
-            cse_results = cse_results + parse_cse_items(response['items'])
-            # generate start_index in series like [11, 21, 31]
-            for start_index in range(11, pages * 10 + 1, 10):
-                try:
-                    cse_results = cse_results + parse_cse_items(response['items'])
-                except KeyError:
-                    break
+        items = []
 
-        return cse_results
+        if num_results != 0:
+            items = response['items']
+            for start_index in range(11, pages * 10 + 1, 10):
+                if start_index > num_results:
+                    break
+                response = query_cse_return_response(qstring, start_index=start_index)
+                items = items + response.get('items', [])
+        return items
 
     def __str__(self):
         return self.build_query()
@@ -363,10 +376,17 @@ class GoogleCSEngine(object):
 
 class GoogleCachedQuery(SQLCache):
 
+    """ Represents a single cached event of querying Google with configurable parameters
+    (lex, seqtypes, term_limit, use_gene_synonyms
+
+    Stores results in cache as md5(qstring) -> json result
+    """
+    VERSION = 0
+
     def __init__(self, granular=False, granular_table='google_match'):
         self.granular = granular
         self.granular_table = granular_table
-        super(self.__class__, self).__init__('google_hgvs2pmid')
+        super(self.__class__, self).__init__('google_query')
 
     def get_cache_key(self, qstring):
         """ Returns a cache_key for the supplied Google query string.
@@ -376,15 +396,25 @@ class GoogleCachedQuery(SQLCache):
         """
         return hashlib.md5(qstring).hexdigest()
 
-    #def store_granular(self, lex, result):
-    #    entry_pairs = [{'hgvs_text': lex.hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
-    #    self.batch_insert(self.granular_table, entry_pairs)
+    def store_granular(self, hgvs_text, cse_results):
+        pmids = googlecse2pmid(cse_results)
+        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in pmids]
+        self.batch_insert(self.granular_table, entry_pairs)
 
     def query(self, lex, seqtypes=None, term_limit=31, use_gene_synonyms=True, skip_cache=False, force_granular=False):
-        """
+        """ Supply a "lex" object to run a GoogleQuery and return all parseable results as GoogleCSEResult
+        objects.  Supply seqtypes as a list of sequence types to constrain query as desired.
+
+        Examples:
+            GoogleQuery(lex, seqtypes=['c','p'], use_gene_synonyms=False)
+
+
         :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param seqtypes: list of seqtypes [default: 'c','p','g','n']
+        :param term_limit: (int) number of terms to constrain query to [default: 31]
+        :param use_gene_synonyms: (bool) whether to use GeneSynonyms in query [default: True]
         :param skip_cache: whether to force reloading the data by skipping the cache
-        :return: list of PMIDs if found (result of Clinvar query)
+        :return: list of GoogleCSEresult objects or empty list if no results
         """
         if seqtypes is None:
             seqtypes = ['c', 'p', 'g', 'n']
@@ -392,22 +422,46 @@ class GoogleCachedQuery(SQLCache):
         gcse = GoogleCSEngine(lex)
         qstring = gcse.build_query(seqtypes, term_limit=term_limit, use_gene_synonyms=use_gene_synonyms)
 
+        # This looks like a lot of extra steps (get the results, parse the results, convert the results
+        # into PMIDs)... but there's an advantage. By storing the JSON response instead of the GoogleCSEResult
+        # objects, we have the power to potentially return better GoogleCSEResult objects at a later time -- i.e.
+        # whenever metapub's UrlReverse improves at PMID resolution.
+        #
+        # In other words, we can reuse our cached API results for each query while leaving ourselves open to the
+        # possibility of taking advantage of improved interpretation over time.
+
         if not skip_cache:
             result = self.retrieve(qstring, version=self.VERSION)
             if result:
+                cse_results = parse_cse_items(result)
                 if force_granular:
-                    self.store_granular(qstring, result)
-                return result
-        #json_result =
+                    self.store_granular(lex.hgvs_text, cse_results)
+                return cse_results
 
-        #self.
+        result = gcse.send_query(qstring)
+        self.store(qstring, result)
 
-        self.store(lex, result)
+        cse_results = parse_cse_items(result)
+
         if (force_granular or self.granular) and result:
-            self.store_granular(lex, result)
-        return result
+            self.store_granular(lex.hgvs_text, cse_results)
+
+        return cse_results
+
+    def create_granular_table(self):
+        tname = self.granular_table
+        log.info('creating table {} for GoogleCachedQuery'.format(tname))
+
+        self.execute("drop table if exists {}".format(tname))
+
+        sql = """create table {} (
+                  hgvs_text varchar(255) not null,
+                  PMID int(11) default NULL,
+                  version int(11) default NULL)
+                  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
+        self.execute(sql)
+        sql = 'call create_index("{}", "hgvs_text,PMID")'.format(tname)
+        self.execute(sql)
 
 
-
-
-GoogleQuery = GoogleCSEngine
+GoogleQuery = GoogleCachedQuery(granular=GRANULAR_CACHE).query

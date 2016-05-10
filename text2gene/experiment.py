@@ -8,6 +8,7 @@ import MySQLdb as mdb
 
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
+from .googlequery import GoogleCachedQuery, googlecse2pmid
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
 from .lvg_cached import HgvsLVGCached
 from .exceptions import Text2GeneError
@@ -19,6 +20,7 @@ log.setLevel(logging.DEBUG)
 search_module_map = {'pubtator': PubtatorCachedQuery,
                      'clinvar': ClinvarCachedQuery,
                      'ncbi': NCBIVariantPubmedsCachedQuery,
+                     'google': GoogleCachedQuery
                     }
 
 lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
@@ -41,6 +43,7 @@ class Experiment(SQLCache):
         * crazy_harebrained_scheme_42_clinvar_match
         * crazy_harebrained_scheme_42_ncbi_match
         * crazy_harebrained_scheme_42_pubtator_match
+        * crazy_harebrained_scheme_42_google_match
         * crazy_harebrained_scheme_42_lvg_mappings
 
     Results in the above tables for the search_modules (able to be specified via keyword argument) consist of
@@ -86,7 +89,7 @@ class Experiment(SQLCache):
         self.lvg_mode = kwargs.get('lvg_mode', 'lvg')      # or 'ncbi' or 'ncbi_enriched'
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
-        self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi'])]
+        self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi', 'google'])]
 
         self.hgvs_examples_table = kwargs.get('hgvs_examples_table', None)
         self.hgvs_examples_db = kwargs.get('hgvs_examples_db', None)
@@ -107,6 +110,7 @@ class Experiment(SQLCache):
         self.ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=True, granular_table=self.get_table_name('clinvar')).query
         self.PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=True, granular_table=self.get_table_name('pubtator')).query
         self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, granular_table=self.get_table_name('ncbi')).query
+        self.GoogleQuery = GoogleCachedQuery(granular=True, granular_table=self.get_table_name('google')).query
 
         # set our internal LVG query function based on preference stated in kwargs.
         self.LVG = lvg_module_map[self.lvg_mode](granular_table=self.get_mapping_table_name(self.lvg_mode)).query
@@ -290,6 +294,10 @@ class Experiment(SQLCache):
 
                     if mod == 'pubtator':
                         result = self.PubtatorHgvs2Pmid(lex, force_granular=True, skip_cache=self.skip_cache)
+
+                    if mod == 'google':
+                        cse_results = self.GoogleQuery(lex, force_granular=True, skip_cache=self.skip_cache)
+                        result = googlecse2pmid(cse_results)
 
                     log.debug('EXPERIMENT [%s.%i]: [%s] %s results: %r', self.experiment_name, self.iteration, hgvs_text, mod, result)
                 except Exception as error:

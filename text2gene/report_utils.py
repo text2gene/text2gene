@@ -9,7 +9,7 @@ from metapub import PubMedFetcher, FindIt
 
 from flask import Markup
 
-from .googlequery import GoogleQuery
+from .googlequery import GoogleQuery, GoogleCSEngine
 from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .ncbi import NCBIHgvs2Pmid
 from .cached import ClinvarHgvs2Pmid
@@ -128,8 +128,8 @@ class CitationTable(object):
     def _load_google(self):
         log.info('[%s] Getting Google results...', self.lex.hgvs_text)
         try:
-            self.google_cse = GoogleQuery(self.lex)
-            self.google_query = '%s' % self.google_cse
+            self.google_cse = GoogleCSEngine(self.lex)
+            self.google_query = self.google_cse.build_query()
             self.google_query_c = self.google_cse.query_c()
             self.google_query_g = self.google_cse.query_g()
             self.google_query_p = self.google_cse.query_p()
@@ -140,7 +140,7 @@ class CitationTable(object):
         if self.google_cse:
             # TODO: allow configuration of seqtype array for send_query
             try:
-                self.google_results = self.google_cse.send_query()
+                self.google_results = GoogleQuery(self.lex)
             except GoogleQueryRemoteError as error:
                 self.google_results = []
                 self.errors.append('%r' % error)
