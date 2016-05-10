@@ -91,12 +91,12 @@ class GoogleCSEResult(object):
         if not self.doi:
             try:
                 self.urlreverse = UrlReverse(self.url)
+                self.doi = self.urlreverse.doi
+                self.pmid = self.urlreverse.pmid
+
             except Exception as error:
                 self.urlreverse = None
                 self.error = '%r' % error
-
-            self.doi = self.urlreverse.doi
-            self.pmid = self.urlreverse.pmid
 
         else:
             self.urlreverse = None
