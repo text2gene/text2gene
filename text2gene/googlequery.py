@@ -420,8 +420,9 @@ class GoogleCachedQuery(SQLCache):
 
     def store_granular(self, hgvs_text, cse_results):
         pmids = googlecse2pmid(cse_results)
-        entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in pmids]
-        self.batch_insert(self.granular_table, entry_pairs)
+        if pmids:
+            entry_pairs = [{'hgvs_text': hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in pmids]
+            self.batch_insert(self.granular_table, entry_pairs)
 
     def query(self, lex, seqtypes=None, term_limit=31, use_gene_synonyms=True, skip_cache=False, force_granular=False):
         """ Supply a "lex" object to run a GoogleQuery and return all parseable results as GoogleCSEResult
