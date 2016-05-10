@@ -9,7 +9,7 @@ from flask import Blueprint, request, redirect
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
 from ..lvg_cached import LVG
-from ..googlequery import GoogleQuery, GoogleCSEngine
+from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -145,6 +145,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
     outd = {'action': 'google', 'hgvs_text': hgvs_text, 'cse': cse,
             'seqtypes': seqtypes,
             'query': '',
+            'pmids': '',
             'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
@@ -157,6 +158,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 
         cse_results = GoogleQuery(lex, seqtypes=seqtypes)
 
+        outd['pmids'] = googlecse2pmid(cse_results)
         outd['response'] = []
         for res in cse_results:
             outd['response'].append(res.to_dict())

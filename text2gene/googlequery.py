@@ -102,8 +102,9 @@ class GoogleCSEResult(object):
             self.urlreverse = None
             try:
                 self.pmid = doi2pmid(self.doi)
-            except MetaPubError as error:
-                log.debug(error)
+            except Exception as error:
+                # so far we've seen XMLSyntaxError and MetaPubError...
+                self.error = '%r' % error
                 self.pmid = None
 
         # coerce to int if we got one.
