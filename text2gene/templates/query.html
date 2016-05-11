@@ -152,7 +152,7 @@
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
-    <p>{% if citation_table.google_query %}{{ citation_table.google_query|e }}
+    <p>{% if citation_table.google_query %}<a target="_blank" href='/v1/google/{{ lex.hgvs_text }}'>{{ citation_table.google_query|e }}</a></p>
     <ul>
         <li>c.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=c'>{{ citation_table.google_query_c }}</a></li>
         <li>p.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=p'>{{ citation_table.google_query_p }}</a></li>
