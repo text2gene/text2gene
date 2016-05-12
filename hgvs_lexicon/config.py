@@ -20,8 +20,8 @@ else:
     log.setLevel(logging.INFO)
 ####
 
-log.debug('%s config dir: %s' % (PKGNAME, CFGDIR))
-log.debug('%s env: %s' % (PKGNAME, ENV))
+#log.debug('%s config dir: %s' % (PKGNAME, CFGDIR))
+#log.debug('%s env: %s' % (PKGNAME, ENV))
 
 configs = [os.path.join(CFGDIR, x) for x in os.listdir(CFGDIR) if x.find(ENV+'.ini') > -1]
 
@@ -57,3 +57,4 @@ def get_uta_connection():
 
     # if we get this far and nothing can be reached, return the biocommons default UTA host
     return hgvs.dataproviders.uta.connect()
+

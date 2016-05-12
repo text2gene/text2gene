@@ -1,10 +1,23 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import sys
+import logging
 
 from text2gene.googlequery import GoogleQuery
 from text2gene.api import LVGEnriched
 from text2gene.exceptions import Text2GeneError
+
+log = logging.getLogger('text2gene.*')
+log.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+log.addHandler(ch)
+
+logging.getLogger('hgvs_lexicon').addHandler(ch)
+
+UPDATE_CACHE = True
+
 
 def dmesg(hgvs_text, msg):
     print('[%s] %s' % (hgvs_text, msg))
@@ -30,7 +43,7 @@ for hgvs_text in hgvs_samples:
     lex = LVGEnriched(hgvs_text)
     
     try:
-        cse_results = GoogleQuery(lex)
+        cse_results = GoogleQuery(lex, skip_cache=UPDATE_CACHE)
     except Text2GeneError as error:
         print('@@@ Error querying Google')
         dmesg(hgvs_text, '%r' % error)

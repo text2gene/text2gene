@@ -64,15 +64,18 @@ class SQLCache(SQLData):
         If an entry with previously stored querydict exists, entry will be updated with date_created set to datetime.now()
         This behavior can be changed to ignoring the update by setting update_if_duplicate to False (default: True).
 
+        Override self.get_cache_key to implement a different approach to turning `querydict` arg into hashable key.
+
         Keywords:
            update_if_duplicate: (bool) see note above.
 
-        :param querydict:
+        :param querydict: serializable
         :param value: serializable value
         :return: True if successful
         :raises: MySQLdb exceptions and json serialization errors
         """
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': json.dumps(value), 'version': self.VERSION}
+        cvalue = json.dumps(value).replace("\'", '')        # get rid of literal "\'" which mysql will choke on.
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': cvalue, 'version': self.VERSION}
 
         try:
             self.insert(self.tablename, fv_dict)

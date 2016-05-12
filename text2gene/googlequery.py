@@ -9,7 +9,6 @@ import requests
 
 from metapub.urlreverse import UrlReverse
 from metapub.convert import doi2pmid
-from metapub.exceptions import MetaPubError 
 
 from medgen.annotate.gene import GeneSynonyms
 from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
@@ -19,6 +18,11 @@ from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.googlequery')
+
+# disable noisy SSL warnings arising from improperly configured remote websites
+# (a necessary evil, sadly)
+from requests.packages import urllib3
+urllib3.disable_warnings()
 
 # Google API Key authorized for Servers
 API_KEY = 'AIzaSyBbzzCZbm5ccB6MC1e0y_tRFeNBdeoutPo'
@@ -462,7 +466,10 @@ class GoogleCachedQuery(SQLCache):
                 return cse_results
 
         result = gcse.send_query(qstring)
-        self.store(qstring, result)
+        try:
+            self.store(qstring, result)
+        except Exception as error:
+            from IPython import embed; embed()
 
         cse_results = parse_cse_items(result)
 
