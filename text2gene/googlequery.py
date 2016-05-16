@@ -466,10 +466,7 @@ class GoogleCachedQuery(SQLCache):
                 return cse_results
 
         result = gcse.send_query(qstring)
-        try:
-            self.store(qstring, result)
-        except Exception as error:
-            from IPython import embed; embed()
+        self.store(qstring, result)
 
         cse_results = parse_cse_items(result)
 
