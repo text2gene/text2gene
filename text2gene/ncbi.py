@@ -173,6 +173,33 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
     def get_cache_key(self, hgvs_text):
         return str(hgvs_text)
 
+    def get_cache_value(self, obj):
+        """ Returns pickled object representation of supplied object. """
+        return pickle.dumps(obj)
+
+    def retrieve(self, hgvs_text, version=0):
+        """ If cache contains a value for hgvs_text, retrieve it. Otherwise, return None.
+
+        (Overrides default retrieve)
+
+        If requested version number is GREATER THAN OR EQUAL TO version number of existing data, older version will be
+        destroyed so that newer version can be created in its place.
+
+        Thus, supplying version=0 allows returns from cache from *any* version of data that has ever been stored.
+
+        :param hgvs_text: (str)
+        :param version: (int) only return results from cache with greater than or equal version number [default: 0]
+        :return: LVG object or None
+        """
+        row = self.get_row(hgvs_text)
+        if row:
+            if row['version'] >= version:
+                return pickle.loads(row['cache_value'])
+            else:
+                log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(hgvs_text))
+                self.delete(hgvs_text)
+        return None
+
     def _store_granular_hgvs_type(self, lex, hgvs_seqtype_name):
         hgvs_vars = getattr(lex, hgvs_seqtype_name)
         if hgvs_vars:
@@ -190,17 +217,15 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
         if not skip_cache:
             result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:
-                lexobj = pickle.loads(self.retrieve(hgvs_text))
                 if force_granular:
-                    self.store_granular(lexobj)
-                return lexobj
+                    self.store_granular(result)
+                return result
 
         lexobj = NCBIEnrichedLVG(hgvs_text)
         if lexobj:
-            self.store(hgvs_text, pickle.dumps(lexobj))
+            self.store(hgvs_text, lexobj)
             if force_granular or self.granular:
                 self.store_granular(lexobj)
-
             return lexobj
         else:
             raise Text2GeneError('NCBIEnrichedLVG object could not be created from input hgvs_text %s' % hgvs_text)

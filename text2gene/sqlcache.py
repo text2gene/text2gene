@@ -45,6 +45,12 @@ class SQLCache(SQLData):
         """
         return hashlib.md5(pickle.dumps(sorted(querydict.items()))).hexdigest()
 
+    def get_cache_value(self, value):
+        """ Default method to turn a serializable data structure into a storable and
+        reconstructable mysql blob value.  (Uses json.dumps and strips out literal "\'")
+        """
+        return json.dumps(value).replace("\'", '')        # get rid of literal "\'" which mysql will choke on.
+
     def update(self, fv_dict):
         """
         :param fv_dict: field-value dictionary with values intended to replace existing entry at cache_key
@@ -74,7 +80,7 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions and json serialization errors
         """
-        cvalue = json.dumps(value).replace("\'", '')        # get rid of literal "\'" which mysql will choke on.
+        cvalue = self.get_cache_value(value)
         fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': cvalue, 'version': self.VERSION}
 
         try:
