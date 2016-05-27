@@ -8,7 +8,6 @@ from flask import Blueprint, request, redirect
 
 from hgvs_lexicon.exceptions import CriticalHgvsError
 
-from ..lvg_cached import LVG
 from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
@@ -31,8 +30,6 @@ def hgvs2pmid(hgvs_text):
     :param hgvs_text: str
     :return: HTTP200 (json) or HTTP400 (json)
     """
-    # TODO: allow URL argument to specify type of lvg_mode to use.
-
     outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
@@ -47,15 +44,15 @@ def hgvs2pmid(hgvs_text):
 
         ncbi_pmids = NCBIHgvs2Pmid(lex.hgvs_text)
         if ncbi_pmids:
-            outd['response']['NCBI'] = ncbi_pmids
+            outd['response']['ncbi'] = ncbi_pmids
 
         clinvar_pmids = ClinvarHgvs2Pmid(lex)
         if clinvar_pmids:
-            outd['response']['ClinVar'] = clinvar_pmids
+            outd['response']['clinvar'] = clinvar_pmids
 
         pubtator_pmids = PubtatorHgvs2Pmid(lex)
         if pubtator_pmids:
-            outd['response']['PubTator'] = pubtator_pmids
+            outd['response']['abstracts'] = pubtator_pmids
 
     return HTTP200(outd)
 
@@ -108,9 +105,9 @@ def lvg(hgvs_text):
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            hgvs_obj = LVG(hgvs_text)
+            hgvs_obj = LVGEnriched(hgvs_text)
         except Exception as error:
-            return HTTP400(error, 'Error using HgvsLVG to find lexical variants for %s' % hgvs_text)
+            return HTTP400(error, 'Error using LVGEnriched to find lexical variants for %s' % hgvs_text)
         outd['response'] = hgvs_obj.to_dict()
     
     return HTTP200(outd)
