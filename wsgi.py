@@ -1,10 +1,30 @@
 from __future__ import absolute_import, print_function
 
+import logging
 import os
+
 from werkzeug.contrib.fixers import ProxyFix
 
 from text2gene.app_config import app
 from text2gene.config import CFGDIR, ENV, PKGNAME, CONFIG
+
+from requests.packages import urllib3
+urllib3.disable_warnings()
+
+filepath = 'logs/text2gene_service.log'
+fh = logging.FileHandler(filepath)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+fh.setLevel(logging.DEBUG)
+
+log = logging.getLogger(PKGNAME)
+log.addHandler(fh)
+log.setLevel(logging.DEBUG)
+
+logging.getLogger('hgvs_lexicon').addHandler(fh)
+logging.getLogger('metapub').addHandler(fh)
+logging.getLogger('metapub').setLevel(logging.DEBUG)
+
 
 app.wsgi_app = ProxyFix(app.wsgi_app) 
 

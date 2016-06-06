@@ -38,13 +38,15 @@ def get_uta_connection():
     """
 
     # try default UTA host; fall back to alternate UTA host if timeout occurs.
-
-    hosts = [CONFIG.get('hgvs', 'uta_default_host'), CONFIG.get('hgvs', 'uta_fallback_host')]
+    host_port_pairs = { 'default': {'host': CONFIG.get('hgvs', 'uta_default_host'), 'port': CONFIG.get('hgvs', 'uta_default_port')},
+                        'backup': {'host':  CONFIG.get('hgvs', 'uta_fallback_port'), 'port': CONFIG.get('hgvs', 'uta_fallback_host')},
+                      }
     timeout = int(CONFIG.get('hgvs', 'uta_connection_timeout'))
     uta_cnxn_tmpl = CONFIG.get('hgvs', 'uta_connection_tmpl')
-    port = 5432
 
-    for host in hosts:
+    for pair in list(host_port_pairs.values()):
+        host = pair['host']
+        port = pair['port']
         if host == 'default':
             return hgvs.dataproviders.uta.connect()
         else:

@@ -11,9 +11,6 @@ ENV = os.getenv('%s_SERVICES_ENV' % PKGNAME, 'dev')
 
 env.user = 'biomed'
 
-ch = logging.StreamHandler()
-logging.getLogger('hgvs_lexicon').addHandler(ch)
-
 @task
 def preset_envs():
     os.environ['%s_SERVICES_ENV' % PKGNAME] = 'dev'
