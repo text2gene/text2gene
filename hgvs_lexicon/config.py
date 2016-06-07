@@ -11,6 +11,9 @@ CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))
 ENV = os.getenv('%s_ENV' % PKGNAME, 'dev')
 
+UTA_HOST = None
+UTA_PORT = None
+
 ####
 import logging
 log = logging.getLogger(PKGNAME)
@@ -34,25 +37,35 @@ def get_uta_connection():
 
     If no connection can be made, returns None.
 
+    Also sets UTA_HOST and UTA_PORT globals in this file.
+
     :return: open UTA connection or None if all connections fail
     """
 
+    global UTA_HOST
+    global UTA_PORT
+
+    UTA_HOST = 'default'
+    UTA_PORT = 'default'
+
     # try default UTA host; fall back to alternate UTA host if timeout occurs.
-    host_port_pairs = { 'default': {'host': CONFIG.get('hgvs', 'uta_default_host'), 'port': CONFIG.get('hgvs', 'uta_default_port')},
-                        'backup': {'host':  CONFIG.get('hgvs', 'uta_fallback_port'), 'port': CONFIG.get('hgvs', 'uta_fallback_host')},
-                      }
+    host_port_pairs = [{'host': CONFIG.get('hgvs', 'uta_default_host'), 'port': CONFIG.get('hgvs', 'uta_default_port')},
+                       {'host':  CONFIG.get('hgvs', 'uta_fallback_port'), 'port': CONFIG.get('hgvs', 'uta_fallback_port')},
+                      ]
     timeout = int(CONFIG.get('hgvs', 'uta_connection_timeout'))
     uta_cnxn_tmpl = CONFIG.get('hgvs', 'uta_connection_tmpl')
 
-    for pair in list(host_port_pairs.values()):
+    for pair in host_port_pairs:
         host = pair['host']
-        port = pair['port']
+        port = int(pair['port'])
         if host == 'default':
             return hgvs.dataproviders.uta.connect()
         else:
             try:
                 socket.create_connection((host, port), timeout=timeout)
                 log.info('Connected to UTA host %s on port %i', host, port)
+                UTA_HOST = host
+                UTA_PORT = port
                 return hgvs.dataproviders.uta.connect(uta_cnxn_tmpl.format(host=host), pooling=True)
             except Exception as error:
                 log.info('Could not connect to UTA host %s on port %i: %r', host, port, error)
