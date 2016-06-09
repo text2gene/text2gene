@@ -53,7 +53,7 @@ genes = reply.strip().split(' ')
 
 gene_str = ','.join(['"%s"' % gene for gene in genes])
 
-get_variants_sql = 'select * from samples_'+nickname+' where Symbol in (%s)' % gene_str
+get_variants_sql = 'insert into samples_'+nickname+' select * from samples where Symbol in (%s)' % gene_str
 
 for gene in genes:
     db.execute(get_variants_sql)
