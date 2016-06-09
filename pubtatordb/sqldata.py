@@ -56,9 +56,9 @@ class SQLData(object):
 
         return [conn, cursor]
 
-    def fetchall(self, select_sql):
+    def fetchall(self, select_sql, *args):
         try:
-            return self.execute(select_sql).record
+            return self.execute(select_sql, *args).record
         #except mdb.Error as err:
         #    log.warn(err)
         #    return None
@@ -66,19 +66,19 @@ class SQLData(object):
             # no results
             return None
 
-    def fetchrow(self, select_sql):
-        results = self.fetchall(select_sql)
+    def fetchrow(self, select_sql, *args):
+        results = self.fetchall(select_sql, *args)
         return results[0] if results else None
 
-    def fetchID(self, select_sql, id_colname='ID'):
+    def fetchID(self, select_sql, id_colname='ID', *args):
         try:
-            return self.fetchrow(select_sql)[id_colname]
+            return self.fetchrow(select_sql, *args)[id_colname]
         except TypeError:
             return None
 
-    def results2set(self, select_sql, col):
+    def results2set(self, select_sql, col, *args):
         things = set()
-        for row in self.fetchall(select_sql):
+        for row in self.fetchall(select_sql, *args):
             things.add(str(row[col]))
         return things
 
@@ -132,7 +132,7 @@ class SQLData(object):
             _, values = self._get_fields_and_values(field_value_dict)
             all_values.append('(%s)' % ','.join(values))
 
-        sql = 'insert into %s (%s) values %s;' % (tablename, ','.join(fields), ','.join(all_values))
+        sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
 
         queryobj = self.execute(sql)
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
@@ -151,22 +151,22 @@ class SQLData(object):
         """
         fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null)
 
-        sql = 'insert into %s (%s) values (%s);' % (tablename, ','.join(fields), ','.join(values)) 
+        sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(values))
         queryobj = self.execute(sql)
         # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID
 
     def drop_table(self, tablename):
-        return self.execute(' drop table if exists ' + tablename)
+        return self.execute('drop table if exists ' + tablename)
 
     def truncate(self, tablename):
-        return self.execute(" truncate " + tablename)
+        return self.execute('truncate ' + tablename)
 
-    def execute(self, sql):
-        log.debug('SQL.execute ' + sql)
+    def execute(self, sql, *args):
+        log.debug('SQL.execute ' + sql % args)
         log.debug('#######')
         queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        queryobj.Query(sql)
+        queryobj.Query(sql, *args)
         return queryobj
 
     def ping(self):
@@ -178,7 +178,7 @@ class SQLData(object):
             return self.schema_info()
 
         except mdb.Error as err:
-            log.error("DB connection is dead %d: %s" % (err.args[0], err.args[1]))
+            log.error('DB connection is dead %d: %s', err.args[0], err.args[1])
             return False
 
     def schema_info(self):

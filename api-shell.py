@@ -1,9 +1,12 @@
-#!/usr/bin/env python
+#!ve/bin/python
+
+from __future__ import print_function, unicode_literals
 
 import IPython
 
 from pubtatordb import PubtatorDB
 from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
+from hgvs_lexicon import config as hgvs_config
 from text2gene.api import *
 
 import hgvs.dataproviders.uta
@@ -20,17 +23,18 @@ mapper = hgvs.variantmapper.EasyVariantMapper(uta)
 
 _EOL = '\r\n'
 
-print _EOL
-print _EOL
+print(_EOL)
+print(_EOL)
 
-print('#################################################################')
-print(' text2gene ')
-print()
-print('        type whos for api function list')
-print()
-print('              In [1]: whos ')
-print()
-print('#################################################################')
+HEADER = """#################################################################
+        text2gene / hgvs_lexicon / pubtatordb API shell
+
+            UTA connection: {}:{}
+
+            type 'whos' for api function list
+
+#################################################################""".format(hgvs_config.UTA_HOST,
+                                                                            hgvs_config.UTA_PORT)
 
 hgvs_text_c1 = 'NM_001232.3:c.919G>C'
 hgvs_text_c2 = 'NM_198578.3:c.6055G>A'
@@ -41,5 +45,7 @@ hgvs_text_intron = 'NM_033453.3:c.124+21A>C'
 hgvs_text_g1 = 'NC_000001.10:g.100316615_100316616delAG'
 hgvs_text_g2 = 'NC_000001.10:g.100345603G>T' 
 
-IPython.embed()
+#IPython.start_ipython()
+IPython.embed(header=HEADER)
+
 
