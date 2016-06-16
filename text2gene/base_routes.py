@@ -81,7 +81,8 @@ def query(hgvs_text=''):
 
     return render_template('query.html', lex=lex, lovd_url=lovd_url, citation_table=citation_table,
                            clinvar = clinvar_info, ncbi_variants=ncbi_variants, gene=gene_info,
-                           found_in_clinvar_example_tables=get_clinvar_tables_containing_variant(hgvs_text))
+                           found_in_clinvar_example_tables=None)
+                           # found_in_clinvar_example_tables=get_clinvar_tables_containing_variant(hgvs_text))
 
 
 @base.route('/examples')

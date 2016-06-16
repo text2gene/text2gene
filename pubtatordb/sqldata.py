@@ -64,7 +64,7 @@ class SQLData(object):
         #    return None
         except TypeError:
             # no results
-            return None
+            return []
 
     def fetchrow(self, select_sql, *args):
         results = self.fetchall(select_sql, *args)

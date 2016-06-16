@@ -132,9 +132,13 @@ def pubtator_results_for_lex(lex):
             try:
                 result = pubtator_results_for_seqvar(seqvar, gene_id)
                 results.update(result)
-                for row in results['%s' % seqvar]:
-                    log.info('[%s] [[%s]] Mentions: %s  PMID: %s  Components: %s', lex.seqvar, seqvar,
-                             row['Mentions'], row['PMID'], row['Components'])
+                try:
+                    for row in results['%s' % seqvar]:
+                        log.info('[%s] [[%s]] Mentions: %s  PMID: %s  Components: %s', lex.seqvar, seqvar,
+                                  row['Mentions'], row['PMID'], row['Components'])
+                except Exception as error:
+                    print(error)
+                    from IPython import embed; embed()
 
             except RejectedSeqVar:
                 log.debug('[%s] [[%s]] HgvsComponents raised RejectedSeqVar', lex.seqvar, seqvar)
