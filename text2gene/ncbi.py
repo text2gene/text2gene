@@ -6,8 +6,8 @@ import urllib
 
 import requests
 
-from hgvs_lexicon import Variant, HgvsLVG
-from hgvs_lexicon.exceptions import CriticalHgvsError
+from metavariant import Variant, VariantLVG
+from metavariant.exceptions import CriticalHgvsError
 
 from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE
@@ -18,7 +18,7 @@ log = logging.getLogger('text2gene.ncbi')
 
 def ncbi_report_to_variants(report):
     """ Parses Hgvs_* strings from NCBI report and creates a "variants" dictionary
-    like the following (mimicking the HgvsLVG.variants attribute):
+    like the following (mimicking the VariantLVG.variants attribute):
 
     {seqtype: { 'hgvs_string': SequenceVariant object }
 
@@ -30,7 +30,7 @@ def ncbi_report_to_variants(report):
         for seqtype in variants.keys():
             hgvs_text = rep_part.get('Hgvs_%s' % seqtype, '').strip()
             if hgvs_text:
-                # set up data structure just like HgvsLVG object, i.e.:
+                # set up data structure just like VariantLVG object, i.e.:
                 # {seqtype: { 'hgvs_string': SequenceVariant object }
                 seqvar = Variant(hgvs_text)
                 if seqvar:
@@ -96,7 +96,7 @@ class NCBIHgvsLVG(object):
 
         .hgvs_text      hgvs string representing input variant
         .seqvar         SequenceVariant object representing input variant
-        .variants       dictionary resembling HgvsLVG.variants
+        .variants       dictionary resembling VariantLVG.variants
         .report         copy of NCBI report; safe since this is not a cached object
         .kwargs         accepts arbitrary input kwargs to mimic the "real" LVG objects
 
@@ -120,10 +120,10 @@ class NCBIHgvsLVG(object):
         self.kwargs = kwargs
 
 
-class NCBIEnrichedLVG(HgvsLVG):
+class NCBIEnrichedLVG(VariantLVG):
 
-    """ Creates a true LVG object by subclassing from HgvsLVG and using data drawn from an NCBIReport
-    lookup.  See HgvsLVG (from hgvs_lexicon) for additional documentation.
+    """ Creates a true LVG object by subclassing from VariantLVG and using data drawn from an NCBIReport
+    lookup.  See VariantLVG (from metavariant) for additional documentation.
 
     *** ! To use the cached version of this object, use LVGEnriched ! ***
 

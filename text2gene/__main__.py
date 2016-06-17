@@ -5,7 +5,8 @@ from hgvs.exceptions import HGVSParseError
 from metapub import FindIt
 
 from pubtatordb import PubtatorDB
-from hgvs_lexicon import HgvsComponents, RejectedSeqVar
+from metavariant import VariantComponents
+from metavariant.exceptions import RejectedSeqVar
 
 from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from .ncbi import NCBIHgvs2Pmid, NCBIEnrichedLVG, NCBIReport
@@ -56,7 +57,7 @@ def hgvs_to_pmid_results_dict(hgvs_text):
 
     lex = LVG(hgvs_text)
 
-    edittype = HgvsComponents(lex.seqvar).edittype
+    edittype = VariantComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
         print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
         return None
@@ -82,7 +83,7 @@ def process_hgvs_through_pubtator(hgvs_text):
 
     lex = LVG(hgvs_text)
 
-    edittype = HgvsComponents(lex.seqvar).edittype
+    edittype = VariantComponents(lex.seqvar).edittype
     if edittype not in ['SUB', 'DEL', 'INS', 'FS', 'INDEL']:
         print('[%s] Cannot process edit type %s; skipping' % (hgvs_text, edittype))
         return None
@@ -99,7 +100,7 @@ def process_hgvs_through_pubtator(hgvs_text):
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype]:
             try:
-                components = HgvsComponents(seqvar)
+                components = VariantComponents(seqvar)
             except RejectedSeqVar:
                 print('[%s] Rejected sequence variant: %r' % (hgvs_text, seqvar))
                 continue

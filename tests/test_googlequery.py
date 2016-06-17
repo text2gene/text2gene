@@ -2,8 +2,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import unittest
 
-from hgvs_lexicon.hgvs_samples import *
-from hgvs_lexicon import Variant
+from metavariant.hgvs_samples import *
+from metavariant import Variant
 
 from text2gene.api import GoogleQuery, LVG, LVGEnriched
 

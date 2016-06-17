@@ -1,10 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
 from medgen.api import GeneID, ClinvarPubmeds
+from metavariant import VariantComponents, Variant
+from metavariant.exceptions import RejectedSeqVar
 
 from pubtatordb import PubtatorDB
 from pubtatordb.exceptions import PubtatorDBError
-from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
 
 from .config import log
 
@@ -12,7 +13,7 @@ pubtator_db = PubtatorDB()
 
 
 def clinvar_lex_to_pmid(lex):
-    """ Takes a "lex" object (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
+    """ Takes a "lex" object (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
     lex.variants to do a search in Clinvar for associated PMIDs.  Returns a list of PMIDs.
 
     :param lex: lexical variant object (see above options)
@@ -23,7 +24,7 @@ def clinvar_lex_to_pmid(lex):
         for seqvar in lex.variants[seqtype].values():
             # throw away sequence variants without enough information
             try:
-                HgvsComponents(seqvar)
+                VariantComponents(seqvar)
             except RejectedSeqVar:
                 log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
                 continue
@@ -34,12 +35,12 @@ def clinvar_lex_to_pmid(lex):
     
 
 def pubtator_lex_to_pmid(lex):
-    """ Takes an LVG object ("lex") (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
+    """ Takes an LVG object ("lex") (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
-    Returns a dictionary of results mapping HgvsComponents objects to PMIDs found -- i.e.:
+    Returns a dictionary of results mapping VariantComponents objects to PMIDs found -- i.e.:
 
-        { hgvs_text: {'comp': HgvsComponents object,
+        { hgvs_text: {'comp': VariantComponents object,
                       'pmids': [<pmids>]
                      }
 
@@ -58,7 +59,7 @@ def pubtator_lex_to_pmid(lex):
     for seqtype in lex.variants:
         for seqvar in lex.variants[seqtype].values():
             try:
-                components = HgvsComponents(seqvar)
+                components = VariantComponents(seqvar)
             except RejectedSeqVar:
                 log.debug('[%s] Rejected sequence variant: %r' % (lex.seqvar, seqvar))
                 continue
@@ -93,7 +94,7 @@ def pubtator_results_for_seqvar(seqvar_or_hgvs_text, gene_id):
 
     result = {hgvs_text: []}
 
-    components = HgvsComponents(seqvar)
+    components = VariantComponents(seqvar)
 
     if seqvar.type == 'p':
         result[hgvs_text] = pubtator_db.search_proteins(components, gene_id)
@@ -104,17 +105,17 @@ def pubtator_results_for_seqvar(seqvar_or_hgvs_text, gene_id):
 
 
 def pubtator_results_for_lex(lex):
-    """ Takes an LVG object ("lex") (one of HgvsLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
+    """ Takes an LVG object ("lex") (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
     Returns a dictionary of results mapping hgvs_text to PMIDs found -- i.e.:
 
-        { hgvs_text: {'components': HgvsComponents object,
+        { hgvs_text: {'components': VariantComponents object,
                       'pmids': [<pmids>]
                      }
         }
 
-    :param lex: lexical variant object (HgvsLVG, NCBIHgvsLVG, NCBIEnrichedLVG)
+    :param lex: lexical variant object (VariantLVG, NCBIHgvsLVG, NCBIEnrichedLVG)
     :return: dictionary of results
     """
     try:
@@ -141,7 +142,7 @@ def pubtator_results_for_lex(lex):
                     from IPython import embed; embed()
 
             except RejectedSeqVar:
-                log.debug('[%s] [[%s]] HgvsComponents raised RejectedSeqVar', lex.seqvar, seqvar)
+                log.debug('[%s] [[%s]] VariantComponents raised RejectedSeqVar', lex.seqvar, seqvar)
 
             except PubtatorDBError as error:
                 log.info('[%s] [[%s]] %r', lex.seqvar, seqvar, error)

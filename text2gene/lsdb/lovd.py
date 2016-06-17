@@ -38,13 +38,13 @@ LOVD_LISTS = {'dmd.nl': {'url': 'http://www.dmd.nl/nmdb2/variants.php?select_db=
 LOVD_NL_URL = 'http://databases.lovd.nl/shared/variants/{gene}/unique#object_id=VariantOnTranscriptUnique%2CVariantOnGenome&id={gene}&search_VariantOnTranscript/DNA=c.{pos}'
 
 def get_lovd_url(gene_name, comp):
-    """ Takes gene_name and HgvsComponents object for sequence variant, composes a LOVD
+    """ Takes gene_name and metavariant.VariantComponents object for sequence variant, composes a LOVD
     search url if possible.
 
     Only supports c.DNA for now.
 
     :param gene_name: (str)
-    :param comp: HgvsComponents object
+    :param comp: metavariant.VariantComponents object
     """
     # simplify the position to loosen the search constraints; only use first number
     # in position elements such as "8-20" (8) and "3779_3782" (3779).

@@ -5,8 +5,8 @@ from __future__ import print_function, unicode_literals
 import IPython
 
 from pubtatordb import PubtatorDB
-from hgvs_lexicon import HgvsLVG, HgvsComponents, Variant
-from hgvs_lexicon import config as hgvs_config
+from metavariant import VariantLVG, VariantComponents, Variant
+from metavariant import config as hgvs_config
 from text2gene.api import *
 
 import hgvs.dataproviders.uta

@@ -1,10 +1,10 @@
 
 import unittest
 
-from hgvs_lexicon import HgvsLVG
-from hgvs_lexicon.exceptions import CriticalHgvsError
+from metavariant import VariantLVG
+from metavariant.exceptions import CriticalHgvsError
 
-class TestHgvsLVG(unittest.TestCase):
+class TestVariantLVG(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -14,7 +14,7 @@ class TestHgvsLVG(unittest.TestCase):
 
     def test_del_numeric_or_chars(self):
         hgvs_text = 'NM_005228.3:c.2240_2257del18'
-        lex = HgvsLVG(hgvs_text)
+        lex = VariantLVG(hgvs_text)
 
         expected_c = [
                 "NM_005228.3:c.2240_2257del18",
@@ -39,10 +39,10 @@ class TestHgvsLVG(unittest.TestCase):
         bad_hgvs_text = 'NM_004628.4:c.621_622ins83'
     
         with self.assertRaises(CriticalHgvsError):
-            HgvsLVG(bad_hgvs_text)
+            VariantLVG(bad_hgvs_text)
 
     def test_gene_name(self):
         hgvs_text = 'NM_000548.3:c.826_827del'
-        lex = HgvsLVG(hgvs_text)
+        lex = VariantLVG(hgvs_text)
         assert lex.gene_name == 'TSC2'
 

@@ -11,7 +11,8 @@ from metapub.urlreverse import UrlReverse
 from metapub.convert import doi2pmid
 
 from medgen.annotate.gene import GeneSynonyms
-from hgvs_lexicon import HgvsComponents, RejectedSeqVar, Variant
+from metavariant import VariantComponents, Variant
+from metavariant.exceptions import RejectedSeqVar
 
 from .exceptions import GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .sqlcache import SQLCache
@@ -188,7 +189,7 @@ def get_posedits_for_seqvar(seqvar):
     posedits = []
 
     try:
-        comp = HgvsComponents(seqvar)
+        comp = VariantComponents(seqvar)
     except RejectedSeqVar as error:
         log.debug(error)
         return []
@@ -218,7 +219,7 @@ def get_posedits_for_lex(lex, seqtypes=None):
 
         get_posedits_for_lex(lex, seqtypes=['p'])
 
-    :param lex: *LVG* instance (HgvsLVG | NCBIEnrichedLVG | LVGEnriched | LVG object)
+    :param lex: *LVG* instance (VariantLVG | NCBIEnrichedLVG | LVGEnriched | LVG object)
     :param seqtypes: list of strings indicating SequenceVariant "type" order [default: ['c', 'p', 'g', 'n']
     :returns: string containing expanded google query for variant
     """
@@ -436,7 +437,7 @@ class GoogleCachedQuery(SQLCache):
             GoogleQuery(lex, seqtypes=['c','p'], use_gene_synonyms=False)
 
 
-        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param lex: any lexical variant object (VariantLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param seqtypes: list of seqtypes [default: 'c','p','g','n']
         :param term_limit: (int) number of terms to constrain query to [default: 31]
         :param use_gene_synonyms: (bool) whether to use GeneSynonyms in query [default: True]

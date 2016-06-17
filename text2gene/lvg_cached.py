@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import pickle
 import logging
 
-from hgvs_lexicon import HgvsLVG
+from metavariant import VariantLVG 
 
 from .exceptions import Text2GeneError
 from .sqlcache import SQLCache
@@ -11,7 +11,7 @@ from .config import GRANULAR_CACHE
 
 log = logging.getLogger('text2gene.lvg')
 
-class HgvsLVGCached(SQLCache):
+class VariantLVGCached(SQLCache):
 
     VERSION = 0
 
@@ -71,7 +71,7 @@ class HgvsLVGCached(SQLCache):
                     self.store_granular(result)
                 return result
 
-        lexobj = HgvsLVG(hgvs_text)
+        lexobj = VariantLVG(hgvs_text)
         if lexobj:
             self.store(hgvs_text, lexobj)
             if force_granular or self.granular:
@@ -79,7 +79,7 @@ class HgvsLVGCached(SQLCache):
 
             return lexobj
         else:
-            raise Text2GeneError('HgvsLVG object could not be created from input hgvs_text %s' % hgvs_text)
+            raise Text2GeneError('VariantLVG object could not be created from input hgvs_text %s' % hgvs_text)
 
     def create_granular_table(self):
         tname = self.granular_table
@@ -105,4 +105,4 @@ class HgvsLVGCached(SQLCache):
 
 # API Definitions
 
-LVG = HgvsLVGCached(GRANULAR_CACHE).query
+LVG = VariantLVGCached(GRANULAR_CACHE).query

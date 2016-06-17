@@ -4,8 +4,8 @@ from flask import Blueprint, render_template, redirect, request
 
 from metapub import PubMedFetcher
 
-from hgvs_lexicon import HgvsComponents
-from hgvs_lexicon.exceptions import CriticalHgvsError
+from metavariant import VariantLVG
+from metavariant.exceptions import CriticalHgvsError
 
 from .utils import HTTP200, get_hostname
 from .config import ENV, CONFIG, PKGNAME
@@ -76,7 +76,7 @@ def query(hgvs_text=''):
         pass
 
     # LOVD URL: link to search in a relevant LOVD instance, if we know of one.
-    comp = HgvsComponents(lex.seqvar)
+    comp = VariantComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp)
 
     return render_template('query.html', lex=lex, lovd_url=lovd_url, citation_table=citation_table,

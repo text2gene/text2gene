@@ -9,8 +9,8 @@ import MySQLdb as mdb
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .googlequery import GoogleCachedQuery, googlecse2pmid
-from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery, NCBIHgvsLVG
-from .lvg_cached import HgvsLVGCached
+from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
+from .lvg_cached import VariantLVGCached
 from .exceptions import Text2GeneError
 from .report_utils import hgvs_to_clinvar_variationID
 
@@ -24,7 +24,7 @@ search_module_map = {'pubtator': PubtatorCachedQuery,
                     }
 
 lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
-                  'lvg': HgvsLVGCached,
+                  'lvg': VariantLVGCached,
                  }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
 
 

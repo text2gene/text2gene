@@ -26,7 +26,7 @@ class ClinvarCachedQuery(SQLCache):
 
         "<hgvs_text>@<lvg_mode>"
 
-        :param lex: any variant LVG object (HgvsLVG, NCBIEnrichedLVG, etc)
+        :param lex: any variant LVG object (VariantLVG, NCBIEnrichedLVG, etc)
         :return: key generated from relevant details in lex
         """
         tmpl = '{hgvs_text}@{lvg_mode}'
@@ -38,7 +38,7 @@ class ClinvarCachedQuery(SQLCache):
 
     def query(self, lex, skip_cache=False, force_granular=False):
         """
-        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param lex: any lexical variant object (VariantLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of PMIDs if found (result of Clinvar query)
         """
@@ -85,7 +85,7 @@ class PubtatorCachedQuery(SQLCache):
 
         "<hgvs_text>@<lvg_mode>"
 
-        :param lex: any variant LVG object (HgvsLVG, NCBIEnrichedLVG, etc)
+        :param lex: any variant LVG object (VariantLVG, NCBIEnrichedLVG, etc)
         :return: key generated from relevant details in lex
         """
         tmpl = '{hgvs_text}@{lvg_mode}'
@@ -97,7 +97,7 @@ class PubtatorCachedQuery(SQLCache):
 
     def query(self, lex, skip_cache=False, force_granular=False):
         """
-        :param lex: any lexical variant object (HgvsLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
+        :param lex: any lexical variant object (VariantLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of PMIDs if found (result of Clinvar query)
         """
