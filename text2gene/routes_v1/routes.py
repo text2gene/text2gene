@@ -7,6 +7,7 @@ import logging
 from flask import Blueprint, request, redirect
 
 from metavariant.exceptions import CriticalHgvsError
+from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
@@ -33,6 +34,7 @@ def hgvs2pmid(hgvs_text):
     outd = {'action': 'hgvs2pmid', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
+        hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
             lex = LVGEnriched(hgvs_text)
         except CriticalHgvsError as error:
@@ -68,6 +70,7 @@ def ncbi_variant_reporter(hgvs_text):
     outd = {'action': 'report', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
+        hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         report = NCBIReport(hgvs_text)
 
         outd['response'] = report
@@ -86,6 +89,7 @@ def lvg_enriched(hgvs_text):
     outd = {'action': 'lvgenriched', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
+        hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
             hgvs_obj = LVGEnriched(hgvs_text)
         except Exception as error:
@@ -104,6 +108,7 @@ def lvg(hgvs_text):
     outd = {'action': 'lvg', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
+        hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
             hgvs_obj = LVGEnriched(hgvs_text)
         except Exception as error:
@@ -146,6 +151,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
             'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if 'hgvs_text' not in hgvs_text:
+        hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
             lex = LVGEnriched(hgvs_text)
         except Exception as error:

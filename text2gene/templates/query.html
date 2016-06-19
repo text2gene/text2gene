@@ -133,8 +133,9 @@
 
     <hr />
 
+
 <div class="clear">
-    <h3>LVG Output</h3>
+    <h3>Lexical Synonyms for {{ lex.hgvs_text|e }}</h3>
     <ul>
     {% for seqtype, hgvs_list in lex.variants.iteritems() %}
     {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
@@ -148,7 +149,7 @@
     </ul>
 </div>
 
-
+<!--
 <div class="clear">
     <hr />
     <h3>Google Query Expansion</h3>
@@ -169,8 +170,8 @@
     {% endfor %}
     </ul>
     {% endif %}
-
 </div>
+-->
 
 </body>
 </html>

@@ -6,6 +6,8 @@ import pickle
 
 import MySQLdb as mdb
 
+from metavariant.utils import strip_gene_name_from_hgvs_text
+
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .googlequery import GoogleCachedQuery, googlecse2pmid
@@ -271,6 +273,9 @@ class Experiment(SQLCache):
             else:
                 # assume this is a row from mysql
                 hgvs_text = item['hgvs_text'].strip()
+
+            # make sure we're storing cache results with non-gene-containing hgvs strings as the key.
+            hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
 
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)

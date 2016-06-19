@@ -132,9 +132,9 @@ class SQLData(object):
             _, values = self._get_fields_and_values(field_value_dict)
             all_values.append('(%s)' % ','.join(values))
 
-        sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
+        sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(['%s' for _ in all_values]))
 
-        queryobj = self.execute(sql)
+        queryobj = self.execute(sql, tuple(all_values))
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID      # unclear what this would do. return a list?
 
@@ -151,8 +151,8 @@ class SQLData(object):
         """
         fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null)
 
-        sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(values))
-        queryobj = self.execute(sql)
+        sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(['%s' for _ in values]))
+        queryobj = self.execute(sql, tuple(values))
         # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID
 

@@ -14,7 +14,9 @@ except IndexError:
 
 db = SQLCache('experiment')
 
-sql = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = DATABASE() and TABLE_NAME LIKE '{}'".format(tname_pattern)
+#sql = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = DATABASE() and TABLE_NAME LIKE '{}'".format(tname_pattern)
+sql = 'select TABLE_NAME from information_schema.TABLES where TABLE_NAME LIKE "{}"'.format(tname_pattern)
+print(sql)
 
 results = db.fetchall(sql)
 tables = []

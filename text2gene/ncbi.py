@@ -8,6 +8,7 @@ import requests
 
 from metavariant import Variant, VariantLVG
 from metavariant.exceptions import CriticalHgvsError
+from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from .sqlcache import SQLCache
 from .config import GRANULAR_CACHE
@@ -138,7 +139,7 @@ class NCBIEnrichedLVG(VariantLVG):
     LVG_MODE = 'ncbi_enriched'
 
     def __init__(self, hgvs_text_or_seqvar, **kwargs):
-        self.hgvs_text = '%s' % hgvs_text_or_seqvar
+        self.hgvs_text = strip_gene_name_from_hgvs_text('%s' % hgvs_text_or_seqvar)
         self.seqvar = Variant(hgvs_text_or_seqvar)
         self.ncbierror = None
         if self.seqvar is None:
@@ -347,6 +348,7 @@ class NCBIVariantReportCachedQuery(SQLCache):
                 self._store_granular_hgvs_type(hgvs_text, variants[seqtype], seqtype)
 
     def query(self, hgvs_text, skip_cache=False, force_granular=False):
+
         if not skip_cache:
             result = self.retrieve(hgvs_text, version=self.VERSION)
             if result:

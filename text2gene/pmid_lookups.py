@@ -139,7 +139,7 @@ def pubtator_results_for_lex(lex):
                                   row['Mentions'], row['PMID'], row['Components'])
                 except Exception as error:
                     print(error)
-                    from IPython import embed; embed()
+                    #from IPython import embed; embed()
 
             except RejectedSeqVar:
                 log.debug('[%s] [[%s]] VariantComponents raised RejectedSeqVar', lex.seqvar, seqvar)
