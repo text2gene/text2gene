@@ -163,10 +163,14 @@ class SQLData(object):
         return self.execute('truncate ' + tablename)
 
     def execute(self, sql, *args):
-        log.debug('SQL.execute ' + sql % args)
-        log.debug('#######')
         queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        queryobj.Query(sql, args)
+        if args:
+            log.debug('SQL.execute ' + sql % args)
+            queryobj.Query(sql, args)
+        else:
+            log.debug('SQL.execute ' + sql)
+            queryobj.Query(sql)
+        log.debug('#######')
         return queryobj
 
     def ping(self):
