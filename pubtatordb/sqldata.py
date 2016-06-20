@@ -134,7 +134,7 @@ class SQLData(object):
 
         sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(['%s' for _ in all_values]))
 
-        queryobj = self.execute(sql, tuple(all_values))
+        queryobj = self.execute(sql, *tuple(all_values))
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID      # unclear what this would do. return a list?
 
@@ -152,7 +152,7 @@ class SQLData(object):
         fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null)
 
         sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(['%s' for _ in values]))
-        queryobj = self.execute(sql, tuple(values))
+        queryobj = self.execute(sql, *tuple(values))
         # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID
 
@@ -166,7 +166,7 @@ class SQLData(object):
         log.debug('SQL.execute ' + sql % args)
         log.debug('#######')
         queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        queryobj.Query(sql, *args)
+        queryobj.Query(sql, args)
         return queryobj
 
     def ping(self):

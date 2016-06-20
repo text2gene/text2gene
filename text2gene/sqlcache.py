@@ -57,8 +57,8 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions
         """
-        sql = "update {db.tablename} set cache_value='{cache_value}' where cache_key='{cache_key}'".format(db=self, **fv_dict)
-        self.execute(sql)
+        sql = "update {db.tablename} set cache_value=%s where cache_key=%s".format(db=self, **fv_dict)
+        self.execute(sql, *(fv_dict['cache_value'], fv_dict['cache_key']))
         return True
 
     def store(self, querydict, value, **kwargs):
