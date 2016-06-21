@@ -5,9 +5,9 @@ import math
 import re
 import sys
 
-from pubtatordb.sqldata import SQLData
-from hgvs_lexicon import HgvsComponents
+from metavariant import VariantComponents
 
+from pubtatordb.sqldata import SQLData
 from pubtatordb.config import get_data_log
 
 log = get_data_log('logs/sqldata.log')
@@ -166,7 +166,7 @@ def parse_components(components):
                 write_missing_position(comp_dict)
                 return None
 
-            components = HgvsComponents(**comp_dict)
+            components = VariantComponents(**comp_dict)
             return components.to_mysql_dict()
 
     if components.startswith('rs'):
