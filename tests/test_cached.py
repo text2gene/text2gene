@@ -1,17 +1,17 @@
 
 import unittest
 
-from text2gene.lvg_cached import HgvsLVGCached
+from text2gene.lvg_cached import VariantLVGCached
 from text2gene.ncbi import NCBIEnrichedLVGCachedQuery
 from text2gene import LVG, LVGEnriched
 
 test_hgvs_c = 'NM_001232.3:c.919G>C'
 test_hgvs_n = 'NM_194248.2:n.285C>T'
 
-lvg_cache_db = HgvsLVGCached()
+lvg_cache_db = VariantLVGCached()
 ncbi_lvg_cache_db = NCBIEnrichedLVGCachedQuery()
 
-class TestHgvsLVGCached(unittest.TestCase):
+class TestVariantLVGCached(unittest.TestCase):
 
     def setUp(self):
         lvg_cache_db.delete(test_hgvs_c)

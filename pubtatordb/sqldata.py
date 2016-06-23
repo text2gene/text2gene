@@ -82,7 +82,7 @@ class SQLData(object):
             things.add(str(row[col]))
         return things
 
-    def _get_fields_and_values(self, field_value_dict, None_as_null=True):
+    def _get_fields_and_values(self, field_value_dict, None_as_null=True, quote_values=False):
         """ Return a tuple containing (fields, values) in which the keys 
         of the dictionary become a list of field names, and the values of
         of the dictionary become a list of pre-quoted, mysql-escaped values.
@@ -91,6 +91,7 @@ class SQLData(object):
 
         :param new_data: list of field:value dictionaries
         :param None_as_null: (bool)
+        :param quote_values: whether to surround value fields with quotation marks.
         :returns: (list, list) containing (fields, values)
         """
         fields = []
@@ -102,9 +103,15 @@ class SQLData(object):
             fields.append(key)
             # surround strings and datetimes with quotation marks
             if hasattr(val, 'strftime'):
-                val = '"%s"' % val.strftime(SQLDATE_FMT)
+                if quote_values:
+                    val = '"%s"' % val.strftime(SQLDATE_FMT)
+                else:
+                    val = '%s' % val.strftime(SQLDATE_FMT)
             elif hasattr(val, 'lower'):
-                val = '"%s"' % mdb.escape_string(val)
+                if quote_values:
+                    val = '"%s"' % mdb.escape_string(val)
+                else:
+                    val = '%s' % mdb.escape_string(val)
             elif val is None:
                 val = 'NULL'
             else:
@@ -117,7 +124,10 @@ class SQLData(object):
         """ Insert new_data (list of dicts with identical schemas) into 
         indicated tablename.  
 
-        Warning: supplied data MUST have identical data structure!
+        Note: supplied data dictionaries MUST have identical data structure.
+
+        WARNING: this is *really* not SQL-injection-safe, so don't wrap 
+                end-user interfaces around this method, OK?
 
         :param tablename: name of table to receive new rows
         :param new_data: list of field:value dictionaries
@@ -129,10 +139,10 @@ class SQLData(object):
         all_values = []
 
         for field_value_dict in new_data:
-            _, values = self._get_fields_and_values(field_value_dict)
+            _, values = self._get_fields_and_values(field_value_dict, quote_values=True)
             all_values.append('(%s)' % ','.join(values))
 
-        sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(['%s' for _ in all_values]))
+        sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
 
         queryobj = self.execute(sql, *tuple(all_values))
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
@@ -149,7 +159,7 @@ class SQLData(object):
         :param None_as_null: (bool) whether to insert None values as NULL [default: False]
         :return row_id: (integer) (returns 0 if insert failed)
         """
-        fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null)
+        fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null, quote_values=False)
 
         sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(['%s' for _ in values]))
         queryobj = self.execute(sql, *tuple(values))
