@@ -29,12 +29,22 @@ HGVS_SAMPLES = ['NM_194248.1:c.158C>T',
 
 @base.route('/')
 def home():
-    return render_template('home.html') 
+    return render_template('index.html') 
 
 
 @base.route('/about')
 def about():
     return render_template('about.html')
+
+
+@base.route('/who')
+def who():
+    return render_template('who.html')
+
+
+@base.route('/demo')
+def demo():
+    return render_template('demo.html')
 
 
 @base.route('/query', methods=['POST'])

@@ -125,7 +125,7 @@
             <td class="green_dot">{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
             <td class="pubtator">{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
             <td class="google">{% if citation.in_google %}<span class="snippet"><a target="_blank" href="{{ citation.google_url }}">{{ citation.htmlSnippet }}</a></span>{% endif %}</td>
-            <td class="pdf">{% if citation.pdf_url %}<a href="{{ citation.pdf_url }}">[pdf]</a>{% endif %}</td>
+            <td class="publink">{% if citation.dxdoi_url %}<a href="{{ citation.dxdoi_url }}">[publisher link]</a>{% endif %}</td>
         </tr>{% endfor %}
     </table>
 

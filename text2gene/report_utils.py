@@ -192,6 +192,12 @@ class Citation(object):
         return self._pdf_src.url
 
     @property
+    def dxdoi_url(self):
+        if self.pma.doi:
+            return 'https://dx.doi.org/' + self.pma.doi
+        return None
+
+    @property
     def pubmed_url(self):
         return 'http://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=self.pmid)
 
