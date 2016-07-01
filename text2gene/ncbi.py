@@ -195,7 +195,7 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
         row = self.get_row(hgvs_text)
         if row:
             if row['version'] >= version:
-                return pickle.loads(row['cache_value'])
+                return pickle.loads(row['cache_value'].decode('string_escape'))
             else:
                 log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(hgvs_text))
                 self.delete(hgvs_text)

@@ -113,7 +113,7 @@ class SQLCache(SQLData):
         row = self.get_row(querydict)
         if row:
             if row['version'] >= version:
-                return json.loads(row['cache_value'])
+                return json.loads(row['cache_value'].decode('string_escape'))
             else:
                 log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(querydict))
                 self.delete(querydict)
@@ -126,8 +126,8 @@ class SQLCache(SQLData):
         :return: dictionary representing entire row for this query dictionary
         """
         key = self.get_cache_key(querydict)
-        sql = 'SELECT * from {db.tablename} where cache_key = "{key}" limit 1'.format(db=self, key=key)
-        return self.fetchrow(sql)
+        sql = 'SELECT * from ' + self.tablename + ' where cache_key = %s limit 1'
+        return self.fetchrow(sql, key)
 
     def _create_triggers(self):
         sql = """create trigger `{db.tablename}_new_entry_date` before INSERT on `{db.tablename}`
