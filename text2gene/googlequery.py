@@ -361,10 +361,13 @@ class GoogleCSEngine(object):
             posedits = get_posedits_for_seqvar(self.seqvar)
 
         # Count how many terms Google will ding us for.
+        # Reject any posedits that are longer than 100 chars (Google won't accept them.)
         terms = []
         term_count = 0
 
         for posedit in list(posedits):
+            if len(posedit) > 100:
+                break
             if term_count == term_limit:
                 break
             terms.append(posedit)
