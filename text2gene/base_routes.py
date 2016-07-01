@@ -47,6 +47,8 @@ def demo():
     return render_template('demo.html')
 
 
+@base.route('/variant', methods=['POST'])
+@base.route('/variant/<hgvs_text>', methods=['GET'])
 @base.route('/query', methods=['POST'])
 @base.route('/query/<hgvs_text>', methods=['GET'])
 def query(hgvs_text=''):

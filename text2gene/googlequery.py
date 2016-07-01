@@ -1,9 +1,11 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
+import os
 import logging
 import urllib
 import hashlib
+from urlparse import urlparse       # !not Py3k safe
 
 import requests
 
@@ -64,6 +66,8 @@ def query_cse_return_response(qstring, cse='whitelist', start_index=None):
 
 class GoogleCSEResult(object):
 
+    TYPES_WE_DONT_LIKE = ['xslt', 'xlsx', 'csv']
+
     def __init__(self, item, **kwargs):
         # item
         self.title = item.get('title', None)
@@ -83,7 +87,10 @@ class GoogleCSEResult(object):
         self.citation_title = None
         self.metatags = None
 
-        # in case we run into a problem loading UrlReverse
+        # UrlReverse container
+        self.urlreverse = None
+
+        # In case we run into a problem loading UrlReverse, or we want to log an invalid filetype.
         self.error = None
 
         # PMID attribute will hopefully become filled by some means...
@@ -92,19 +99,24 @@ class GoogleCSEResult(object):
         # Inspect the dictionary and fill what variables we find.
         self._fill_variables_from_cse_result(item)
 
+        # if this an Excel spreadsheet it can fuck right off. See T2G-73
+        path = urlparse(self.url).path
+        ext = os.path.splitext(path)[1]
+        if ext in self.TYPES_WE_DONT_LIKE:
+            self.error = 'Ignoring unwanted filetype "{ext}" from result {url}'.format(ext=ext, url=self.url)
+            log.debug(self.error)
+            return
+
         # Now try to get the PMID!
         if not self.doi:
             try:
                 self.urlreverse = UrlReverse(self.url)
                 self.doi = self.urlreverse.doi
                 self.pmid = self.urlreverse.pmid
-
             except Exception as error:
                 self.urlreverse = None
                 self.error = '%r' % error
-
         else:
-            self.urlreverse = None
             try:
                 self.pmid = doi2pmid(self.doi)
             except Exception as error:
@@ -116,7 +128,7 @@ class GoogleCSEResult(object):
         try:
             self.pmid = int(self.pmid)
         except (ValueError, TypeError):
-            log.debug('PMID was a monster! Got %s (doi: %s) (url: %s)' % (self.pmid, self.doi, self.url))
+            log.debug('PMID lookup failed for {url} (doi: {doi})'.format(doi=self.doi, url=self.url))
             self.pmid = None
 
     def to_dict(self):

@@ -1,0 +1,1 @@
+2/2/2016, 0.0.x -- text2gene initial development (no logged changes until 0.1.0 release).
