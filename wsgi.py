@@ -1,5 +1,8 @@
 from __future__ import absolute_import, print_function
 
+activate_this = '/srv/code/text2gene/ve/bin/activate_this.py'
+execfile(activate_this, dict(__file__=activate_this))
+
 import logging
 import os
 
