@@ -31,6 +31,7 @@ setup(
                    },
     cmdclass = {'build_ext': build_ext},
     setup_requires = ['setuptools', 'numpy'],
+    package_data={'text2gene': ['config/*.ini']},
     install_requires = [
         # 'mysqlclient',  # py3k only
         'pysqlpool',      # py2k only

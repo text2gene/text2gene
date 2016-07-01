@@ -3,8 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import os
 from configparser import ConfigParser
 
+CWD = os.path.dirname(os.path.realpath(__file__))
+
 PKGNAME = 'text2gene'
-default_cfg_dir = os.path.join(os.getcwd(), 'etc')
+default_cfg_dir = os.path.join(CWD, 'config')
 CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))
 ENV = os.getenv('%s_ENV' % PKGNAME, 'dev')

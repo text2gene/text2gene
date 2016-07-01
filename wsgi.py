@@ -1,10 +1,12 @@
 from __future__ import absolute_import, print_function
-
-activate_this = '/srv/code/text2gene/ve/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
-
 import logging
 import os
+
+CWD = os.path.dirname(os.path.realpath(__file__))
+
+activate_this = os.path.join(CWD, './ve/bin/activate_this.py')
+execfile(activate_this, dict(__file__=activate_this))
+
 
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -14,7 +16,7 @@ from text2gene.config import CFGDIR, ENV, PKGNAME, CONFIG
 from requests.packages import urllib3
 urllib3.disable_warnings()
 
-filepath = 'logs/text2gene_service.log'
+filepath = os.path.join(CWD, 'logs/text2gene_service.log')
 fh = logging.FileHandler(filepath)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
