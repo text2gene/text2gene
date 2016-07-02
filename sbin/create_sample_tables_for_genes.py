@@ -1,10 +1,15 @@
 from __future__ import print_function, unicode_literals
 
 import sys
+import logging
 
 from metapub.utils import remove_chars
 
 from medgen.api import ClinVarDB
+
+log = logging.getLogger('text2gene')
+log.setLevel(logging.DEBUG)
+log.addHandler(logging.StreamHandler())
 
 PROMPT_STRING = ' *>'
 PROMPT_YN = ' n>'
@@ -45,8 +50,9 @@ if reply.strip() == '':
 db = ClinVarDB()
 
 # Actually make the table, finally.
-create_table_sql = 'create table samples_{} like samples'
-db.execute(create_table_sql.format(nickname))
+create_table_sql = 'create table samples_{} like samples'.format(nickname)
+res = db.execute(create_table_sql)
+from IPython import embed; embed()
 
 # Collect the list of genes
 genes = reply.strip().split(' ')
@@ -58,9 +64,9 @@ get_variants_sql = 'insert into samples_'+nickname+' select * from samples where
 for gene in genes:
     db.execute(get_variants_sql)
 
-count = db.execute('select count(*) from samples_'+nickname)
+rows = db.fetchall('select * from samples_'+nickname)
 
 print()
-print('Done: new table samples_%s has %i entries.' % (nickname, count))
+print('Done: new table samples_%s has %i entries.' % (nickname, len(rows)))
 print()
 
