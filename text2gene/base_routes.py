@@ -47,6 +47,11 @@ def demo():
     return render_template('demo.html')
 
 
+@base.route('/faq')
+def demo():
+    return render_template('faq.html')
+
+
 @base.route('/variant', methods=['POST'])
 @base.route('/variant/<hgvs_text>', methods=['GET'])
 @base.route('/query', methods=['POST'])
