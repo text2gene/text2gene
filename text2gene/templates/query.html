@@ -1,6 +1,11 @@
 <html>
 <head>
     <title>Text2Gene HgvsQuery</title>
+
+    <meta name="title" content="Text2Gene: {{ lex.hgvs_text|e }} ({{ lex.gene_name}})" />
+    <meta name="description" content="{{ lex.hgvs_text|e }}  ({{ lex.gene_name }}) PubMed clinical citations" />
+    <meta name="author" content="Text2Gene, LLC" />
+
     <style>
             #left {
                 width: 480px;
