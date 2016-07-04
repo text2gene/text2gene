@@ -48,7 +48,7 @@ def demo():
 
 
 @base.route('/faq')
-def demo():
+def faq():
     return render_template('faq.html')
 
 
