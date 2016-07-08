@@ -24,5 +24,5 @@ def preset_envs():
 def run_services():
     #preset_envs()
     show_envs()
-    local('gunicorn -w 5 -b 0.0.0.0:5000 wsgi:app')
+    local('gunicorn -w 10 -b 0.0.0.0:5000 wsgi:app')
 
