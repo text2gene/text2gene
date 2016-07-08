@@ -110,7 +110,7 @@ class GoogleCSEResult(object):
         # Now try to get the PMID!
         if not self.doi:
             try:
-                self.urlreverse = UrlReverse(self.url)
+                self.urlreverse = UrlReverse(self.url, verify=False)    # "verify" is an extra step we don't really need.
                 self.doi = self.urlreverse.doi
                 self.pmid = self.urlreverse.pmid
             except Exception as error:
