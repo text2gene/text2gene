@@ -52,7 +52,6 @@ db = ClinVarDB()
 # Actually make the table, finally.
 create_table_sql = 'create table samples_{} like samples'.format(nickname)
 res = db.execute(create_table_sql)
-from IPython import embed; embed()
 
 # Collect the list of genes
 genes = reply.strip().split(' ')
