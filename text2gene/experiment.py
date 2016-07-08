@@ -7,6 +7,7 @@ import pickle
 import MySQLdb as mdb
 
 from metavariant.utils import strip_gene_name_from_hgvs_text
+from metavariant.exceptions import CriticalHgvsError
 
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
@@ -88,7 +89,7 @@ class Experiment(SQLCache):
 
         self.skip_cache = kwargs.get('skip_cache', False)
 
-        self.lvg_mode = kwargs.get('lvg_mode', 'lvg')      # or 'ncbi' or 'ncbi_enriched'
+        self.lvg_mode = kwargs.get('lvg_mode', 'ncbi_enriched')      # or 'ncbi' or 'ncbi_enriched'
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
         self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi', 'google'])]
@@ -279,6 +280,7 @@ class Experiment(SQLCache):
 
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)
+                gene_name = lex.gene_name
             except Exception as error:
                 log.info('EXPERIMENT [%s.%i]: [%s] Error creating LVG; skipping. (Error: %r',
                                 self.experiment_name, self.iteration, hgvs_text, error)
@@ -337,10 +339,10 @@ class Experiment(SQLCache):
                     'PMID': None,
                     'VariationID': varID,
                     'gene_name': gene_name,
-                    'match_pubtator': False,
-                    'match_ncbi': False,
-                    'match_clinvar': False,
-                    'match_google': False
+                    'match_pubtator': 0,
+                    'match_ncbi': 0,
+                    'match_clinvar': 0,
+                    'match_google': 0
                     }
 
         for pmid in pmids:
@@ -348,6 +350,6 @@ class Experiment(SQLCache):
             row['PMID'] = pmid
             for mod in self.search_modules:
                 if pmid in summary_table[mod]:
-                    row['match_%s' % mod] = True
+                    row['match_%s' % mod] = 1
             self.insert(self.summary_table_name, row)
 

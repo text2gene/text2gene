@@ -144,7 +144,7 @@ class SQLData(object):
 
         sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
 
-        queryobj = self.execute(sql, *tuple(all_values))
+        queryobj = self.execute(sql)        #, *tuple(all_values))
         # # retrieve and return the row id of the insert. returns 0 if insert failed.
         return queryobj.lastInsertID      # unclear what this would do. return a list?
 
@@ -174,12 +174,16 @@ class SQLData(object):
 
     def execute(self, sql, *args):
         queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        if args:
-            log.debug('SQL.execute ' + sql % args)
-            queryobj.Query(sql, args)
-        else:
-            log.debug('SQL.execute ' + sql)
-            queryobj.Query(sql)
+        try:
+            if args:
+                log.debug('SQL.execute ' + sql % args)
+                queryobj.Query(sql, args)
+            else:
+                log.debug('SQL.execute ' + sql)
+                queryobj.Query(sql)
+        except TypeError as error:
+            print(error)
+            from IPython import embed; embed()
         log.debug('#######')
         return queryobj
 
