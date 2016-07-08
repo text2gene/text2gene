@@ -4,6 +4,7 @@ import time
 
 from medgen.api import ClinVarDB
 from text2gene.api import LVGEnriched, NCBIHgvs2Pmid
+from text2gene.exceptions import *
 from metavariant.exceptions import CriticalHgvsError
 from metavariant.config import UTA_HOST, UTA_PORT
 
@@ -24,12 +25,12 @@ for entry in hgvs_examples:
     dmesg(hgvs_text, 'collecting')
     try:
         lex = LVGEnriched(hgvs_text)
-    except CriticalHgvsError as error:
+        pmids = NCBIHgvs2Pmid(hgvs_text)
+        dmesg(hgvs_text, 'PMIDs: %r' % pmids)
+        dmesg(hgvs_text, '%r' % lex.variants)
+        dmesg(hgvs_text, 'done')
+
+    except Exception as error:
         print(error)
         continue
-
-    pmids = NCBIHgvs2Pmid(hgvs_text)
-    dmesg(hgvs_text, 'PMIDs: %r' % pmids)
-    dmesg(hgvs_text, '%r' % lex.variants)
-    dmesg(hgvs_text, 'done')
 
