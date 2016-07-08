@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import, unicode_literals
 
 import logging
-log = logging.getLogger('hgvs_lexicon')
+log = logging.getLogger('metavariant')
 log.addHandler(logging.StreamHandler())
 log.setLevel(logging.DEBUG)
 

@@ -5,6 +5,9 @@ from fabric.operations import put, local
 from fabric.decorators import task
 from fabric.api import cd, run, env, sudo, local
 
+os.environ.setdefault('UTA_HOST', 'localhost')
+os.environ.setdefault('UTA_USER', 'uta_admin')
+
 from wsgi import show_envs, PKGNAME
 
 ENV = os.getenv('%s_SERVICES_ENV' % PKGNAME, 'dev')
