@@ -27,7 +27,7 @@ print(_EOL)
 print(_EOL)
 
 HEADER = """#################################################################
-        text2gene / hgvs_lexicon / pubtatordb API shell
+        text2gene / metavariant / pubtatordb API shell
 
             UTA connection: {}:{}
 

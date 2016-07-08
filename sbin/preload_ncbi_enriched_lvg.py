@@ -4,11 +4,14 @@ import time
 
 from medgen.api import ClinVarDB
 from text2gene.api import LVGEnriched, NCBIHgvs2Pmid
-from hgvs_lexicon.exceptions import CriticalHgvsError
+from metavariant.exceptions import CriticalHgvsError
+from metavariant.config import UTA_HOST, UTA_PORT
 
 
-hgvs_examples = ClinVarDB().fetchall('select * from clinvar_hgvs order by rand() limit 200000')  # limit 10')
+hgvs_examples = ClinVarDB().fetchall('select * from samples order by rand() limit 200000')  # limit 10')
 
+print()
+print('Using UTA host at %s:%r' % (UTA_HOST, UTA_PORT))
 print()
 print('%i HGVS examples found' % len(hgvs_examples))
 print()

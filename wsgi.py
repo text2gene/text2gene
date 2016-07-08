@@ -28,7 +28,7 @@ log = logging.getLogger(PKGNAME)
 log.addHandler(fh)
 log.setLevel(logging.DEBUG)
 
-logging.getLogger('hgvs_lexicon').addHandler(fh)
+logging.getLogger('metavariant').addHandler(fh)
 logging.getLogger('metapub').addHandler(fh)
 logging.getLogger('metapub').setLevel(logging.DEBUG)
 
