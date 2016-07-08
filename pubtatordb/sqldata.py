@@ -174,16 +174,12 @@ class SQLData(object):
 
     def execute(self, sql, *args):
         queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        try:
-            if args:
-                log.debug('SQL.execute ' + sql % args)
-                queryobj.Query(sql, args)
-            else:
-                log.debug('SQL.execute ' + sql)
-                queryobj.Query(sql)
-        except TypeError as error:
-            print(error)
-            from IPython import embed; embed()
+        if args:
+            log.debug('SQL.execute ' + sql % args)
+            queryobj.Query(sql, args)
+        else:
+            log.debug('SQL.execute ' + sql)
+            queryobj.Query(sql)
         log.debug('#######')
         return queryobj
 
