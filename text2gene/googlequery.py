@@ -28,13 +28,15 @@ from requests.packages import urllib3
 urllib3.disable_warnings()
 
 # Google API Key authorized for Servers
-API_KEY = 'AIzaSyBbzzCZbm5ccB6MC1e0y_tRFeNBdeoutPo'
+#API_KEY = 'AIzaSyBbzzCZbm5ccB6MC1e0y_tRFeNBdeoutPo'
+API_KEY = 'AIzaSyAoL5ix-H-FbKPU4A71bW7LCHxe6sKFVw0'
 
 # Google query API endpoint
 CSE_URL = "https://www.googleapis.com/customsearch/v1"
 
 # Google CSE engine ID ("cx") -- whitelisted journals (list of relevant science publishers, NIH, etc)
-CSE_CX_WHITELIST = '003914143621252222636:gtzu3oichua'
+#CSE_CX_WHITELIST = '003914143621252222636:gtzu3oichua'
+CSE_CX_WHITELIST = '009155410218757639293:nyh3tdzvfhc'
 
 # Google CSE engine ID ("cx") -- whitelisted schemas (ScholarlyArticle only)
 CSE_CX_SCHEMA = '003914143621252222636:-mop04_esug'
@@ -430,6 +432,16 @@ class GoogleCachedQuery(SQLCache):
         self.granular_table = granular_table
         super(self.__class__, self).__init__('google_query')
 
+    def _truncate_result(self, result):
+        """ Removes unnecessary bulk from Google CSE result list. """
+        out = []
+        for item in result:
+            if item.get('pagemap', None):
+                if item['pagemap'].get('article', None):
+                    item = item['pagemap'].pop('article')
+        out.append(item)
+        return out
+
     def get_cache_key(self, qstring):
         """ Returns a cache_key for the supplied Google query string.
 
@@ -482,6 +494,11 @@ class GoogleCachedQuery(SQLCache):
                 return cse_results
 
         result = gcse.send_query(qstring)
+
+        # if result is too long to be stored, doctor it up (remove unnecessary parts):
+        if len('%r' % result) > 65535:
+            result = self._truncate_result(result)
+
         self.store(qstring, result)
 
         cse_results = parse_cse_items(result)
