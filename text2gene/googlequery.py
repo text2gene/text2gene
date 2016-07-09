@@ -46,6 +46,9 @@ CSE_QUERY_TEMPLATES = {'whitelist': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_C
                         'schema': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_SCHEMA + '&q={}',
                        }
 
+# define "all" seqtypes for search purposes as using the following set (notably absent the g.DNA seqtype,
+#       which we have proven experimentally to not help much (or at all) in finding pubmed evidence).
+ALL_SEQTYPES = ['c', 'p', 'n']
 
 def query_cse_return_response(qstring, cse='whitelist', start_index=None):
     """ Query the Google Custom Search Engine for provided query string.
@@ -169,6 +172,7 @@ class GoogleCSEResult(object):
     def __repr__(self):
         return '<text2gene.googlequery.GoogleCSEResult:%s (pmid: %r) (doi: %r)>' % (self.url, self.pmid, self.doi)
 
+
 def parse_cse_items(cse_items):
     """ Convert list of Google CSE "items" into list of GoogleCSEResult objects.
 
@@ -238,7 +242,7 @@ def get_posedits_for_lex(lex, seqtypes=None):
     :returns: string containing expanded google query for variant
     """
     if not seqtypes:
-        seqtypes = ['c', 'p', 'g', 'n']
+        seqtypes = ALL_SEQTYPES
 
     if not lex.gene_name:
         log.debug('No gene_name for SequenceVariant %s', lex.seqvar)
@@ -355,7 +359,7 @@ class GoogleCSEngine(object):
         :return: (str) built query
         """
         if not seqtypes:
-            seqtypes = ['c', 'p', 'g', 'n']
+            seqtypes = ALL_SEQTYPES
 
         if self.lex:
             posedits = get_posedits_for_lex(self.lex, seqtypes)
@@ -396,7 +400,7 @@ class GoogleCSEngine(object):
         :return: list of dictionaries
         """
         if seqtypes is None:
-            seqtypes = ['c', 'p', 'g', 'n']
+            seqtypes = ALL_SEQTYPES
 
         if qstring is None:
             qstring = self.build_query(seqtypes=seqtypes)
@@ -436,9 +440,11 @@ class GoogleCachedQuery(SQLCache):
         """ Removes unnecessary bulk from Google CSE result list. """
         out = []
         for item in result:
-            if item.get('pagemap', None):
-                if item['pagemap'].get('article', None):
-                    item = item['pagemap'].pop('article')
+            if type(item) == dict:
+                if item.get('pagemap', None):
+                    for key in ('person', 'article', 'cse_thumbnail'):
+                        if item['pagemap'].get(key, None):
+                            item['pagemap'].pop(key)
         out.append(item)
         return out
 
@@ -465,14 +471,14 @@ class GoogleCachedQuery(SQLCache):
 
 
         :param lex: any lexical variant object (VariantLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
-        :param seqtypes: list of seqtypes [default: 'c','p','g','n']
+        :param seqtypes: list of seqtypes [default: ALL_SEQTYPES global]
         :param term_limit: (int) number of terms to constrain query to [default: 31]
         :param use_gene_synonyms: (bool) whether to use GeneSynonyms in query [default: True]
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of GoogleCSEresult objects or empty list if no results
         """
         if seqtypes is None:
-            seqtypes = ['c', 'p', 'g', 'n']
+            seqtypes = ALL_SEQTYPES
 
         gcse = GoogleCSEngine(lex)
         qstring = gcse.build_query(seqtypes, term_limit=term_limit, use_gene_synonyms=use_gene_synonyms)
@@ -496,7 +502,7 @@ class GoogleCachedQuery(SQLCache):
         result = gcse.send_query(qstring)
 
         # if result is too long to be stored, doctor it up (remove unnecessary parts):
-        if len('%r' % result) > 65535:
+        if len('%r' % result) > 64000:
             result = self._truncate_result(result)
 
         self.store(qstring, result)
