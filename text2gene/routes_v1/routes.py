@@ -9,7 +9,7 @@ from flask import Blueprint, request, redirect
 from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 
-from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid
+from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -140,7 +140,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 
     else:
         hgvs_text = hgvs_text.strip()
-        seqtypes = request.args.get('seqtypes', 'c,p,g,n').split(',')
+        seqtypes = request.args.get('seqtypes', ALL_SEQTYPES).split(',')
         cse = request.args.get('cse', 'whitelist')
 
 
