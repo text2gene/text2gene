@@ -10,6 +10,8 @@ from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES
+from ..report_utils import CitationTable
+#from ..cached import CacheStats
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -167,3 +169,32 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
             outd['response'].append(res.to_dict())
 
     return HTTP200(outd)
+
+
+@routes_v1.route('/v1/citation_table/<hgvs_text>', methods=['GET'])
+def citation_table(hgvs_text):
+    """ Returns JSON containing hgvs2pmid, googlequery, and lvg characteristics for given hgvs_text """
+    hgvs_text = hgvs_text.strip()
+    try:
+        ctable = CitationTable(hgvs_text)
+        return HTTP200(ctable.to_dict())
+    except Exception as error:
+        return HTTP400(error, 'CitationTable failed for %s' % hgvs_text)
+
+
+@routes_v1.route('/v1/cache_stats', methods=['GET'])
+def cache_stats():
+    """ Returns JSON containing statistics for the latest cache contents in MySQL. """
+    from pubtatordb import PubtatorDB
+    db = PubtatorDB()
+    cache_report = {'hgvslvg_cache': None,
+                    'google_query_cache': None,
+                    'ncbi_report_cache': None,
+                    'pubtator_hgvs2pmid_cache': None,
+                    'clinvar_hgvs2pmid_cache': None,
+                    }
+    for tablename in list(cache_report.keys()):
+        result = db.fetchrow('select count(cache_key) from ' + tablename)
+        cache_report[tablename] = result['count']
+
+    return HTTP200(cache_report)
