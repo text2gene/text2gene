@@ -11,7 +11,7 @@ from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES
 from ..report_utils import CitationTable
-#from ..cached import CacheStats
+from ..sqlcache import SQLCache
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -174,17 +174,17 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 def citation_table(hgvs_text):
     """ Returns JSON containing hgvs2pmid, googlequery, and lvg characteristics for given hgvs_text """
     hgvs_text = hgvs_text.strip()
-    try:
-        ctable = CitationTable(hgvs_text)
-        return HTTP200(ctable.to_dict())
-    except Exception as error:
-        return HTTP400(error, 'CitationTable failed for %s' % hgvs_text)
+    #try:
+    lex = LVGEnriched(hgvs_text)
+    ctable = CitationTable(lex)
+    return HTTP200(ctable.to_dict())
+    #except Exception as error:
+    #    return HTTP400(error, 'CitationTable failed for %s' % hgvs_text)
 
 
 @routes_v1.route('/v1/cache_stats', methods=['GET'])
 def cache_stats():
     """ Returns JSON containing statistics for the latest cache contents in MySQL. """
-    from ..sqlcache import SQLCache
     db = SQLCache('clinvar')
     cache_report = {'hgvslvg_cache': None,
                     'google_query_cache': None,
@@ -198,3 +198,28 @@ def cache_stats():
         cache_report[tablename] = result['cnt']
 
     return HTTP200(cache_report)
+
+
+@routes_v1.route('/v1/experiment/<name>', methods=['GET'])
+def experiment(name):
+    """ Returns JSON containing experiment results (in progress or completed) for given experiment name. """
+    db = SQLCache('experiment')
+    name = name.strip()
+    outd = {'action': 'experiment', 'name': name, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if name != '<name>':
+        tname_pattern = 'name%'
+        sql = 'select TABLE_NAME from information_schema.TABLES where TABLE_NAME LIKE "%s"'
+        rows = db.execute(sql, (tname_pattern,))
+        if not rows:
+            outd['response'] = 'No tables matched pattern "%s"' % tname_pattern
+        else:
+            tables = {}
+            for row in rows:
+                tablename = row['TABLE_NAME']
+                sql = 'select count(*) as cnt from %s' % tablename
+                res = db.execute(sql)
+                tables[tablename] = res['cnt']
+            outd['response'] = tables
+
+    return HTTP200(outd)

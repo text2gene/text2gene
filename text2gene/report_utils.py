@@ -130,10 +130,10 @@ class CitationTable(object):
         try:
             self.google_cse = GoogleCSEngine(self.lex)
             self.google_query = self.google_cse.build_query()
-            self.google_query_c = self.google_cse.query_c()
-            self.google_query_g = self.google_cse.query_g()
-            self.google_query_p = self.google_cse.query_p()
-            self.google_query_n = self.google_cse.query_n()
+            #self.google_query_c = self.google_cse.query_c()
+            #self.google_query_g = self.google_cse.query_g()
+            #self.google_query_p = self.google_cse.query_p()
+            #self.google_query_n = self.google_cse.query_n()
         except GoogleQueryMissingGeneName as error:
             self.errors.append('%r' % error)
 
@@ -155,6 +155,10 @@ class CitationTable(object):
                         cit.google_result = cseresult
                     except KeyError:
                         self.pmid2citation[cseresult.pmid] = Citation(cseresult.pmid, google=True, google_result=cseresult)
+
+    def to_dict(self):
+        outd = self.__dict__
+        return outd
 
 
 class Citation(object):
