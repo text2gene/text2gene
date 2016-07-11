@@ -1,6 +1,7 @@
 import logging
 
 from metavariant import Variant
+from text2gene.experiment import Experiment
 
 experiment_name = 'clinvar_epilepsy'
 iteration = 2944
@@ -21,10 +22,10 @@ for line in sample_sheet:
         print(error)
         continue
 
-    LOADED_EXAMPLES.append('%s' % seqvar)
+    if seqvar:
+        LOADED_EXAMPLES.append('%s' % seqvar)
 
 
-from text2gene.experiment import Experiment
 exper = Experiment(experiment_name, lvg_mode='lvg', iteration=iteration,
                     hgvs_examples=LOADED_EXAMPLES,)
 exper.run()
