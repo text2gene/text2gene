@@ -288,10 +288,10 @@ class GoogleCSEngine(object):
             self.seqvar = lex.seqvar
             self.hgvs_text = lex.hgvs_text
 
-            if not lex.gene_name:
+            # try to load the gene_name if we can...
+            self.gene_name = lex.gene_name
+            if not self.gene_name:
                 self.gene_name = kwargs.get('gene_name', None)
-            else:
-                self.gene_name = lex.gene_name
 
         elif seqvar:
             self.lex = None
