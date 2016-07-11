@@ -142,9 +142,8 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 
     else:
         hgvs_text = hgvs_text.strip()
-        seqtypes = request.args.get('seqtypes', ALL_SEQTYPES).split(',')
+        seqtypes = request.args.get('seqtypes', ','.join(ALL_SEQTYPES)).split(',')
         cse = request.args.get('cse', 'whitelist')
-
 
     outd = {'action': 'google', 'hgvs_text': hgvs_text, 'cse': cse,
             'seqtypes': seqtypes,
@@ -185,16 +184,17 @@ def citation_table(hgvs_text):
 @routes_v1.route('/v1/cache_stats', methods=['GET'])
 def cache_stats():
     """ Returns JSON containing statistics for the latest cache contents in MySQL. """
-    from pubtatordb import PubtatorDB
-    db = PubtatorDB()
+    from ..sqlcache import SQLCache
+    db = SQLCache('clinvar')
     cache_report = {'hgvslvg_cache': None,
                     'google_query_cache': None,
                     'ncbi_report_cache': None,
                     'pubtator_hgvs2pmid_cache': None,
                     'clinvar_hgvs2pmid_cache': None,
+                    'ncbi_hgvs2pmid_cache': None,
                     }
     for tablename in list(cache_report.keys()):
-        result = db.fetchrow('select count(cache_key) from ' + tablename)
-        cache_report[tablename] = result['count']
+        result = db.fetchrow('select count(cache_key) as cnt from ' + tablename)
+        cache_report[tablename] = result['cnt']
 
     return HTTP200(cache_report)
