@@ -71,7 +71,7 @@ def query(hgvs_text=''):
     try:
         lex = LVGEnriched(hgvs_text)
     except CriticalHgvsError as error:
-        return render_template('home.html', error_msg='%r' % error)
+        return render_template('demo.html', error_msg='%r' % error)
 
     # GENE INFO: nice info to have at hand (e.g. medgen url) if we know the gene name for this variant.
     if lex.gene_name:
