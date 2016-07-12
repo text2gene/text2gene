@@ -208,9 +208,9 @@ def experiment(name):
     outd = {'action': 'experiment', 'name': name, 'response': 'Change <hgvs_text> in url to HGVS string.'}
 
     if name != '<name>':
-        tname_pattern = 'name%'
-        sql = 'select TABLE_NAME from information_schema.TABLES where TABLE_NAME LIKE "%s"'
-        rows = db.execute(sql, (tname_pattern,))
+        tname_pattern = name + '%'
+        sql = 'select TABLE_NAME from information_schema.TABLES where TABLE_NAME LIKE "%s"' % tname_pattern
+        rows = db.fetchall(sql)
         if not rows:
             outd['response'] = 'No tables matched pattern "%s"' % tname_pattern
         else:
@@ -218,7 +218,7 @@ def experiment(name):
             for row in rows:
                 tablename = row['TABLE_NAME']
                 sql = 'select count(*) as cnt from %s' % tablename
-                res = db.execute(sql)
+                res = db.fetchrow(sql)
                 tables[tablename] = res['cnt']
             outd['response'] = tables
 
