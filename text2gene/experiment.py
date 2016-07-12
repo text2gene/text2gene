@@ -13,7 +13,7 @@ from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .googlequery import GoogleCachedQuery, googlecse2pmid
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
-#from .lvg_cached import VariantLVGCached
+from .lvg_cached import VariantLVGCached
 from .exceptions import Text2GeneError
 from .report_utils import hgvs_to_clinvar_variationID
 
@@ -26,9 +26,9 @@ search_module_map = {'pubtator': PubtatorCachedQuery,
                      'google': GoogleCachedQuery
                     }
 
-#lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
-#                  'lvg': VariantLVGCached,
-#                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
+lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
+                  'lvg': VariantLVGCached,
+                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
 
 
 class Experiment(SQLCache):
