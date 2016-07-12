@@ -287,10 +287,9 @@ class GoogleCSEngine(object):
             self.lex = lex
             self.seqvar = lex.seqvar
             self.hgvs_text = lex.hgvs_text
-
-            # try to load the gene_name if we can...
-            self.gene_name = lex.gene_name
-            if not self.gene_name:
+            if lex.gene_name:
+                self.gene_name = lex.gene_name
+            else:
                 self.gene_name = kwargs.get('gene_name', None)
 
         elif seqvar:
@@ -308,7 +307,7 @@ class GoogleCSEngine(object):
         if self.gene_name is None:
             raise GoogleQueryMissingGeneName('Information supplied with variant %s is missing gene name.' % self.seqvar)
 
-        self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
+        # self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
         self.gene_synonyms = GeneSynonyms(self.gene_name)
 
         # choice of Google CSE ("cx") -- "whitelist" or "schema" [default: whitelist]

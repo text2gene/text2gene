@@ -13,7 +13,7 @@ from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .googlequery import GoogleCachedQuery, googlecse2pmid
 from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
-from .lvg_cached import VariantLVGCached
+#from .lvg_cached import VariantLVGCached
 from .exceptions import Text2GeneError
 from .report_utils import hgvs_to_clinvar_variationID
 
@@ -26,9 +26,9 @@ search_module_map = {'pubtator': PubtatorCachedQuery,
                      'google': GoogleCachedQuery
                     }
 
-lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
-                  'lvg': VariantLVGCached,
-                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
+#lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
+#                  'lvg': VariantLVGCached,
+#                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
 
 
 class Experiment(SQLCache):
@@ -116,7 +116,12 @@ class Experiment(SQLCache):
         self.GoogleQuery = GoogleCachedQuery(granular=True, granular_table=self.get_table_name('google')).query
 
         # set our internal LVG query function based on preference stated in kwargs.
-        self.LVG = lvg_module_map[self.lvg_mode](granular_table=self.get_mapping_table_name(self.lvg_mode)).query
+        #self.LVG = lvg_module_map[self.lvg_mode](granular_table=self.get_mapping_table_name(self.lvg_mode)).query
+
+        #if self.lvg_mode=='ncbi_enriched':
+        self.LVG = NCBIEnrichedLVGCachedQuery(granular_table=self.get_mapping_table_name(self.lvg_mode)).query
+        #else:
+        #    self.LVG = VariantLVGCached(granular_table=self.get_mapping_table_name(self.lvg_mode)).query
 
         super(self.__class__, self).__init__('experiment')
 
@@ -280,7 +285,7 @@ class Experiment(SQLCache):
 
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)
-                gene_name = lex.gene_name
+                #print(lex.gene_name)
             except Exception as error:
                 log.info('EXPERIMENT [%s.%i]: [%s] Error creating LVG; skipping. (Error: %r',
                                 self.experiment_name, self.iteration, hgvs_text, error)
@@ -311,6 +316,8 @@ class Experiment(SQLCache):
                     log.debug('EXPERIMENT [%s.%i]: [%s] Error searching for matches in %s: %r',
                                     self.experiment_name, self.iteration, hgvs_text, mod, error)
                     errors.append('%r' % error)
+                    #if 'GoogleQueryMissingGeneName' in '%r' % error:
+                    #    from IPython import embed; embed()
 
                 for pmid in result:
                     pmids.add(pmid)
