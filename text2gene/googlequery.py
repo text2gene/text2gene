@@ -9,7 +9,7 @@ from urlparse import urlparse       # !not Py3k safe
 
 import requests
 
-from metapub.urlreverse import UrlReverse
+from metapub import UrlReverse
 from metapub.convert import doi2pmid
 
 from medgen.annotate.gene import GeneSynonyms
