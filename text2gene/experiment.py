@@ -272,7 +272,11 @@ class Experiment(SQLCache):
         else:
             hgvs_examples = self.hgvs_examples
 
+        total_examples = len(hgvs_examples)
+        index = 0
         for item in hgvs_examples:
+            index += 1
+
             if hasattr(item, 'upper'):
                 # assume this is a string from a list
                 hgvs_text = str(item).strip()
@@ -282,6 +286,7 @@ class Experiment(SQLCache):
 
             # make sure we're storing cache results with non-gene-containing hgvs strings as the key.
             hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
+            log.info('EXPERIMENT [%s.%i]: %i / %i' % (self.experiment_name, self.iteration, index, total_examples))
 
             try:
                 lex = self.LVG(hgvs_text, force_granular=True)
