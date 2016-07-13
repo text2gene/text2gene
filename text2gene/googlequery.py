@@ -492,12 +492,14 @@ class GoogleCachedQuery(SQLCache):
 
         if not skip_cache:
             result = self.retrieve(qstring, version=self.VERSION)
-            if result:
+            if result is not None:
+                log.debug('GoogleQuery: loaded results from cache for qstring %s' % qstring)
                 cse_results = parse_cse_items(result)
                 if force_granular:
                     self.store_granular(lex.hgvs_text, cse_results)
                 return cse_results
 
+        log.debug('GoogleQuery: Hitting Google API with qstring %s' % qstring)
         result = gcse.send_query(qstring)
 
         # if result is too long to be stored, doctor it up (remove unnecessary parts):

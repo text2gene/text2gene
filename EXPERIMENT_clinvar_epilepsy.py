@@ -12,6 +12,7 @@ log.addHandler(fh)
 
 otherlog = logging.getLogger('text2gene')
 otherlog.addHandler(logging.StreamHandler())
+otherlog.setLevel(logging.DEBUG)
 
 sample_sheet = open('data/clinvar_epilepsy_2944.tsv').read().split('\n')
 LOADED_EXAMPLES = []
