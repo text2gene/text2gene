@@ -42,6 +42,7 @@ class CitationTable(object):
     """
 
     def __init__(self, lex, **kwargs):
+        self.hgvs_text = lex.hgvs_text
         self.lex = lex
         self.pmid2citation = {}
         self.errors = []
@@ -157,7 +158,23 @@ class CitationTable(object):
                         self.pmid2citation[cseresult.pmid] = Citation(cseresult.pmid, google=True, google_result=cseresult)
 
     def to_dict(self):
-        outd = self.__dict__
+        """ Returns dictionary representation of this CitationTable.
+
+        Notes on the shape of some of the data in the resultant dictionary:
+
+        'pmid2citation': pmid -> Citation.to_dict()
+        'lex': LVGobject.to_dict()   (see metavariant.HgvsLVG)
+        """
+        outd = {'lex': self.lex.to_dict(),
+                'errors': self.errors,
+                'pubtator_results': self.pubtator_results,
+                'google_results': self.google_results,
+                'clinvar_results': self.clinvar_results,
+                'ncbi_results': self.ncbi_results,
+                }
+        outd['pmid2citation'] = {}
+        for pmid, cit in (self.pmid2citation.items()):
+            outd['pmid2citation'][pmid] = cit.to_dict()
         return outd
 
 
@@ -180,6 +197,33 @@ class Citation(object):
 
         # placeholder for FindIt lookup of link to article PDF (if available)
         self._pdf_src = None
+
+    def to_dict(self, pdf_url=False):
+        """ Returns dictionary representation of this Citation.
+
+        Does not include PubMedArticle (self.pma) since this info can be quickly re-retrieved
+        if needed later, and would result in a much bigger dictionary than needed here.
+
+        Includes all other attributes and @property items by default except pdf_url
+        (see keywords), since pdf_url may require a few extra seconds of processing time.
+
+        Keywords:
+            pdf_url (bool): allows inclusion of pdf_url in result [default: False].
+        """
+        outd = self.__dict__.copy()
+        outd.pop('pma')
+        outd.pop('_pdf_src')
+        if pdf_url:
+            outd['pdf_url'] = self.pdf_url
+        outd['dxdoi_url'] = self.dxdoi_url
+        outd['citation'] = self.pma.citation
+        outd['pubmed_url'] = self.pubmed_url
+        outd['pubtator_url'] = self.pubtator_url
+        outd['clinvar_url'] = self.clinvar_url
+        outd['google_url']  = self.google_url
+        outd['htmlSnippet'] = self.htmlSnippet
+
+        return outd
 
     @property
     def citation(self):

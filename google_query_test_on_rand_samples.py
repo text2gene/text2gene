@@ -4,7 +4,7 @@ import sys
 import logging
 
 from text2gene.googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid
-from text2gene.api import LVGEnriched
+from text2gene.api import LVGEnriched, CitationTable
 from text2gene.exceptions import Text2GeneError
 
 from medgen.api import ClinVarDB
@@ -116,6 +116,8 @@ for row in rows:
         dmesg(hgvs_text, ' == Total Resolved: %i / %i' % (len(resolved), len(cse_results)))
         print()
         record_result(row, pmids=pmids_by_seqtype[seqtype], qstring=qstring, num_results=len(cse_results), seqtype=seqtype)
+        cit = CitationTable(lex)
+        print(cit.to_dict())
 
     print()
 
