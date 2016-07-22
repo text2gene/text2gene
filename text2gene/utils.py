@@ -1,5 +1,8 @@
 from __future__ import absolute_import, print_function
 
+from functools import wraps
+import getpass
+
 import os, json, logging
 from datetime import datetime
 import pytz
@@ -7,9 +10,20 @@ from pyrfc3339 import generate, parse
 
 from flask import Response, make_response
 
-log = logging.getLogger('library-services')
+log = logging.getLogger('text2gene.http')
 
-import getpass
+#TODO: make configurable from config file
+ALLOWED_IPS = ['50.0.191.24']
+
+def restrict_by_ip(func):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        if request.remote_addr in ALLOWED_IPS:
+            return func(*args, **kwargs)
+        else:
+            return abort(403)
+    return wrapped
+
 def get_hostname():
     hostname = getpass.os.uname()[1]
     return hostname
