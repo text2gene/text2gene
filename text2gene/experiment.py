@@ -106,9 +106,6 @@ class Experiment(SQLCache):
         if not self.hgvs_examples_table and not self.hgvs_examples:
             raise Text2GeneError('You need to supply either a list of hgvs_examples or database details to produce a list. (see Experiment class documentation)')
 
-        # setup granular result tables necessary to store our results
-        self._setup_tables()
-
         # HGVS2PMID cache-backed functions internal to this Experiment
         self.ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=True, granular_table=self.get_table_name('clinvar')).query
         self.PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=True, granular_table=self.get_table_name('pubtator')).query
@@ -262,6 +259,9 @@ class Experiment(SQLCache):
         self.insert(self.results_table_name, row)
 
     def run(self):
+        # setup each search_module's granular result table
+        self._setup_tables()
+
         # create table to track experiment progress and aggregate results from all search modules.
         self._create_experiment_results_table()
         self._create_experiment_summary_table()

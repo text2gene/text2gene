@@ -42,4 +42,3 @@ def routes():
 
     return render_template('routes.html', get_routes=get_routes, post_routes=post_routes)
 
-
