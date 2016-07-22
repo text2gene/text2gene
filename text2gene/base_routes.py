@@ -1,5 +1,7 @@
 from __future__ import print_function, absolute_import
 
+from functools import wraps
+
 from flask import Blueprint, render_template, redirect, request
 
 from metapub import PubMedFetcher
@@ -16,6 +18,18 @@ from .ncbi import LVGEnriched, NCBIHgvsLVG
 #from .report_utils import get_clinvar_tables_containing_variant
 from .report_utils import GeneInfo, CitationTable, ClinVarInfo
 from .lsdb.lovd import get_lovd_url
+
+
+ALLOWED_IPS = ['192.168.1.3']
+
+def restrict_by_ip(func):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        if request.remote_addr in ALLOWED_IPS:
+            return func(*args, **kwargs)
+        else:
+            return abort(403)
+    return wrapped
 
 fetch = PubMedFetcher()
 
