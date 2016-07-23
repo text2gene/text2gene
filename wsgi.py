@@ -48,5 +48,5 @@ def show_envs():
 
 if __name__=='__main__':
     show_envs()
-    app.run(debug=True, host='0.0.0.0', port=int(CONFIG.get('flask', 'port')))
+    app.run(debug=True, host='0.0.0.0', port=int(CONFIG.get('network', 'port')))
 
