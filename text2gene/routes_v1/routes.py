@@ -187,7 +187,7 @@ def citation_table(hgvs_text):
 def cache_stats():
     """ Returns JSON containing statistics for the latest cache contents in MySQL. """
     db = SQLCache('clinvar')
-    cache_report = {'hgvslvg_cache': None,
+    cache_report = {'ncbi_enriched_lvg_cache': None,
                     'google_query_cache': None,
                     'ncbi_report_cache': None,
                     'pubtator_hgvs2pmid_cache': None,
