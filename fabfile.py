@@ -17,11 +17,15 @@ os.environ.setdefault('UTA_USER', 'uta_admin')
 
 env.user = 'nthmost'
 
-#@task
-#def preset_envs():
-#    os.environ['%s_SERVICES_ENV' % PKGNAME] = 'dev'
-#    os.environ['%s_SERVICES_CONFIG_DIR' % PKGNAME] = 'etc'
-#    os.environ['%s_SERVICES_DEBUG' % PKGNAME] = 'True'
+@task
+def run_private():
+    cfg = ConfigParser()
+    cfg.read('text2gene/config/private.ini')
+    host = cfg.get('network', 'host')
+    port = cfg.get('network', 'port')
+    num_workers = cfg.get('gunicorn', 'num_workers')
+    local('gunicorn -w %s -b %s:%s wsgi:app' % (num_workers, host, port))
+
 
 @task
 def run_services():
@@ -32,6 +36,5 @@ def run_services():
     host = cfg.get('network', 'host')
     port = cfg.get('network', 'port')
     num_workers = cfg.get('gunicorn', 'num_workers')
-
     local('gunicorn -w %s -b %s:%s wsgi:app' % (num_workers, host, port))
 

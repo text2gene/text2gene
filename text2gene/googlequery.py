@@ -18,7 +18,7 @@ from metavariant.exceptions import RejectedSeqVar
 
 from .exceptions import GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .sqlcache import SQLCache
-from .config import GRANULAR_CACHE
+from .config import GRANULAR_CACHE, CONFIG
 
 log = logging.getLogger('text2gene.googlequery')
 
@@ -28,8 +28,7 @@ from requests.packages import urllib3
 urllib3.disable_warnings()
 
 # Google API Key authorized for Servers
-#API_KEY = 'AIzaSyBbzzCZbm5ccB6MC1e0y_tRFeNBdeoutPo'
-API_KEY = 'AIzaSyAoL5ix-H-FbKPU4A71bW7LCHxe6sKFVw0'
+API_KEY = CONFIG.get('google', 'api_key')
 
 # Google query API endpoint
 CSE_URL = "https://www.googleapis.com/customsearch/v1"

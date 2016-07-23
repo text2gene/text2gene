@@ -28,5 +28,9 @@ configs = [os.path.join(CFGDIR, x) for x in os.listdir(CFGDIR) if x.find(ENV+'.i
 CONFIG = ConfigParser()
 CONFIG.read(configs)
 
+private_conf = os.path.join(CFGDIR, 'private.ini')
+if os.path.exists(private_conf):
+    CONFIG.read(private_conf)
+
 # if training is "active", enable GRANULAR_CACHE for all cacheing engines.
 GRANULAR_CACHE = False

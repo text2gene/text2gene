@@ -29,7 +29,7 @@ def get_hostname():
     return hostname
 
 def HTTP200(serializable):
-    log.debug('[HTTP_200] '+str(serializable))
+    #log.debug('[HTTP_200] '+str(serializable))
     try:
         return Response(json.dumps(serializable, cls=CustomJsonEncoder), status=200, mimetype='application/json')
     except UnicodeDecodeError:

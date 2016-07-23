@@ -22,4 +22,5 @@ numpy-*
 *.dump
 *.json
 data/*.txt
+private.ini
 *.log
