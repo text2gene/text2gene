@@ -46,7 +46,12 @@ found = 0
 unparsed = 0
 nopmids = 0
 newpmids = 0
-for line in sample_sheet:
+hadzero = 0
+
+# make a new header with a text2gene_evidence column
+output_sheet.write(sample_sheet[0] + '\ttext2gene_evidence\n')
+
+for line in sample_sheet[1:]:
     try:
         seqvar = Variant(line.split()[1])
     except Exception as error:
@@ -66,29 +71,35 @@ for line in sample_sheet:
                 if pmid not in known_pmids:
                     new_pmids.append(pmid)
             if new_pmids:
+                if len(known_pmids) == 0:
+                    hadzero += 1
                 newpmids += 1
-                pmid_str = ';'.join(['PMID:%s' % item for item in new_pmids])
-                line = line + '\t' + pmid_str + '\n'
+                pmid_str = '|'.join(['PMID:%s' % item for item in new_pmids])
+                line = line + '\t' + pmid_str
             else:
                 nopmids += 1
-                line = line + '\t \n'
+                line = line + '\t '
         else:
             nopmids += 1
-            line = line + '\t \n'
+            line = line + '\t '
     else:
         unparsed += 1
         print(line.split()[1] + ' cannot be parsed')
 
-    output_sheet.write(line)
+    output_sheet.write(line + '\n')
 
 print()
 print('====================================')
-print('Unparsed: %i' % unparsed)
 print('Parsed: %i' % parsed)
+print('Unparseable: %i' % unparsed)
 print('Found PMIDs: %i' % found)
 print('Found NEW PMIDS: %i' % newpmids)
 print('No new PMIDs: %i' % nopmids)
+print('Had zero before T2G: %i' % hadzero)
 print()
-print('Pct of variants annotated with new evidence: %d' % (100 * (float(newpmids) / float(parsed))))
+print('Pct of parseable variants annotated with new evidence: %d' % (100 * (float(newpmids) / float(parsed))))
+print('Pct of parseable variants annotated by Text2Gene: %d' % (100 * (float(found) / float(parsed))))
+print()
+print('Number variants with zero evidence newly annotated by Text2Gene: %i' % hadzero)
 
 

@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 from pyrfc3339 import generate, parse
 
-from flask import Response, make_response
+from flask import Response, make_response, request, abort
 
 log = logging.getLogger('text2gene.http')
 
@@ -21,7 +21,7 @@ def restrict_by_ip(func):
         if request.remote_addr in ALLOWED_IPS:
             return func(*args, **kwargs)
         else:
-            return abort(403)
+            return abort(403, 'IP address %s cannot access this part of the API' % request.remote_addr)
     return wrapped
 
 def get_hostname():

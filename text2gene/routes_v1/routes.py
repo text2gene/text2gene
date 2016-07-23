@@ -15,7 +15,7 @@ from ..sqlcache import SQLCache
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
-from ..utils import HTTP200, HTTP400
+from ..utils import HTTP200, HTTP400, restrict_by_ip
 
 routes_v1 = Blueprint('routes_v1', __name__, template_folder='templates')
 
@@ -122,6 +122,7 @@ def lvg(hgvs_text):
 
 @routes_v1.route('/v1/google', methods=['POST'])
 @routes_v1.route('/v1/google/<hgvs_text>', methods=['GET'])
+@restrict_by_ip
 def google_query(hgvs_text='<hgvs_text>', **kwargs):
     """ Performs LVG and GoogleQuery for given hgvs_text string.
 
