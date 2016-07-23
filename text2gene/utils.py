@@ -10,15 +10,19 @@ from pyrfc3339 import generate, parse
 
 from flask import Response, make_response, request, abort
 
+from .config import CONFIG
+
 log = logging.getLogger('text2gene.http')
 
-#TODO: make configurable from config file
-ALLOWED_IPS = ['50.0.191.24']
+if CONFIG.get('network', 'allowed_ips') != 'any':
+    ALLOWED_IPS = [item for item in CONFIG.get('network', 'allowed_ips').split(',')]
+else:
+    ALLOWED_IPS = ['any']
 
 def restrict_by_ip(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
-        if request.remote_addr in ALLOWED_IPS:
+        if 'any' in ALLOWED_IPS or request.remote_addr in ALLOWED_IPS:
             return func(*args, **kwargs)
         else:
             return abort(403, 'IP address %s cannot access this part of the API' % request.remote_addr)

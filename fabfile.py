@@ -11,9 +11,7 @@ from fabric.api import cd, run, env, sudo, local
 os.environ.setdefault('UTA_HOST', 'localhost')
 os.environ.setdefault('UTA_USER', 'uta_admin')
 
-#from wsgi import show_envs, PKGNAME
-
-#ENV = os.getenv('%s_SERVICES_ENV' % PKGNAME, 'dev')
+ENV = os.getenv('text2gene_ENV', 'dev')
 
 env.user = 'nthmost'
 
@@ -29,10 +27,9 @@ def run_private():
 
 @task
 def run_services():
-    #preset_envs()
-#    show_envs()
+    # show_envs()
     cfg = ConfigParser()
-    cfg.read('fab.conf')
+    cfg.read('text2gene/config/%s.ini' % ENV.lower())
     host = cfg.get('network', 'host')
     port = cfg.get('network', 'port')
     num_workers = cfg.get('gunicorn', 'num_workers')
