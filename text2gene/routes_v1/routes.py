@@ -172,6 +172,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 
 
 @routes_v1.route('/v1/citation_table/<hgvs_text>', methods=['GET'])
+@restrict_by_ip
 def citation_table(hgvs_text):
     """ Returns JSON containing hgvs2pmid, googlequery, and lvg characteristics for given hgvs_text """
     hgvs_text = hgvs_text.strip()
