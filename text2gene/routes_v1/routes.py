@@ -175,12 +175,17 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
 def citation_table(hgvs_text):
     """ Returns JSON containing hgvs2pmid, googlequery, and lvg characteristics for given hgvs_text """
     hgvs_text = hgvs_text.strip()
-    #try:
-    lex = LVGEnriched(hgvs_text)
-    ctable = CitationTable(lex)
-    return HTTP200(ctable.to_dict())
-    #except Exception as error:
-    #    return HTTP400(error, 'CitationTable failed for %s' % hgvs_text)
+    outd = {'action': 'citation_table', 'hgvs_text': hgvs_text, 'response': 'Change <hgvs_text> in url to HGVS string.'}
+
+    if 'hgvs_text' not in hgvs_text:
+        try:
+            lex = LVGEnriched(hgvs_text)
+            ctable = CitationTable(lex)
+            outd['response'] = ctable.to_dict()
+        except Exception as error:
+            return HTTP400(error, 'CitationTable failed for %s' % hgvs_text)
+
+    return HTTP200(outd)
 
 
 @routes_v1.route('/v1/cache_stats', methods=['GET'])
