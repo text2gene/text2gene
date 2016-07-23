@@ -156,7 +156,7 @@ class Experiment(SQLCache):
         cache_value (pickled object).
 
         Keywords:
-            update_if_duplicate: when True: if item with same cache_key found, update value.
+            update_if_duplicate: when True: if item with same cache_key found, update value. (default: True)
 
         :return: True if successful, False otherwise
         """
