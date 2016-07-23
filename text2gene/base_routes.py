@@ -8,7 +8,7 @@ from metavariant import VariantLVG, VariantComponents
 from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 
-from .utils import HTTP200, get_hostname
+from .utils import HTTP200, get_hostname, restrict_by_ip
 from .config import ENV, CONFIG, PKGNAME
 
 from .exceptions import NCBIRemoteError
@@ -56,6 +56,7 @@ def faq():
 @base.route('/variant/<hgvs_text>', methods=['GET'])
 @base.route('/query', methods=['POST'])
 @base.route('/query/<hgvs_text>', methods=['GET'])
+@restrict_by_ip
 def query(hgvs_text=''):
     """ Runs all of the relevant search queries after producing a lex object from input hgvs_text """
 
