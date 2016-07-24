@@ -47,6 +47,6 @@ setup(
         'gunicorn',  # web api
         'fabric',  # web api
         'metavariant',
-        'metapub==0.4.2a1',
+        'metapub',
         ],
     )
