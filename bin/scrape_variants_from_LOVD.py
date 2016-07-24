@@ -64,7 +64,6 @@ if __name__ == '__main__':
         print('Supply gene Symbol name as argument to this script.  (e.g. ACVRL1)')
         sys.exit()
 
-
-    print(parse_lovd_variants_by_gene_name_response(api_response, symbol))
-
+    variants = parse_lovd_variants_by_gene_name_response(api_response, symbol)
+    embed()
     
