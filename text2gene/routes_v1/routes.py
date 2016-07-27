@@ -10,7 +10,7 @@ from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 from metavariant.lovd import LOVDVariantsForGene
 
-from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES
+from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES, get_posedits_for_seqvar
 from ..report_utils import CitationTable
 from ..sqlcache import SQLCache
 from ..ncbi import NCBIHgvs2Pmid, NCBIReport, LVGEnriched
@@ -113,11 +113,16 @@ def lvg(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
-            hgvs_obj = LVGEnriched(hgvs_text)
+            lex = LVGEnriched(hgvs_text)
         except Exception as error:
             return HTTP400(error, 'Error using LVGEnriched to find lexical variants for %s' % hgvs_text)
-        outd['response'] = hgvs_obj.to_dict()
-    
+
+        outd['response'] = lex.to_dict()
+        outd['response']['synonyms'] = {}
+
+        for seqvar in lex.seqvars:
+            outd['response']['synonyms']['%s' % seqvar] = get_posedits_for_seqvar(seqvar)
+
     return HTTP200(outd)
 
 
