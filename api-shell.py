@@ -6,7 +6,9 @@ import IPython
 
 from pubtatordb import PubtatorDB
 from metavariant import VariantLVG, VariantComponents, Variant
+from metavariant import LOVDVariantsForGene
 from metavariant import config as hgvs_config
+
 from text2gene.api import *
 
 import hgvs.dataproviders.uta

@@ -8,6 +8,7 @@ from flask import Blueprint, request, redirect
 
 from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
+from metavariant.lovd import LOVDVariantsForGene
 
 from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES
 from ..report_utils import CitationTable
@@ -228,5 +229,20 @@ def experiment(name):
                 res = db.fetchrow(sql)
                 tables[tablename] = res['cnt']
             outd['response'] = tables
+
+    return HTTP200(outd)
+
+
+@routes_v1.route('/v1/lovd_variants_for_gene/<symbol>', methods=['GET'])
+def lovd_variants_for_gene(symbol):
+    """ Returns JSON containing variant list retrieved from LOVD (lovd.nl) for given Hugo gene symbol """
+
+    symbol = symbol.strip()
+    outd = {'action': 'lovd_variants_for_gene', 'symbol': symbol, 'response': 'Change <symbol> in url to Hugo gene symbol'}
+    if 'symbol' not in symbol:
+        try:
+            outd['response'] = LOVDVariantsForGene(symbol)
+        except Exception as error:
+            HTTP400(error)
 
     return HTTP200(outd)
