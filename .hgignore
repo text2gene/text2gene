@@ -22,5 +22,6 @@ numpy-*
 *.dump
 *.json
 data/*.txt
+data_nocommit/
 private.ini
 *.log
