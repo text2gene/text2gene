@@ -13,7 +13,7 @@ log = logging.getLogger('text2gene.lvg')
 
 class VariantLVGCached(SQLCache):
 
-    VERSION = 0
+    VERSION = 1
 
     def __init__(self, granular=False, granular_table='lvg_mappings'):
         self.granular = granular
