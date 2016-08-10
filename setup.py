@@ -48,5 +48,6 @@ setup(
         'fabric',  # web api
         'metavariant',
         'metapub',
+        'Flask-BasicAuth',
         ],
     )

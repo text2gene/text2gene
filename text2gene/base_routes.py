@@ -29,7 +29,7 @@ HGVS_SAMPLES = ['NM_194248.1:c.158C>T',
 
 @base.route('/')
 def home():
-    return render_template('index.html') 
+    return render_template('demo.html')
 
 
 @base.route('/about')
