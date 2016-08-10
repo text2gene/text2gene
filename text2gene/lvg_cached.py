@@ -7,13 +7,14 @@ from metavariant import VariantLVG
 
 from .exceptions import Text2GeneError
 from .sqlcache import SQLCache
-from .config import GRANULAR_CACHE
+from .config import GRANULAR_CACHE, SEQVAR_MAX_LEN
 
 log = logging.getLogger('text2gene.lvg')
 
+
 class VariantLVGCached(SQLCache):
 
-    VERSION = 0
+    VERSION = 1
 
     def __init__(self, granular=False, granular_table='lvg_mappings'):
         self.granular = granular
@@ -71,7 +72,7 @@ class VariantLVGCached(SQLCache):
                     self.store_granular(result)
                 return result
 
-        lexobj = VariantLVG(hgvs_text)
+        lexobj = VariantLVG(hgvs_text, seqvar_max_len=SEQVAR_MAX_LEN)
         if lexobj:
             self.store(hgvs_text, lexobj)
             if force_granular or self.granular:

@@ -14,6 +14,7 @@ from pubtatordb.sqldata import SQLData, SQLdatetime
 
 log = logging.getLogger('text2gene.sqlcache')
 
+
 class SQLCache(SQLData):
     """ Subclass of SQLData that stores simple key-value pairs on a unique-key-indexed
     table within the text2gene database.  (Needs to already exist with same authorization
