@@ -159,7 +159,7 @@ class NCBIEnrichedLVG(VariantLVG):
                                               hgvs_g=self.hgvs_g,
                                               hgvs_p=self.hgvs_p,
                                               hgvs_n=self.hgvs_n,
-                                              kwargs=kwargs)
+                                              **kwargs)
 
 
 class NCBIEnrichedLVGCachedQuery(SQLCache):
@@ -223,7 +223,6 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
                 return result
 
         lexobj = NCBIEnrichedLVG(hgvs_text, seqvar_max_len=SEQVAR_MAX_LEN)
-        from IPython import embed; embed()
         if lexobj:
             self.store(hgvs_text, lexobj)
             if force_granular or self.granular:
