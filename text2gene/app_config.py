@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 import os
 
 from flask import Flask, render_template
-from flask.ext.basicauth import BasicAuth
+from flask_basicauth import BasicAuth
 
 from .base_routes import base
 from .routes_v1.routes import routes_v1
