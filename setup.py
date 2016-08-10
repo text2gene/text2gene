@@ -14,7 +14,7 @@ class build_ext(_build_ext):
 
 setup(
     name = 'text2gene',
-    version = '0.0.5',
+    version = '0.0.5.1',
     description = 'genetic variant lvg and medical genetics search for relevant literature',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',

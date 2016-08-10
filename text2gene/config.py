@@ -11,6 +11,8 @@ CFGDIR = os.getenv('%s_CONFIG_DIR' % PKGNAME, default_cfg_dir)
 DEBUG = bool(os.getenv('%s_DEBUG' % PKGNAME, False))
 ENV = os.getenv('%s_ENV' % PKGNAME, 'dev')
 
+SEQVAR_MAX_LEN = 100
+
 ####
 import logging
 log = logging.getLogger(PKGNAME)

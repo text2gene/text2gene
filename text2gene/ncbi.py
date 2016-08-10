@@ -11,7 +11,7 @@ from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from .sqlcache import SQLCache
-from .config import GRANULAR_CACHE
+from .config import GRANULAR_CACHE, SEQVAR_MAX_LEN
 from .exceptions import Text2GeneError, NCBIRemoteError
 
 log = logging.getLogger('text2gene.ncbi')
@@ -222,7 +222,8 @@ class NCBIEnrichedLVGCachedQuery(SQLCache):
                     self.store_granular(result)
                 return result
 
-        lexobj = NCBIEnrichedLVG(hgvs_text)
+        lexobj = NCBIEnrichedLVG(hgvs_text, seqvar_max_len=SEQVAR_MAX_LEN)
+        from IPython import embed; embed()
         if lexobj:
             self.store(hgvs_text, lexobj)
             if force_granular or self.granular:
