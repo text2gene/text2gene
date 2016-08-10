@@ -1,12 +1,14 @@
 from __future__ import absolute_import, print_function
 
 import os
+from configparser import NoSectionError
 
 from flask import Flask, render_template
 from flask_basicauth import BasicAuth
 
 from .base_routes import base
 from .routes_v1.routes import routes_v1
+from .config import CONFIG
 
 app = Flask(__name__,
             static_folder=os.path.join(os.getcwd(), 'text2gene', 'static'),
@@ -14,11 +16,17 @@ app = Flask(__name__,
             template_folder=os.path.join(os.getcwd(), 'text2gene', 'templates'),
             )
 app.config['DEBUG'] = False
-app.config['BASIC_AUTH_USERNAME'] = 'john'
-app.config['BASIC_AUTH_PASSWORD'] = 'matrix'
 
-basic_auth = BasicAuth(app)
-app.config['BASIC_AUTH_FORCE'] = True
+# if a basic_auth section is found and filled out in the config,
+# set up Flask BasicAuth with configured username and passsword.
+try:
+    if CONFIG.get('basicauth', 'username'):
+        app.config['BASIC_AUTH_USERNAME'] = CONFIG.get('basicauth', 'username')
+        app.config['BASIC_AUTH_PASSWORD'] = CONFIG.get('basicauth', 'password')
+        basic_auth = BasicAuth(app)
+        app.config['BASIC_AUTH_FORCE'] = True
+except NoSectionError:
+    pass
 
 app.register_blueprint(base)
 app.register_blueprint(routes_v1)

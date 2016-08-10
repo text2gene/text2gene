@@ -6,94 +6,18 @@
     <meta name="description" content="{{ lex.hgvs_text|e }}  ({{ lex.gene_name }}) PubMed clinical citations" />
     <meta name="author" content="Text2Gene, LLC" />
 
-    <style>
-            #left {
-                width: 480px;
-                float: left;
-            }
+    <link rel="stylesheet" href="text2gene.css" />
 
-            #right {
-                margin-top: 40px;
-                margin-left: 500px;
-                padding-bottom: 20px;
-            }
-
-            .ncbi_tag {
-                color: darkolivegreen;
-            }
-
-            .error {
-                color: red;
-            }
-
-            .clear {
-                clear: both;
-            }
-
-            .positive {
-                background-color: lightblue;
-            }
-
-            .negative {
-                background-color: whitesmoke;
-            }
-
-            #pubmed_sources {
-                padding: 5px;
-                margin: 5px;
-            }
-            #pubmed_sources tr td {
-                padding: 5px;
-                text-align: center;
-            }
-            #pubmed_sources tr td img {
-                width: 25px;
-            }
-            td.pmid {
-                font-weight: bold;
-            }
-            td.pmid a {
-                text-decoration: none;
-            }
-            td.pmid a:hover {
-                text-decoration: underline;
-            }
-            button {
-                font-weight: bold;
-                color: green;
-            }
-            .mention {
-                background-color: lightpink;
-                padding: 5px;
-            }
-            .mention a {
-                text-decoration: none;
-            }
-            .mention a:hover {
-                text-decoration: dotted;
-            }
-            .citation {
-                width: 350px;
-            }
-            .green_dot {
-                width: 50px;
-            }
-            .pubtator {
-                width: 80px;
-            }
-            .google {
-                width: 350px;
-            }
-            .snippet a {
-                text-decoration: none;
-            }
-            .snippet a:hover {
-                text-decoration: underline;
-            }
-    </style>
 </head>
 
 <body>
+
+<div id="header">
+<img src="/text2gene_logo_small.png" />
+
+<p><i>Automatically search PubMed and databases for information relevant for clinical interpretation of rare genetic variants.</i></p>
+</div>
+<hr />
 
 <div class="clear">
 

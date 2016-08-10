@@ -1,0 +1,104 @@
+            #left {
+                width: 480px;
+                float: left;
+            }
+
+            #right {
+                margin-top: 40px;
+                margin-left: 500px;
+                padding-bottom: 20px;
+            }
+            #header {
+                width: 100%;
+                text-align: center;
+            }
+            #footer {
+                width: 100%;
+                text-align: center;
+                font-size: 24px;
+            }
+            #footer a {
+                color: magenta;
+            }
+            .values {
+                text-align: left;
+            }
+            .values .icon {
+                width: 100px;
+            }
+            .values .text {
+                font-weight: bold;
+                font-size: 24px;
+            }
+            .ncbi_tag {
+                color: darkolivegreen;
+            }
+
+            .error {
+                color: red;
+            }
+
+            .clear {
+                clear: both;
+            }
+
+            .positive {
+                background-color: lightblue;
+            }
+
+            .negative {
+                background-color: whitesmoke;
+            }
+
+            #pubmed_sources {
+                padding: 5px;
+                margin: 5px;
+            }
+            #pubmed_sources tr td {
+                padding: 5px;
+                text-align: center;
+            }
+            #pubmed_sources tr td img {
+                width: 25px;
+            }
+            td.pmid {
+                font-weight: bold;
+            }
+            td.pmid a {
+                text-decoration: none;
+            }
+            td.pmid a:hover {
+                text-decoration: underline;
+            }
+            button {
+                font-weight: bold;
+                color: green;
+            }
+            .mention {
+                background-color: lightpink;
+                padding: 5px;
+            }
+            .mention a {
+                text-decoration: none;
+            }
+            .mention a:hover {
+                text-decoration: dotted;
+            }
+            .citation {
+                width: 350px;
+            }
+            .green_dot {
+                width: 50px;
+            }
+            .pubtator {
+                width: 80px;
+            }
+            .google {
+                width: 350px;
+            }
+            .snippet a {
+                text-decoration: none;
+            }
+            .snippet a:hover {
+                text-decoration: underline;
+            }
