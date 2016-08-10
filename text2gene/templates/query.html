@@ -163,32 +163,5 @@
     </ul>
 </div>
 
-<!--
-<div class="clear">
-    <hr />
-    <h3>Google Query Expansion</h3>
-    <p>{% if citation_table.google_query %}<a target="_blank" href='/v1/google/{{ lex.hgvs_text }}'>{{ citation_table.google_query|e }}</a></p>
-    <ul>
-        <li>c.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=c'>{{ citation_table.google_query_c }}</a></li>
-        <li>p.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=p'>{{ citation_table.google_query_p }}</a></li>
-        <li>g.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=g'>{{ citation_table.google_query_g }}</a></li>
-        <li>n.: <a target="_blank" href='/v1/google/{{ lex.hgvs_text }}?seqtypes=n'>{{ citation_table.google_query_n }}</a></li>
-    </ul>
-
-    {% else %}(Cannot build without gene name){% endif %}</p>
-
-    {% if found_in_clinvar_example_tables %}
-    <hr /><h3>Found in Clinvar hgvs sample tables:</h3>
-    <ul>{% for tname in found_in_clinvar_example_tables %}
-    <li>{{ tname }}</li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-</div>
--->
-
-<hr />
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-
 </body>
 </html>

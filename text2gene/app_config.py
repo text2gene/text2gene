@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function
 import os
 
 from flask import Flask, render_template
+from flask.ext.basicauth import BasicAuth
 
 from .base_routes import base
 from .routes_v1.routes import routes_v1
@@ -13,6 +14,11 @@ app = Flask(__name__,
             template_folder=os.path.join(os.getcwd(), 'text2gene', 'templates'),
             )
 app.config['DEBUG'] = False
+app.config['BASIC_AUTH_USERNAME'] = 'john'
+app.config['BASIC_AUTH_PASSWORD'] = 'matrix'
+
+basic_auth = BasicAuth(app)
+app.config['BASIC_AUTH_FORCE'] = True
 
 app.register_blueprint(base)
 app.register_blueprint(routes_v1)
