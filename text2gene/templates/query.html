@@ -6,7 +6,9 @@
     <meta name="description" content="{{ lex.hgvs_text|e }}  ({{ lex.gene_name }}) PubMed clinical citations" />
     <meta name="author" content="Text2Gene, LLC" />
 
-    <link rel="stylesheet" href="text2gene.css" />
+    <link rel="stylesheet" href="/text2gene.css" />
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+-->
 
 </head>
 
@@ -19,6 +21,7 @@
 </div>
 <hr />
 
+<div id="torso">
 <div class="clear">
 
     <h1>{{ lex.hgvs_text|e }}</h1>
@@ -33,17 +36,12 @@
                                    {% else %}(unknown){% endif %}</h4>
 
     </div>
-
-    {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
-
     </div>
 
-</div>
 <div class="clear">
 <span class="error"><ul>{% for error in citation_table.errors %}<li>{{ error }}</li>{% endfor %}</ul></span>
 
 <hr />
-    <h3>Pubmed Sources</h3>
     {% if citation_table.citations %}
 
         <table id="pubmed_sources">
@@ -69,10 +67,9 @@
 
 </div>
 
-    <hr />
+<hr />
 
-
-<div class="clear">
+<div class="left">
     <h3>Lexical Synonyms for {{ lex.hgvs_text|e }}</h3>
     <ul>
     {% for seqtype, hgvs_list in lex.variants.iteritems() %}
@@ -86,6 +83,18 @@
     {% endfor %}
     </ul>
 </div>
+<div class="right">
+    <h3>Other Resources for this Variant</h3>
+
+    {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
+
+</div>
+
+</div><!-- end torso -->
+
+<div class="clear"></div>
+
+<div id="footer"><hr />[ <a href="mailto:info@text2gene.com">info@text2gene.com</a> ]</div>
 
 </body>
 </html>

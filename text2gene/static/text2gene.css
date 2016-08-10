@@ -1,8 +1,10 @@
+            #torso {
+                margin: 20px;
+            }
             #left {
                 width: 480px;
                 float: left;
             }
-
             #right {
                 margin-top: 40px;
                 margin-left: 500px;
@@ -15,7 +17,7 @@
             #footer {
                 width: 100%;
                 text-align: center;
-                font-size: 24px;
+                font-size: 18px;
             }
             #footer a {
                 color: magenta;

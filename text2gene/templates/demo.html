@@ -1,5 +1,6 @@
 <html>
 <head><title>Text2Gene</title>
+    <link rel="stylesheet" href="/text2gene.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 <body>
@@ -11,12 +12,12 @@
 </div>
 <hr />
 
-<h1>Text2Gene Demo for Clinical Scientists</h1>
+<div id="torso">
+<h3>Text2Gene Demo for Clinical Scientists</h3>
 
 <div id="top_error">{{ error_msg }}</div>
 
-<h3>Variant Summary Page</h3>
-<p>Input an HGVS string:</p>
+<h5>Input an HGVS string:</h5>
 
 <form action="/query" method="POST">
    <input type="text" name="hgvs_text" />
@@ -25,12 +26,12 @@
 
 <hr />
 
-<h3>Text2Gene API for Developers</h3>
+<h3><a href="/examples">Text2Gene API Examples for Developers</a></h3>
 
-<ul><li><a href="/routes">Endpoints (API query routes)</a></li>
-    <li><a href="/examples">Usage examples</a></li>
-</ul>
+For integration documentation, please contact <a href="mailto:naomi.most@text2gene.com">naomi.most@text2gene.com</a>
+</div>
+<div class="clear"></div>
 
-
+<div id="footer"><hr />[ <a href="mailto:info@text2gene.com">info@text2gene.com</a> ]</div>
 </body>
 </html>
