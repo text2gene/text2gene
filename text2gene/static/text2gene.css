@@ -52,12 +52,19 @@
                 background-color: whitesmoke;
             }
 
+            table, th, td {
+                border: 2px solid white;
+            }
             #pubmed_sources {
                 padding: 5px;
                 margin: 5px;
             }
+            #pubmed_sources th {
+                text-align: center;
+            }
             #pubmed_sources tr td {
                 padding: 5px;
+                margin: 15px;
                 text-align: center;
             }
             #pubmed_sources tr td img {
@@ -88,6 +95,7 @@
             }
             .citation {
                 width: 350px;
+                text-align: left;
             }
             .green_dot {
                 width: 50px;
@@ -97,6 +105,7 @@
             }
             .google {
                 width: 350px;
+                text-align: left;
             }
             .snippet a {
                 text-decoration: none;
