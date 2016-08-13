@@ -81,12 +81,17 @@
         {% endfor %}{% endif %}
     {% endfor %}
     </ul>
+    {% if lex.gene_name %}
+    <h3>Gene Synonyms for {{ lex.gene_name }}</h3>
+        {% for genesyn in citation_table.gene_synonyms %}
+            <h5>{{ genesyn }}</h5>
+        {% endfor %}
+    {% endif %}
 </div>
 <div class="right">
     <h3>Other Resources for this Variant</h3>
 
     {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}
-
 </div>
 
 </div><!-- end torso -->

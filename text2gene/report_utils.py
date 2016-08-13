@@ -4,6 +4,7 @@ import logging
 
 from medgen.api import ClinvarVariationID, ClinVarDB
 from medgen.api import GeneID, GeneName
+from medgen.annotate.gene import GeneSynonyms
 
 from metapub import PubMedFetcher, FindIt
 
@@ -46,6 +47,10 @@ class CitationTable(object):
         self.lex = lex
         self.pmid2citation = {}
         self.errors = []
+        self.gene_synonyms = []
+
+        if self.lex.gene_name:
+            self.gene_synonyms = GeneSynonyms(self.lex.gene_name)
 
         self.clinvar_results = None
 
