@@ -52,6 +52,14 @@
                 background-color: whitesmoke;
             }
 
+            .raw_positive {
+                background-color: lightyellow;
+            }
+
+            .raw_negative {
+                background-color: whitesmoke;
+            }
+
             table, th, td {
                 border: 2px solid white;
             }
@@ -68,6 +76,21 @@
                 text-align: center;
             }
             #pubmed_sources tr td img {
+                width: 25px;
+            }
+            #unmapped_sources {
+                padding: 5px;
+                margin: 5px;
+            }
+            #unmapped_sources th {
+                text-align: center;
+            }
+            #unmapped_sources tr td {
+                padding: 5px;
+                margin: 15px;
+                text-align: center;
+            }
+            #unmapped_sources tr td img {
                 width: 25px;
             }
             td.pmid {

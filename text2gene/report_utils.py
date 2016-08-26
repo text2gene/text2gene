@@ -7,6 +7,7 @@ from medgen.api import GeneID, GeneName
 from medgen.annotate.gene import GeneSynonyms
 
 from metapub import PubMedFetcher, FindIt
+from metapub.utils import rootdomain_of
 
 from flask import Markup
 
@@ -21,6 +22,31 @@ log = logging.getLogger('text2gene')
 fetch = PubMedFetcher()
 
 GENEREVIEWS_URL = 'http://www.ncbi.nlm.nih.gov/books/{bookid}/'
+
+
+
+def mime_to_filetype(mime):
+    """ Takes a string describing a MIME type and returns a more simplified "filetype"
+    intended for human readability.
+
+    In general, we're just stripping out the "application/" designation and then making
+    sure the resultant string isn't totally long and ridiculous.  Looking at you,
+    "vnd.openxmlformats-officedocument.spreadsheetml.sheet".
+
+    :param mime: (str)
+    :return: (str)
+    """
+    # ugh, Excel! http://stackoverflow.com/questions/974079/setting-mime-type-for-excel-document
+    if not mime:
+        return ''
+
+    filetype = mime.replace('application/', '').lower()
+    if filetype.startswith('vnd'):
+        if 'excel' in filetype:
+            filetype = 'xls'
+        elif filetype == 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            filetype = 'xlsx'
+    return filetype
 
 
 class CitationTable(object):
@@ -48,6 +74,7 @@ class CitationTable(object):
         self.pmid2citation = {}
         self.errors = []
         self.gene_synonyms = []
+        self.unmapped_citations = []
 
         if self.lex.gene_name:
             self.gene_synonyms = GeneSynonyms(self.lex.gene_name)
@@ -161,6 +188,13 @@ class CitationTable(object):
                         cit.google_result = cseresult
                     except KeyError:
                         self.pmid2citation[cseresult.pmid] = Citation(cseresult.pmid, google=True, google_result=cseresult)
+                else:
+                    #TODO: RawCitation object?
+                    rawcit = cseresult.to_dict()
+                    rawcit['domain'] = rootdomain_of(rawcit['url'])
+                    rawcit['htmlSnippet'] = Markup(rawcit['htmlSnippet'])
+                    rawcit['filetype'] = mime_to_filetype(rawcit['mime'])
+                    self.unmapped_citations.append(rawcit)
 
     def to_dict(self):
         """ Returns dictionary representation of this CitationTable.
@@ -176,6 +210,7 @@ class CitationTable(object):
                 'google_results': self.google_results,
                 'clinvar_results': self.clinvar_results,
                 'ncbi_results': self.ncbi_results,
+                'unmapped_citations': self.unmapped_citations,
                 }
         outd['pmid2citation'] = {}
         for pmid, cit in (self.pmid2citation.items()):

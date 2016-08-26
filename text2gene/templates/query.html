@@ -41,6 +41,7 @@
 <span class="error"><ul>{% for error in citation_table.errors %}<li>{{ error }}</li>{% endfor %}</ul></span>
 
 <hr />
+<h3>PubMed citations</h3>
     {% if citation_table.citations %}
 
         <table id="pubmed_sources">
@@ -58,10 +59,27 @@
         </table>
 
     {%  else %}
+        <p>No Pubmed citations found.</p>
+    {% endif %}
 
-        <p>No citations were found!</p>
-        <p>(Why not? <a href="/faq#nocitation">Click here to read about possible reasons</a>.)</p>
+<hr />
+<h3>Other Sources (no PMID):</h3>
 
+    {%  if citation_table.unmapped_citations %}
+        <table id="unmapped_sources">
+            <tr><th>Source Domain</th><th>Page Title (with link)</th><th>File type</th><th>Page Snippet</th><th>Publisher link</th></tr>
+            {% for rawcit in citation_table.unmapped_citations %}
+            <tr class="{{  loop.cycle('raw_positive', 'raw_negative') }}">
+                <td>{{ rawcit.domain }}</td>
+                <td><a target="_blank" href="{{ rawcit.url }}">{{ rawcit.title }}</a></td>
+                <td>{% if rawcit.filetype %}{{ rawcit.filetype }}{% endif %}</td>
+                <td class="google">{{ rawcit.htmlSnippet }}</td>
+                <td class="publink">{% if rawcit.doi %}<a target="_blank" href="http://dx.doi.org/{{ rawcit.doi }}">{{ rawcit.doi }}</a>{% endif %}</td>
+            </tr>{% endfor %}
+
+        </table>
+    {%  else %}
+        <p>No supplements or other sources currently found.</p>
     {% endif %}
 
 </div>
@@ -81,14 +99,19 @@
         {% endfor %}{% endif %}
     {% endfor %}
     </ul>
+    </div>
+
+<hr />
+
+<div>
     {% if lex.gene_name %}
     <h3>Gene Synonyms for {{ lex.gene_name }}</h3>
         {% for genesyn in citation_table.gene_synonyms %}
             <h5>{{ genesyn }}</h5>
         {% endfor %}
     {% endif %}
-</div>
-<div class="right">
+
+
     <h3>Other Resources for this Variant</h3>
 
     {% if lovd_url %}<a target="_blank" href="{{ lovd_url }}"><button>LOVD Search</button></a>{% endif %}

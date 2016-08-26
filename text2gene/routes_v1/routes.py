@@ -246,7 +246,7 @@ def lovd_variants_for_gene(symbol):
     outd = {'action': 'lovd_variants_for_gene', 'symbol': symbol, 'response': 'Change <symbol> in url to Hugo gene symbol'}
     if 'symbol' not in symbol:
         try:
-            outd['response'] = LOVDVariantsForGene(symbol)
+            outd['response'] = list(LOVDVariantsForGene(symbol))
         except Exception as error:
             HTTP400(error)
 
