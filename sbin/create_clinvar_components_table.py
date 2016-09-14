@@ -54,15 +54,18 @@ def process_row(dbrow):
     return None
 
 
-def add_components_to_row(dbrow, comp):
+def add_components_to_row(db, dbrow, comp):
     print('ADD:')
     try:
         print('\tRef:%s' % comp.ref)
         print('\tPos:%s' % comp.pos)
         print('\tAlt:%s' % comp.alt)
+
+        db.execute('update clinvar.variant_components set Ref=%s, Pos=%s, Alt=%s where variant_name=%s',
+                        dbrow['Ref'], dbrow['Pos'], dbrow['Alt'], dbrow['variant_name'])
+
     except AttributeError as error:
         print(error)
-        from IPython import embed; embed()
 
     print()
 
@@ -98,7 +101,7 @@ def main():
         if components:
             GOOD += 1
             print('[%s] added components: %r' % (row['variant_name'], components))
-            add_components_to_row(row, components)
+            add_components_to_row(db, row, components)
             log.info(row['variant_name'] + ' - no usable amino acid components')
         else:
             ERRORS += 1
