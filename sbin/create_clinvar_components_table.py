@@ -32,6 +32,10 @@ def process_row(dbrow):
         return comp
 
     for option in ['variant_name', 'HGVS_c']:
+        # look out for variants in this format:  NM_001363.4(DKC1):c.1058C>T (p.Ala353Val)
+        if (option.split()) > 1:
+            option = option.split()[0]    
+
         try:
             seqvar = Variant(dbrow[option])
         except TypeError:
@@ -55,6 +59,7 @@ def add_components_to_row(dbrow, comp):
     except AttributeError as error:
         print(error)
         from IPython import embed; embed()
+
     print()
 
 
@@ -85,8 +90,8 @@ def main():
         components = process_row(row)
         if components:
             GOOD += 1
-            add_components_to_row(row, components)
             print('[%s] added components: %r' % (row['variant_name'], components))
+            add_components_to_row(row, components)
             log.info(row['variant_name'] + ' - no usable amino acid components')
         else:
             ERRORS += 1
