@@ -24,6 +24,19 @@
    <button type="submit">submit</button>
 </form>
 
+<h5>Input an Amino Acid Change with Gene Symbol:</h5>
+
+<form action="/amino" method="POST">
+    <strong>Gene:</strong> <input type="text" name="gene_name" size="12" />
+    <h5>Amino Change (Reference, Position, Alternate):</h5>
+    <ul>
+        <li>Ref: <input type="text" name="ref" size="12"/></li>
+        <li>Pos: <input type="text" name="pos" size="12"</input></li>
+        <li>Alt: <input type="text" name="alt" size="12"</input></li>
+    </ul>
+    <button type="submit">submit</button>
+</form>
+
 <hr />
 
 <h3><a href="/examples">Text2Gene API Examples for Developers</a></h3>

@@ -52,6 +52,12 @@ def faq():
     return render_template('faq.html')
 
 
+@base.route('/amino', methods=['GET','POST'])
+@restrict_by_ip
+def amino_change_query(pos='', ref='', alt=''):
+    return render_template('demo.html')
+
+
 @base.route('/variant', methods=['POST'])
 @base.route('/variant/<hgvs_text>', methods=['GET'])
 @base.route('/query', methods=['POST'])
