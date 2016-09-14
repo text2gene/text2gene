@@ -86,7 +86,10 @@ def main():
 
     worked = 0
     errors = 0
+    count = 0
     for row in rows:
+        count += 1
+        print(count, '/', res['cnt'])
         components = process_row(row)
         if components:
             GOOD += 1
@@ -100,6 +103,7 @@ def main():
     
 if __name__=='__main__':
     main()
-    print(ERRORS)
-    print(GOOD)
+
+    print('unusable:', ERRORS)
+    print('good:', GOOD)
 
