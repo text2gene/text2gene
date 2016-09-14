@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 
 from metavariant import Variant, VariantComponents
-from metavariant.exceptions import RejectedSeqVar
+from metavariant.exceptions import RejectedSeqVar, CriticalHgvsError
 from medgen.db.clinvar import ClinVarDB
 
 from text2gene.api import LVGEnriched
@@ -21,7 +21,7 @@ def components_or_None(hgvs_p):
         comp = VariantComponents(Variant(hgvs_p))
         if comp.ref != '':
             return comp
-    except (TypeError, RejectedSeqVar):
+    except (TypeError, RejectedSeqVar, CriticalHgvsError):
         # either the hgvs_p did not parse (Variant returned None) or it has incomplete edit info.
         pass
     return None
@@ -41,9 +41,10 @@ def process_row(dbrow):
 
         try:
             seqvar = Variant(dbrow[option])
-        except TypeError:
+        except (CriticalHgvsError, TypeError):
             # empty
             continue
+
         if seqvar:
             lvg = LVGEnriched(seqvar)
             for entry in lvg.hgvs_p:
@@ -92,7 +93,7 @@ def main():
     count = 0
     for row in rows:
         count += 1
-        print(count, '/', res['cnt'])
+        print(count, '/', res['cnt'], ':', row['variant_name'])
         components = process_row(row)
         if components:
             GOOD += 1
