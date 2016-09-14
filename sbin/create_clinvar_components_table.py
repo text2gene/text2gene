@@ -18,10 +18,13 @@ GOOD = 0
 
 def components_or_None(hgvs_p):
     try:
-        return VariantComponents(Variant(hgvs_p))
+        comp = VariantComponents(Variant(hgvs_p))
+        if comp.ref != '':
+            return comp
     except (TypeError, RejectedSeqVar):
         # either the hgvs_p did not parse (Variant returned None) or it has incomplete edit info.
-        return None
+        pass
+    return None
 
 
 def process_row(dbrow):
@@ -45,7 +48,7 @@ def process_row(dbrow):
             lvg = LVGEnriched(seqvar)
             for entry in lvg.hgvs_p:
                 comp = components_or_None(entry)
-                if comp:
+                if comp and comp.ref:
                     return comp
     return None
 
@@ -82,7 +85,7 @@ def main():
 
     log.info('Rows in variant_components table: %i' % res['cnt'])
 
-    rows = db.fetchall('select * from variant_components')
+    rows = db.fetchall('select * from variant_components order by rand()')
 
     worked = 0
     errors = 0
