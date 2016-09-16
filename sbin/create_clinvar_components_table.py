@@ -7,10 +7,13 @@ from medgen.db.clinvar import ClinVarDB
 from text2gene.api import LVGEnriched
 
 from pubtatordb.sqldata import SQLData
-from pubtatordb.config import get_process_log
+from pubtatordb.config import get_process_log, logging
 
 log = get_process_log('logs/clinvar_components_table.log')
 
+medgen_log = logging.getLogger('medgen')
+medgen_log.setLevel(logging.DEBUG)
+medgen_log.addHandler(logging.StreamHandler())
 
 ERRORS = 0
 GOOD = 0
@@ -61,8 +64,8 @@ def add_components_to_row(db, dbrow, comp):
         print('\tPos:%s' % comp.pos)
         print('\tAlt:%s' % comp.alt)
 
-        db.execute('update clinvar.variant_components set Ref=%s, Pos=%s, Alt=%s where variant_name=%s',
-                        dbrow['Ref'], dbrow['Pos'], dbrow['Alt'], dbrow['variant_name'])
+        upd = {'Ref': comp.ref, 'Pos': comp.pos, 'Alt': comp.alt, 'EditType': comp.edittype, 'SeqType': comp.seqtype}
+        db.update('variant_components', 'id', dbrow['id'], upd)
 
     except AttributeError as error:
         print(error)
