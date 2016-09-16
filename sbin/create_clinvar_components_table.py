@@ -15,6 +15,11 @@ log = get_process_log('logs/clinvar_components_table.log')
 ERRORS = 0
 GOOD = 0
 
+DB_ERROR_FILE = open('logs/clinvar_components_db_errors.txt', 'w')
+
+def write_db_error(msg, err_obj):
+    DB_ERROR_FILE.write('%r: %s\n' % (err_obj, msg))
+    DB_ERROR_FILE.flush()
 
 def components_or_None(hgvs_p):
     try:
@@ -46,7 +51,14 @@ def process_row(dbrow):
             continue
 
         if seqvar:
-            lvg = LVGEnriched(seqvar)
+            try:
+                lvg = LVGEnriched(seqvar)
+            except Exception as error:
+                write_db_error('Could not create LVGEnriched object for %s' % seqvar, error)
+                log.debug('ERROR: %r' % error)
+                log.info('Could not create LVGEnriched object for %s' % seqvar)
+                return None
+
             for entry in lvg.hgvs_p:
                 comp = components_or_None(entry)
                 if comp and comp.ref:
@@ -61,7 +73,7 @@ def add_components_to_row(db, dbrow, comp):
         print('\tPos:%s' % comp.pos)
         print('\tAlt:%s' % comp.alt)
 
-        db.execute('update clinvar.variant_components set Ref=%s, Pos=%s, Alt=%s where variant_name=%s',
+        db.execute('update variant_components set Ref=%s, Pos=%s, Alt=%s where variant_name=%s',
                         dbrow['Ref'], dbrow['Pos'], dbrow['Alt'], dbrow['variant_name'])
 
     except AttributeError as error:
