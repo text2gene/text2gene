@@ -40,7 +40,7 @@ def process_row(dbrow):
         return comp
 
     for option in ['variant_name', 'HGVS_c']:
-        hgvs_text = dbrow[option]
+        hgvs_text = dbrow[option].strip()
         if hgvs_text is None:
             continue
 
