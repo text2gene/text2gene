@@ -35,19 +35,26 @@ def components_or_None(hgvs_p):
 def process_row(dbrow):
 
     # first try the HGVS_p (preferred)
-    comp = components_or_None(dbrow['HGVS_p'].replace('\u2013', '-'))
+    comp = components_or_None(dbrow['HGVS_p'])
     if comp:
         return comp
 
     for option in ['variant_name', 'HGVS_c']:
+        hgvs_text = dbrow[option]
+        if hgvs_text is None:
+            continue
+
         # look out for variants in this format:  NM_001363.4(DKC1):c.1058C>T (p.Ala353Val)
-        if (option.split()) > 1:
-            option = option.split()[0]    
+        if (hgvs_text.split()) > 1:
+            hgvs_text = hgvs_text.split()[0]
+
+        # beware the pesky N-dash in at least 1 observed ClinVar db entry.
+        hgvs_text = hgvs_text.replace('\u2013', '-')
 
         try:
-            seqvar = Variant(dbrow[option].replace('\u2013', '-'))
+            seqvar = Variant(hgvs_text)
         except (CriticalHgvsError, TypeError):
-            # empty
+            # empty or broken
             continue
 
         if seqvar:
