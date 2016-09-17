@@ -35,7 +35,7 @@ def components_or_None(hgvs_p):
 def process_row(dbrow):
 
     # first try the HGVS_p (preferred)
-    comp = components_or_None(dbrow['HGVS_p'])
+    comp = components_or_None(dbrow['HGVS_p'].replace('\u2013', '-'))
     if comp:
         return comp
 
@@ -45,7 +45,7 @@ def process_row(dbrow):
             option = option.split()[0]    
 
         try:
-            seqvar = Variant(dbrow[option])
+            seqvar = Variant(dbrow[option].replace('\u2013', '-'))
         except (CriticalHgvsError, TypeError):
             # empty
             continue
