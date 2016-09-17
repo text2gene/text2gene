@@ -40,9 +40,12 @@ def process_row(dbrow):
         return comp
 
     for option in ['variant_name', 'HGVS_c']:
-        hgvs_text = dbrow[option].strip()
+        hgvs_text = dbrow[option]
         if hgvs_text is None:
             continue
+
+        # basic string cleaning
+        hgvs_text = hgvs_text.strip()
 
         # look out for variants in this format:  NM_001363.4(DKC1):c.1058C>T (p.Ala353Val)
         if (hgvs_text.split()) > 1:
