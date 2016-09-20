@@ -5,7 +5,7 @@ SQLDEBUG = True
 
 import logging
 
-log = logging.getLogger()
+log = logging.getLogger('pubtatordb')
 
 def get_process_log(filepath, loglevel=logging.INFO, name=PKGNAME+'-process'):
     log = logging.getLogger(name)
