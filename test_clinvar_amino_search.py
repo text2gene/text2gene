@@ -21,7 +21,11 @@ def do_queries_for_lvg(lvg):
         try:
             comp = VariantComponents(variant)
             print(comp)
-            print(db.search(comp, lvg.gene_name))
+            result = db.search(comp, lvg.gene_name)
+            if result:
+                print('@@@ RESULTS for {gene} + {ref}|{pos}'.format(gene=lvg.gene_name, ref=comp.ref, pos=comp.pos))
+                for item in result:
+                    print('\t* %s' % item['PMID'])
         except Exception as error:
             print(error)
             print()
