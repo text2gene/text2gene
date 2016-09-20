@@ -16,22 +16,45 @@ clinvar_list = open('data/clinvar_random_samples.txt').readlines()
 #        print(sql_tmpl % (lvg.gene_name, comp.ref, comp.pos))
 
 
-def do_queries_for_lvg(lvg):
+def do_queries_for_lvg(lvg, strict=False):
+    pmids = set()
+    unusable = 0
+
     for variant in lvg.variants['p'].values():
         try:
             comp = VariantComponents(variant)
-            print(comp)
-            result = db.search(comp, lvg.gene_name)
+            result = db.search(comp, lvg.gene_name, strict=strict)
             if result:
                 print('@@@ RESULTS for {gene} + {ref}|{pos}'.format(gene=lvg.gene_name, ref=comp.ref, pos=comp.pos))
                 for item in result:
-                    print('\t* %s' % item['PMID'])
+                    pmids.add(item['PMID'])
         except Exception as error:
-            print(error)
-            print()
+            unusable += 1
+
+    print('[%s] %i p-vars (%i unusable)' % (lvg.seqvar, len(lvg.hgvs_p), unusable))
+
+    for pmid in pmids:
+        print('\t* %s' % pmid)
+    print()
+
+    return len(pmids)
+
+
+total_pmids_strict = 0
+total_pmids_loose = 0
 
 for line in clinvar_list:
     lvg = LVGEnriched(line.strip())
-    do_queries_for_lvg(lvg)
+    total_pmids_strict += do_queries_for_lvg(lvg, strict=True)
+    total_pmids_loose += do_queries_for_lvg(lvg, strict=False)
+
+
+print('Total in clinvar_list: %i' % len(clinvar_list))
+print('Total PMIDs *strict*: %i' % total_pmids_strict)
+print('Total PMIDs *loose*: %i' % total_pmids_loose)
+print()
+print('Done!')
+print()
+
 
 
