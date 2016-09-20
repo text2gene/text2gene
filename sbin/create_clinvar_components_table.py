@@ -159,7 +159,7 @@ def main():
             print('[%s] no usable amino acid components' % row['variant_name'])
             log.info(row['variant_name'] + ' - no usable amino acid components')
 
-    return dbtotal
+    return len(rows)
     
 if __name__=='__main__':
     dbtotal = main()
