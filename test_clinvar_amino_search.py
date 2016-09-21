@@ -10,7 +10,7 @@ db = ClinVarAminoDB()
 #clinvar_list = open('data/clinvar_random_samples.txt').readlines()
 
 clinvar_list = []
-identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components group by variant_name')
+identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components where variant_name like "NM_%" and Ref is not NULL and PMID is not NULL group by variant_name')
 for item in identity_list:
     clinvar_list.append(item['variant_name'].strip())
 

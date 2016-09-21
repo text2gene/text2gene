@@ -31,10 +31,13 @@ update clinvar.variant_components set HGVS_c = NULL where HGVS_c = '-';
 call log('components', 'removing entries without citations');
 delete from variant_components where PMID is NULL;
 
--- index on our most useful search fields
+-- index on our most useful search fields and also our component combo
 call create_index('variant_components', 'VariationID');
 call create_index('variant_components', 'PMID');
 call create_index('variant_components', 'Symbol');
+call create_index('variant_components', "Symbol,Pos,Ref");
+call create_index('variant_components', "Symbol,Pos,Ref,Alt");
+
 
 -- What have we now?
 call info;
