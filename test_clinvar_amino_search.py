@@ -5,15 +5,12 @@ from metavariant import VariantComponents, Variant
 
 db = ClinVarAminoDB()
 
-sql_tmpl = "select * from clinvar.variant_components where Symbol='%s' and Ref='%s' and Pos='%s'"
-
 #clinvar_list = open('data/clinvar_random_samples.txt').readlines()
 
 clinvar_list = []
-identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components')
+identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components group by variant_name order by rand()')
 for item in identity_list:
-    clinvar_list = item['variant_name'].strip()
-
+    clinvar_list.append(item['variant_name'].strip())
 
 #def print_queries_for_lvg(lvg):
 #    for variant in lvg.variants['p'].values():
