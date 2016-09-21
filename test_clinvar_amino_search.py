@@ -7,7 +7,13 @@ db = ClinVarAminoDB()
 
 sql_tmpl = "select * from clinvar.variant_components where Symbol='%s' and Ref='%s' and Pos='%s'"
 
-clinvar_list = open('data/clinvar_random_samples.txt').readlines()
+#clinvar_list = open('data/clinvar_random_samples.txt').readlines()
+
+clinvar_list = []
+identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components')
+for item in identity_list:
+    clinvar_list = item['variant_name'].strip()
+
 
 #def print_queries_for_lvg(lvg):
 #    for variant in lvg.variants['p'].values():
@@ -44,9 +50,12 @@ total_pmids_strict = 0
 total_pmids_loose = 0
 
 for line in clinvar_list:
-    lvg = LVGEnriched(line.strip())
-    total_pmids_strict += do_queries_for_lvg(lvg, strict=True)
-    total_pmids_loose += do_queries_for_lvg(lvg, strict=False)
+    try:
+        lvg = LVGEnriched(line.strip())
+        total_pmids_strict += do_queries_for_lvg(lvg, strict=True)
+        total_pmids_loose += do_queries_for_lvg(lvg, strict=False)
+    except:
+        pass
 
 
 print('Total in clinvar_list: %i' % len(clinvar_list))
