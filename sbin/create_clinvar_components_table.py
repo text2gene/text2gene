@@ -174,7 +174,7 @@ def main():
 
     log.info('Rows in %s: %i' % (SOURCE_TABLENAME, res['cnt']))
 
-    rows = db.fetchall('select * from '+SOURCE_TABLENAME+' order by rand() limit 100')
+    rows = db.fetchall('select * from '+SOURCE_TABLENAME+' order by rand()')
 
     count = 0
     total_added = 0
