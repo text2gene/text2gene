@@ -54,16 +54,16 @@ def get_ncbi_variant_report(hgvs_text):
     """
     Return results from API query to the NCBI Variant Reporter Service
     See documentation at:
-    http://www.ncbi.nlm.nih.gov/variation/tools/reporter
+    https://www.ncbi.nlm.nih.gov/variation/tools/reporter
 
     :param hgvs_text: ( c.DNA | r.RNA | p.Protein | g.Genomic )
     :return: list containing each dict of parsed results
     """
-    response = requests.get("http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
+    response = requests.get("https://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}".format(urllib.quote(hgvs_text)))
 
     if 'Error' in response.text:
         error_str = 'The NCBI Variant Report Service returned an error: "{}"\n'.format(response.text)
-        error_str += 'To reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text)
+        error_str += 'To reproduce, visit: https://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text)
         raise NCBIRemoteError(error_str)
 
     keys = []
@@ -85,7 +85,7 @@ def get_ncbi_variant_report(hgvs_text):
             report.append(outd)
 
     if report == []:
-        raise NCBIRemoteError('The NCBI Variant Report Service returned an empty report.\nTo reproduce, visit: http://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text))
+        raise NCBIRemoteError('The NCBI Variant Report Service returned an empty report.\nTo reproduce, visit: https://www.ncbi.nlm.nih.gov/projects/SNP/VariantAnalyzer/var_rep.cgi?annot1={}'.format(hgvs_text))
 
     return report
 

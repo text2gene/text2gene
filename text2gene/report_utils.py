@@ -21,7 +21,7 @@ log = logging.getLogger('text2gene')
 
 fetch = PubMedFetcher()
 
-GENEREVIEWS_URL = 'http://www.ncbi.nlm.nih.gov/books/{bookid}/'
+GENEREVIEWS_URL = 'https://www.ncbi.nlm.nih.gov/books/{bookid}/'
 
 
 
@@ -287,16 +287,16 @@ class Citation(object):
 
     @property
     def pubmed_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=self.pmid)
+        return 'https://www.ncbi.nlm.nih.gov/pubmed/{pmid}'.format(pmid=self.pmid)
 
     @property
     def pubtator_url(self):
-        url_tmpl = 'http://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={pmid}&searchtype=PubMed_Search&query={pmid}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax='
+        url_tmpl = 'https://www.ncbi.nlm.nih.gov/CBBresearch/Lu/Demo/PubTator/curator_identifier.cgi?user=User63310122&pmid={pmid}&searchtype=PubMed_Search&query={pmid}&page=1&Species_display=1&Chemical_display=1&Gene_display=1&Disease_display=1&Mutation_display=1&tax='
         return url_tmpl.format(pmid=self.pmid)
 
     @property
     def clinvar_url(self):
-        url_tmpl = 'http://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid={pmid}'
+        url_tmpl = 'https://www.ncbi.nlm.nih.gov/clinvar/?LinkName=pubmed_clinvar&uid={pmid}'
         return url_tmpl.format(pmid=self.pmid)
 
     @property
@@ -334,15 +334,15 @@ class GeneInfo(object):
 
     @property
     def ncbi_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/gene/{gene_id}'.format(gene_id=self.gene_id)
+        return 'https://www.ncbi.nlm.nih.gov/gene/{gene_id}'.format(gene_id=self.gene_id)
 
     @property
     def medgen_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/medgen?term={gene_name}%5BGene%5D'.format(gene_name=self.gene_name)
+        return 'https://www.ncbi.nlm.nih.gov/medgen?term={gene_name}%5BGene%5D'.format(gene_name=self.gene_name)
 
     @property
     def gtr_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/gtr/genes/{gene_id}'.format(gene_id=self.gene_id)
+        return 'https://www.ncbi.nlm.nih.gov/gtr/genes/{gene_id}'.format(gene_id=self.gene_id)
 
     @property
     def hgnc_url(self):
@@ -350,11 +350,11 @@ class GeneInfo(object):
 
     @property
     def gene_pubmeds_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/pubmed/?LinkName=gene_pubmed&from_uid={gene_id}'.format(gene_id=self.gene_id)
+        return 'https://www.ncbi.nlm.nih.gov/pubmed/?LinkName=gene_pubmed&from_uid={gene_id}'.format(gene_id=self.gene_id)
 
     @property
     def pubmed_clinical_query_url(self):
-        return 'http://www.ncbi.nlm.nih.gov/pubmed/clinical?term={}[Gene]#clincat=Diagnosis,Narrow;medgen=Genetic'.format(self.gene_name)
+        return 'https://www.ncbi.nlm.nih.gov/pubmed/clinical?term={}[Gene]#clincat=Diagnosis,Narrow;medgen=Genetic'.format(self.gene_name)
 
 
 def hgvs_to_clinvar_variationID(hgvs_text):
@@ -366,7 +366,7 @@ def hgvs_to_clinvar_variationID(hgvs_text):
 
 
 def get_variation_url(varID):
-    return 'http://www.ncbi.nlm.nih.gov/clinvar/variation/{var_id}'.format(var_id=varID)
+    return 'https://www.ncbi.nlm.nih.gov/clinvar/variation/{var_id}'.format(var_id=varID)
 
 
 def get_clinvar_tables_containing_variant(hgvs_text):
