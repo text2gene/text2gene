@@ -54,9 +54,9 @@ def do_queries_for_lvg(lvg, strict=False):
 
 def get_results_for_lvg(lvg, strict):
     num_pmids = do_queries_for_lvg(lvg, strict)
-    if str(lvg.seqvar).startswith('NM_'):
-        if not num_pmids:
-            print_line_in_clinvar_db(entry)
+    #if str(lvg.seqvar).startswith('NM_'):
+    #    if not num_pmids:
+    #        print_line_in_clinvar_db(entry)
     return num_pmids
 
 
