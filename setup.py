@@ -41,7 +41,7 @@ setup(
         'biopython',
         'uta',
         'hgvs',
-        'medgen',
+        'medgen-prime',
         'requests',  # ncbi and google query retrieval
         'flask',  # web api
         'gunicorn',  # web api
