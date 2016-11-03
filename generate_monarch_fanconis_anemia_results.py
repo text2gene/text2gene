@@ -17,7 +17,7 @@ otherlog = logging.getLogger('text2gene')
 otherlog.addHandler(logging.StreamHandler())
 otherlog.setLevel(logging.DEBUG)
 
-sample_sheet = open('data/monarch_fanconis_anemia_131.tsv').read().split('\n')
+sample_sheet = open('data/REDO_monarch_fanconis_anemia_131.tsv').read().split('\n')
 LOADED_EXAMPLES = []
 for line in sample_sheet:
     try:

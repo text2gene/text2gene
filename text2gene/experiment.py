@@ -365,3 +365,10 @@ class Experiment(SQLCache):
                     row['match_%s' % mod] = 1
             self.insert(self.summary_table_name, row)
 
+    def hgvs_list(self):
+        """ Returns full list of variants processed in this experiment. Can only be used AFTER 
+        Experiment has been run.
+        """
+        sql = 'select * from '+self.results_table_name
+        return self.fetchall(sql)
+

@@ -4,7 +4,7 @@ from metavariant import Variant
 from text2gene.experiment import Experiment
 
 experiment_name = 'monarch_fanconis_anemia'
-iteration = 131
+iteration = 132
 
 fh = logging.FileHandler('%s.%i.log' % (experiment_name, iteration))
 log = logging.getLogger('text2gene.experiment')
