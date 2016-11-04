@@ -9,9 +9,9 @@ alter table t2g_variant_summary add column PMID int(11) default null;
 
 -- get the citation number out of the var_citations table
 call log('components', 'enriching PMID column from var_citations table');
-update t2g_variant_summary VC, var_citations VarCit
-    set VC.PMID = VarCit.citation_id 
-    where VC.VariationID = VarCit.VariationID;
+update t2g_variant_summary t2g_VS, var_citations clinvar_VC
+    set t2g_VS.PMID = clinvar_VC.citation_id 
+    where t2g_VS.VariationID = clinvar_VC.VariationID;
 
 -- Remove entries that have no citation (what would be the point?)
 call log('components', 'removing entries without citations');
@@ -19,9 +19,9 @@ delete from t2g_variant_summary where PMID is NULL;
 
 -- complete the Symbol column direcly from the Gene database
 call log('components', 'completing Symbol (gene name) column using Gene database');
-update clinvar.t2g_variant_summary VC, gene.gene_info GDB
-    set VC.Symbol = GDB.Symbol
-    where VC.GeneID = GDB.GeneID;
+update clinvar.t2g_variant_summary VS, gene.gene_info GDB
+    set VS.Symbol = GDB.Symbol
+    where VS.GeneID = GDB.GeneID;
 
 -- Normalize!
 call log('components', 'normalizing hgvs columns to NULL if set to "-"');
