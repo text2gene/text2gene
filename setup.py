@@ -3,6 +3,11 @@ import glob, os
 from setuptools import setup, find_packages
 from setuptools.command.build_ext import build_ext as _build_ext
 
+# If you can't install in OS X becuase of -lssl linking errors, see:
+#
+# http://stackoverflow.com/questions/39767810/cant-install-psycopg2-package-through-pip-install-is-this-because-of-sierra
+# 
+
 class build_ext(_build_ext):
     # http://stackoverflow.com/questions/21605927/why-doesnt-setup-requires-work-properly-for-numpy/21621493
     def finalize_options(self):
@@ -51,3 +56,4 @@ setup(
         'Flask-BasicAuth',
         ],
     )
+
