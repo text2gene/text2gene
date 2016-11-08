@@ -139,6 +139,7 @@ def add_components_to_row(db, dbrow, comp):
         fvdict['PMID'] = dbrow['PMID']
         fvdict['Symbol'] = dbrow['Symbol']
         fvdict['GeneID'] = dbrow['GeneID']
+        fvdict['VariationID'] = dbrow['VariationID']
 
         print(fvdict)
         #if fvdict['fs_pos']:
