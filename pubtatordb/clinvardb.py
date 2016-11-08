@@ -15,19 +15,19 @@ class ClinVarAminoDB(SQLData):
 
     def search_clinvar_strict(self, comp, gene_name):
         if gene_name:
-            sql = 'select * from clinvar.variant_components where Symbol=%s and Ref=%s and Alt=%s and Pos=%s'
+            sql = 'select * from clinvar.t2g_hgvs_components where Symbol=%s and Ref=%s and Alt=%s and Pos=%s'
             args = (gene_name, comp.ref, comp.alt, comp.pos)
         else:
-            sql = 'select * from clinvar.variant_components where Ref=%s and Alt=%s and Pos=%s'
+            sql = 'select * from clinvar.t2g_hgvs_components where Ref=%s and Alt=%s and Pos=%s'
             args = (comp.ref, comp.alt, comp.pos)
         return self.fetchall(sql, *args)
 
     def search_clinvar_loose(self, comp, gene_name):
         if gene_name:
-            sql = 'select * from clinvar.variant_components where Symbol=%s and Ref=%s and Pos=%s'
+            sql = 'select * from clinvar.t2g_hgvs_components where Symbol=%s and Ref=%s and Pos=%s'
             args = (gene_name, comp.ref, comp.pos)
         else:
-            sql = 'select * from clinvar.variant_components where Ref=%s and Pos=%s'
+            sql = 'select * from clinvar.t2g_hgvs_components where Ref=%s and Pos=%s'
             args = (comp.ref, comp.pos)
         return self.fetchall(sql, *args)
 

@@ -1,8 +1,8 @@
 from text2gene.cached import NCBIVariantReportCachedQuery, ClinvarCachedQuery, PubtatorCachedQuery, NCBIVariantPubmedsCachedQuery
 from text2gene.lvg_cached import HgvsLVGCached
 
-HgvsLVGCached().drop_table()
-HgvsLVGCached().create_table()
+VariantLVGCached().drop_table()
+VariantLVGCached().create_table()
 
 ClinvarCachedQuery().drop_table()
 ClinvarCachedQuery().create_table()
