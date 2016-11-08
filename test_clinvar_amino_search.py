@@ -10,9 +10,9 @@ db = ClinVarAminoDB()
 #clinvar_list = open('data/clinvar_random_samples.txt').readlines()
 
 clinvar_list = []
-identity_list = db.fetchall('select distinct(variant_name) from clinvar.variant_components where variant_name like "NM_%" and Ref is not NULL and PMID is not NULL group by variant_name')
+identity_list = db.fetchall('select distinct(hgvs_text) from clinvar.t2g_hgvs_components where hgvs_text like "NM_%" and Ref is not NULL and PMID is not NULL group by hgvs_text')
 for item in identity_list:
-    clinvar_list.append(item['variant_name'].strip())
+    clinvar_list.append(item['hgvs_text'].strip())
 
 #def print_queries_for_lvg(lvg):
 #    for variant in lvg.variants['p'].values():
@@ -21,8 +21,8 @@ for item in identity_list:
 #        print(sql_tmpl % (lvg.gene_name, comp.ref, comp.pos))
 
 
-def print_line_in_clinvar_db(variant_name):
-    sql = 'select * from clinvar.variant_components where variant_name="%s"' % variant_name
+def print_line_in_clinvar_db(hgvs_text):
+    sql = 'select * from clinvar.t2g_hgvs_components where hgvs_text="%s"' % hgvs_text
     rows = db.fetchall(sql)
     for row in rows:
         print(row)
