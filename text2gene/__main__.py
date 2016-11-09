@@ -4,7 +4,6 @@ from medgen.api import GeneID, NCBIVariantPubmeds
 from hgvs.exceptions import HGVSParseError
 from metapub import FindIt
 
-from pubtatordb import PubtatorDB
 from metavariant import VariantComponents
 from metavariant.exceptions import RejectedSeqVar
 

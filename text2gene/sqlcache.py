@@ -10,7 +10,7 @@ import MySQLdb as mdb
 
 from medgen.config import config as medgen_config
 
-from pubtatordb.sqldata import SQLData, SQLdatetime
+from aminosearch.sqldata import SQLData, SQLdatetime
 
 log = logging.getLogger('text2gene.sqlcache')
 

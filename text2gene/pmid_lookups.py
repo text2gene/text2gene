@@ -4,8 +4,8 @@ from medgen.api import GeneID, ClinvarPubmeds
 from metavariant import VariantComponents, Variant
 from metavariant.exceptions import RejectedSeqVar
 
-from pubtatordb import PubtatorDB
-from pubtatordb.exceptions import PubtatorDBError
+from aminosearch import PubtatorDB
+from aminosearch.exceptions import PubtatorDBError
 
 from .config import log
 
