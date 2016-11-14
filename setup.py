@@ -19,7 +19,7 @@ class build_ext(_build_ext):
 
 setup(
     name = 'text2gene',
-    version = '0.0.5.2',
+    version = '0.0.6',
     description = 'genetic variant lvg and medical genetics search for relevant literature',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
@@ -28,6 +28,7 @@ setup(
     license = 'Apache 2.0',
     packages = find_packages(),
     entry_points = { 'console_scripts': [
+                            'aminosearch = aminosearch.__main__:main',
                             'hgvs_search_pubtator = text2gene.__main__:cli_pubtator_search_string',
                             'hgvsfile_search_pubtator= text2gene.__main__:cli_pubtator_search_file', 
                             'hgvs2pmid = text2gene.__main__:cli_hgvs2pmid',

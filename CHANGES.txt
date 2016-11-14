@@ -1,3 +1,4 @@
 2/2/2016, 0.0.x -- text2gene initial development (no logged changes until 0.1.0 release).
 8/2/2016, 0.0.5 -- advent of CitationTable approach to collating results.
 8/26/2016, 0.0.5.3 -- CitationTable: "unmapped_citations" new attribute
+11/14/2016, 0.0.6 -- Advent of AminoSearch

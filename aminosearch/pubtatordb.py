@@ -36,11 +36,16 @@ class PubtatorDB(SQLData):
         return self._fetchall_or_raise_pubtatordberror(sql, comp, *args)
 
     def search_proteins(self, comp, gene_id, strict=False):
+        if not comp.edittype:
+            tablename = 'm2p_general'
+        else:
+            tablename = 'm2p_%s' % comp.edittype
+
         if gene_id:
-            sql = 'select distinct M.* from gene2pubtator G, m2p_'+comp.edittype+' M where G.PMID = M.PMID and G.GeneID=%s and Pos=%s and SeqType="p" and Ref=%s'
+            sql = 'select distinct M.* from gene2pubtator G, '+tablename+' M where G.PMID = M.PMID and G.GeneID=%s and Pos=%s and SeqType="p" and Ref=%s'
             args = (gene_id, comp.pos, comp.ref)
         else:
-            sql = 'select distinct * from m2p_'+comp.edittype+' where SeqType=%s and Pos=%s and SeqType="p" and Ref=%s'
+            sql = 'select distinct * from '+tablename+' where SeqType=%s and Pos=%s and SeqType="p" and Ref=%s'
             args = (comp.seqtype, comp.pos, comp.ref)
 
         if strict:
@@ -48,3 +53,4 @@ class PubtatorDB(SQLData):
             args = (args, comp.alt)
 
         return self._fetchall_or_raise_pubtatordberror(sql, comp, *args)
+

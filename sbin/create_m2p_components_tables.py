@@ -72,6 +72,29 @@ def write_missing_position(row):
     FH_MISSING_POSITION.flush()
 
 
+
+def create_all_edittype_table(db):
+    """Creates an m2p_general table to store mixed bag of all edit types.
+
+    (Useful mostly for aminochange searches.)
+
+    :param db: SQLData object already connected to MySQL PubTator database.
+    """
+    db.execute('''CREATE TABLE m2p_general (
+      PMID int(10) unsigned DEFAULT NULL,
+      Components varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+      Mentions text COLLATE utf8_unicode_ci NOT NULL,
+      SeqType varchar(255) default NULL,
+      EditType varchar(255) default NULL,
+      Ref varchar(255) default NULL,
+      Pos varchar(255) default NULL,
+      Alt varchar(255) default NULL,
+      DupX varchar(255) default NULL,
+      FS_Pos varchar(255) default NULL,
+      RS varchar(255) default NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci''')
+
+
 def create_component_table(db, edit_type):
     """Creates an m2p_<EditType> table depending on the supplied `edit_type`
 
@@ -223,6 +246,12 @@ def setup_db():
         print('@@@ Created %s table in PubTator database.' % tname)
         print('')
 
+    # m2p_general
+    db.drop_table('m2p_general')
+    create_all_edittype_table(db)
+    print('@@@ Created m2p_general table in PubTator database.')
+    print('')
+
     # CREATE INDEXES on each component part column.
     print('@@@ Creating indexes on all tables...')
     for key in component_patterns:
@@ -232,6 +261,13 @@ def setup_db():
             db.execute("call create_index('m2p_%s', 'Ref')" % key)
             db.execute("call create_index('m2p_%s', 'Pos')" % key)
             db.execute("call create_index('m2p_%s', 'Alt')" % key)
+
+    # m2p_general
+    db.execute("call create_index('m2p_general', 'Ref')")
+    db.execute("call create_index('m2p_general', 'Pos')")
+    db.execute("call create_index('m2p_general', 'Alt')")
+    db.execute("call create_index('m2p_general', 'SeqType')")
+    db.execute("call create_index('m2p_general', 'EditType')")
 
     print('@@@ Setting up gene2mutation2pubmed table (with indexes)...')
     create_gene2mutation2pubmed_table(db)
@@ -261,6 +297,9 @@ def main_one_at_a_time():
                 sys.stdout.flush()
 
             db.insert('m2p_' + new_row['EditType'].upper(), new_row)
+
+            # m2p_general
+            db.insert('m2p_general', new_row)
 
         else:
             broken += 1
@@ -311,6 +350,9 @@ def main():
         row_index = 0
         while row_index < len(rows):
             db.batch_insert(tname, rows[row_index:row_index + ROW_LIMIT])
+
+            # m2p_general
+            db.batch_insert('m2p_general', rows[row_index:row_index + ROW_LIMIT])
             row_index = row_index + ROW_LIMIT
 
         total_added += len(rows)
