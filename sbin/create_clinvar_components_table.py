@@ -101,6 +101,7 @@ def process_row(db, dbrow):
         if seqvar:
             variants[seqvar.type].append(seqvar)
 
+    # use the first usable variant to construct an LVG for this variant.
     lex = None
     for seqtype in ['c', 'g', 'n']:
         if variants[seqtype]:
@@ -110,19 +111,31 @@ def process_row(db, dbrow):
             if lex:
                 break
 
+    # collect a unique set of protein variants stripped of parentheses.
+    hgvs_ps = set()
     comp = components_or_None(dbrow['HGVS_p'])
     if comp:
-        hgvs_p = '%s' % Variant(dbrow['HGVS_p'])
-        if (lex is None) or (hgvs_p not in lex.hgvs_p):
+        # treat "uncertain" protein effects as unneeded duplicates of the "certain" ones.
+        hgvs_ps.add(('%s' % Variant(dbrow['HGVS_p'])).replace(')','').replace('(',''))
+
+    # add non-p-vars to the database
+    if lex:
+        for item in lex.hgvs_p:
+            hgvs_ps.add(item.replace(')','').replace('(',''))
+        
+        for seqtype in ['c', 'g', 'n']:
+            for seqvar in lex.variants[seqtype].values():
+                comp = components_or_None(seqvar)
+                if comp:
+                    if add_components_to_row(db, dbrow, comp):
+                        added_components.append(comp)
+
+    # and now add the proteins
+    for hgvs_p in hgvs_ps:
+        comp = components_or_None(Variant(hgvs_p))
+        if comp:
             if add_components_to_row(db, dbrow, comp):
                 added_components.append(comp)
-
-    if lex:
-        for seqvar in lex.seqvars:
-            comp = components_or_None(seqvar)
-            if comp:
-                if add_components_to_row(db, dbrow, comp):
-                    added_components.append(comp)
 
     return added_components
 

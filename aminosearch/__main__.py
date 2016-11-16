@@ -13,16 +13,25 @@ def search_aminoDBs(gene, achg):
     print('[%s]' % achg)
     comp = VariantComponents(aminochange=achg)
 
-    gene_id = GeneID(gene)
+    print('[%s] Posedit: %s' % (achg, comp.posedit))
+    print('[%s] Slang: %r' % (achg, comp.posedit_slang))
 
-    results = cvdb.search(comp, gene_id, strict=False)
-    print('[%s] Clinvar LOOSE matches: %r' % (achg, results))
+    gene_id = GeneID(gene)
+    print('[%s] Gene: %s (ID: %i)' % (achg, gene, gene_id))
+
+    #results = cvdb.search(comp, gene_id, strict=False)
+    #print('[%s] Clinvar LOOSE matches: %r' % (achg, results))
 
     results = cvdb.search(comp, gene_id, strict=True)
-    print('[%s] Clinvar STRICT matches: %r' % (achg, results))
+    print('[%s] Clinvar STRICT matches: %i' % (achg, len(results)))
+    
+    for res in results:
+        print('[%s]' % achg, res['PMID'], res['hgvs_text'], res['VariationID'], res['Symbol'], res['Ref'], res['Pos'], res['Alt'])
 
     results = pubdb.search_proteins(comp, gene_id)
-    print('[%s] PubtatorDB matches: %r' % (achg, results)) 
+    print('[%s] PubtatorDB matches: %i' % (achg, len(results)))
+    for res in results:
+        print('[%s]' % achg, res['PMID'], res['Mention'], res['Components'])
 
 def main():
     import sys
