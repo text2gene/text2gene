@@ -12,6 +12,9 @@ pubdb = PubtatorDB()
 def search_aminoDBs(gene, achg):
     print('[%s]' % achg)
     comp = VariantComponents(aminochange=achg)
+    if not comp:
+        print('[%s] INVALID Amino Change' % achg)
+        return
 
     print('[%s] Posedit: %s' % (achg, comp.posedit))
     print('[%s] Slang: %r' % (achg, comp.posedit_slang))
@@ -31,7 +34,7 @@ def search_aminoDBs(gene, achg):
     results = pubdb.search_proteins(comp, gene_id)
     print('[%s] PubtatorDB matches: %i' % (achg, len(results)))
     for res in results:
-        print('[%s]' % achg, res['PMID'], res['Mention'], res['Components'])
+        print(res)
 
 def main():
     import sys
