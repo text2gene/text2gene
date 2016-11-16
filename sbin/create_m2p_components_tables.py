@@ -252,6 +252,11 @@ def setup_db():
     print('@@@ Created m2p_general table in PubTator database.')
     print('')
 
+    print('@@@ Setting up gene2mutation2pubmed table (with indexes)...')
+    create_gene2mutation2pubmed_table(db)
+    return db
+
+def create_indices(db):
     # CREATE INDEXES on each component part column.
     print('@@@ Creating indexes on all tables...')
     for key in component_patterns:
@@ -268,11 +273,6 @@ def setup_db():
     db.execute("call create_index('m2p_general', 'Alt')")
     db.execute("call create_index('m2p_general', 'SeqType')")
     db.execute("call create_index('m2p_general', 'EditType')")
-
-    print('@@@ Setting up gene2mutation2pubmed table (with indexes)...')
-    create_gene2mutation2pubmed_table(db)
-    return db
-
 
 def main_one_at_a_time():
     db = setup_db()
@@ -303,6 +303,8 @@ def main_one_at_a_time():
 
         else:
             broken += 1
+
+    create_indices(db)
 
     print('')
     print('@@@ RESULTS:')
@@ -357,6 +359,7 @@ def main():
 
         total_added += len(rows)
 
+    create_indices(db)
     print('')
     print('@@@ RESULTS:')
     print('Total rows processed from mutation2pubtator:', total + broken)
