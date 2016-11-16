@@ -4,5 +4,4 @@ call create_index('t2g_hgvs_components', 'PMID');
 call create_index('t2g_hgvs_components', 'Symbol');
 call create_index('t2g_hgvs_components', "Symbol,Pos,Ref");
 call create_index('t2g_hgvs_components', "Symbol,Pos,Ref,Alt");
-ALTER TABLE t2g_hgvs_components ADD UNIQUE INDEX pmid_hgvs (PMID, hgvs_text);
 

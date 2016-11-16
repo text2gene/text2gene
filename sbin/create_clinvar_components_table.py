@@ -10,6 +10,7 @@ from pubtatordb.sqldata import SQLData
 from pubtatordb.config import get_process_log
 
 import re
+import subprocess
 
 SOURCE_TABLENAME = 'clinvar.t2g_variant_summary'
 TARGET_TABLENAME = 'clinvar.t2g_hgvs_components'
@@ -174,10 +175,31 @@ def main():
     global GOOD
 
     db = ClinVarDB()
-    log.info('Started "create_clinvar_components_table.py"')
     
     # hello, are you there MySQL? It's me, python.
     db.ping()
+    
+    print('(Re)creating clinvar component table', TARGET_TABLENAME)
+
+    db.drop_table(TARGET_TABLENAME)
+    db.execute("call log('components', 'creating "+TARGET_TABLENAME+" table')")
+    db.execute('''create table '''+TARGET_TABLENAME+''' (
+        id int(11) primary key auto_increment,
+        VariationID int(11),
+        hgvs_text varchar(255),
+        PMID int(11) default null,
+        GeneID int(11) default null,
+        Symbol varchar(20) default null,
+        Ref varchar(10) default null,
+        Pos int(11) default null,
+        Alt varchar(10) default null,
+        EditType varchar(25) default null,
+        SeqType varchar(10) default null)''')
+
+    log.info('Rebuilding %s', TARGET_TABLENAME)
+
+    log.info('Creating unique index on PMID-hgvs_text')
+    db.execute('ALTER TABLE '+TARGET_TABLENAME+' ADD UNIQUE INDEX pmid_hgvs (PMID, hgvs_text)')
 
     try:
         res = db.fetchrow('select count(*) as cnt from %s' % SOURCE_TABLENAME)
@@ -203,10 +225,11 @@ def main():
         total_added += len(results)
 
     return len(rows), total_added
-    
-if __name__=='__main__':
-    dbtotal, added = main()
 
+
+if __name__=='__main__':
+
+    dbtotal, added = main()
     print('@@@ FINISHED!!!!')
     print()
     print('good:', GOOD)
@@ -215,4 +238,10 @@ if __name__=='__main__':
     print('component rows added:', added)
     print('-----------')
     print()
+    print('Sourcing sbin/clinvar_components_index.sql...')
+
+    cmd = 'mysql -u medgen -pmedgen -D clinvar < sbin/clinvar_components_index.sql'
+
+    print(subprocess.call(cmd, shell=True))
+
 
