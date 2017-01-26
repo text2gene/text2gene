@@ -1,0 +1,15 @@
+fabric
+Flask
+gunicorn
+hgvs
+ipython
+medgen-prime
+metapub
+metavariant
+MySQL-python
+numpy
+PySQLPool
+pytest
+requests
+uta
+virtualenv
