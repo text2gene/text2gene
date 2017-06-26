@@ -8,6 +8,7 @@ from medgen.annotate.gene import GeneSynonyms
 
 from metapub import PubMedFetcher, FindIt
 from metapub.utils import rootdomain_of
+from metapub.exceptions import InvalidPMID
 
 from flask import Markup
 
@@ -223,7 +224,12 @@ class Citation(object):
     def __init__(self, pmid, **kwargs):
 
         self.pmid = pmid
-        self.pma = fetch.article_by_pmid(pmid)
+        try:
+            self.pma = fetch.article_by_pmid(pmid)
+        except InvalidPMID:
+            # we hope this doesn't happen too often (these IDs should have been vetted by now),
+            # but CYA here applies... 
+            return None
 
         self.in_pubtator = kwargs.get('pubtator', False)
         self.in_ncbi = kwargs.get('ncbi', False)

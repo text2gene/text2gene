@@ -1,3 +1,7 @@
+            #ncbi_bullets {
+                list-style: none;
+            }            
+
             #torso {
                 margin: 20px;
             }
