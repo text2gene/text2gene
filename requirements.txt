@@ -8,8 +8,10 @@ metapub
 metavariant
 MySQL-python
 numpy
+pip
 PySQLPool
 pytest
 requests
+setuptools
 uta
 virtualenv
