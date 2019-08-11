@@ -29,7 +29,7 @@ def search_aminoDBs(gene, achg):
     print('[%s] Clinvar STRICT matches: %i' % (achg, len(results)))
     
     for res in results:
-        print('[%s]' % achg, res['PMID'], res['hgvs_text'], res['VariationID'], res['Symbol'], res['Ref'], res['Pos'], res['Alt'])
+        print('[%s]' % achg, res['PMID'], res['HGVS'], res['VariationID'], res['Symbol'], res['Ref'], res['Pos'], res['Alt'])
 
     results = pubdb.search_proteins(comp, gene_id)
     print('[%s] PubtatorDB matches: %i' % (achg, len(results)))

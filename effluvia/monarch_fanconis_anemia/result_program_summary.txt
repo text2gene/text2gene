@@ -1,0 +1,145 @@
+list index out of range
+NM_021922.2(FANCE):c.355C>T parsed
+NM_000135.2(FANCA):c.4015delC parsed
+NM_058216.2(RAD51C):c.966-?_1026+?del cannot be parsed
+NM_004629.1(FANCG):c.1183_1192delGAGGTGTTTT parsed
+NM_000059.3(BRCA2):c.658_659delGT parsed
+NM_058216.1(RAD51C):c.(?_-1)_(*1_?)del cannot be parsed
+NM_058216.2(RAD51C):c.905-2A>C parsed
+BRCA2, cannot be parsed
+BRCA2, cannot be parsed
+BRCA2, cannot be parsed
+BRCA2, cannot be parsed
+NM_022725.3(FANCF):c.230_252del23 parsed
+BRCA2, cannot be parsed
+NM_058216.2(RAD51C):c.773G>A parsed
+NM_058216.2(RAD51C):c.224dupA parsed
+FANCB, cannot be parsed
+NM_014176.3(UBE2T):c.179+5G>A parsed
+NM_000135.2(FANCA):c.2557C>T parsed
+NM_014176.3(UBE2T):c.4C>G parsed
+FANCB, cannot be parsed
+NM_001113378.1(FANCI):c.2422A>T parsed
+NM_000136.2(FANCC):c.65G>A parsed
+FANCA, cannot be parsed
+NM_032043.2(BRIP1):c.1045G>C parsed
+FANCC, cannot be parsed
+NM_000136.2(FANCC):c.844-1G>C parsed
+NM_000136.2(FANCC):c.1555dupA parsed
+FANCD2, cannot be parsed
+NM_004629.1(FANCG):c.307+1G>C parsed
+NM_000135.2(FANCA):c.513G>A parsed
+SLX4, cannot be parsed
+NM_000135.2(FANCA):c.3788_3790delTCT parsed
+NM_024675.3(PALB2):c.1653T>A parsed
+NM_004629.1(FANCG):c.1066C>T parsed
+NM_024675.3(PALB2):c.1676_1677delAAinsG parsed
+NM_000136.2(FANCC):c.67delG parsed
+PALB2:c.49-?_2586+?del cannot be parsed
+NM_004629.1(FANCG):c.925-2A>G parsed
+NM_024675.3(PALB2):c.3549C>G parsed
+NM_004629.1(FANCG):c.1794_1803delCTGGATCCGT parsed
+NM_000135.2(FANCA):c.3720_3724delAAACA parsed
+NM_004629.1(FANCG):c.1480+1G>C parsed
+BRCA2, cannot be parsed
+NM_004629.1(FANCG):c.637_643delTACCGCC parsed
+NM_024675.3(PALB2):c.2962C>T parsed
+FANCB, cannot be parsed
+NM_058216.2(RAD51C):c.93delG parsed
+FANCB, cannot be parsed
+NM_024675.3(PALB2):c.3116delA parsed
+NM_007294.3(BRCA1):c.594_597delTGTG parsed
+NM_058216.2(RAD51C):c.572-?_*120+?del cannot be parsed
+NM_058216.2(RAD51C):c.(?_-1)_837+?del cannot be parsed
+NM_000135.2(FANCA):c.987_990delTCAC parsed
+NM_024675.3(PALB2):c.395delT parsed
+NM_058216.2(RAD51C):c.577C>T parsed
+NM_021922.2(FANCE):c.421C>T parsed
+NM_024675.3(PALB2):c.2393_2394insCT parsed
+NM_022725.3(FANCF):c.349_395del47 parsed
+NM_000059.3(BRCA2):c.8732C>A parsed
+NM_022725.3(FANCF):c.16C>T parsed
+NM_000135.2(FANCA):c.2574C>G parsed
+NM_022725.3(FANCF):c.484_485delCT parsed
+NM_022725.3(FANCF):c.327C>G parsed
+FANCB, cannot be parsed
+NM_024675.3(PALB2):c.3323delA parsed
+NM_000135.2(FANCA):c.3066+1G>T parsed
+NM_000136.2(FANCC):c.520C>T parsed
+NM_000135.2(FANCA):c.1615delG parsed
+FANCA, cannot be parsed
+NM_000136.2(FANCC):c.553C>T parsed
+NM_024675.3(PALB2):c.2521delA parsed
+NM_000136.2(FANCC):c.1487T>G parsed
+NM_000135.2(FANCA):c.1007_3066del parsed
+NM_001018115.2(FANCD2):c.958C>T parsed
+NM_000136.2(FANCC):c.37C>T parsed
+SLX4, cannot be parsed
+NM_058216.2(RAD51C):c.405-1G>C parsed
+NM_058216.2(RAD51C):c.97_98delCA parsed
+NM_032043.2(BRIP1):c.2392C>T parsed
+NM_000135.2(FANCA):c.894_1006del113 parsed
+NM_000136.2(FANCC):c.1661T>C parsed
+FANCA, cannot be parsed
+NM_001114636.1(FANCL):c.1111_1114dupATTA parsed
+NM_033084.4(FANCD2):c.2097_2099delCCT parsed
+NM_018062.3(FANCL):c.822-15_822-9delins177 cannot be parsed
+NM_000136.2(FANCC):c.456+4A>T parsed
+NM_001018115.2(FANCD2):c.904C>T parsed
+NM_000135.2(FANCA):c.3558dupG parsed
+SLX4, cannot be parsed
+FANCG, cannot be parsed
+NM_000136.2(FANCC):c.165+1G>T parsed
+NM_004629.1(FANCG):c.313G>T parsed
+SLX4, cannot be parsed
+NM_001018115.2(FANCD2):c.3707G>A parsed
+NM_000136.2(FANCC):c.1642C>T parsed
+SLX4, cannot be parsed
+NM_000135.2(FANCA):c.1606delT parsed
+FANCD2, cannot be parsed
+NM_058216.2(RAD51C):c.97C>T parsed
+NM_000059.3(BRCA2):c.631+2T>G parsed
+NM_005236.2(ERCC4):c.689T>C parsed
+FANCI, cannot be parsed
+NM_007294.3(BRCA1):c.5095C>T parsed
+FANCB, cannot be parsed
+NM_005236.2(ERCC4):c.2065C>A parsed
+NM_000059.3(BRCA2):c.9196C>T parsed
+NM_000059.3(BRCA2):c.631+1G>A parsed
+NM_058216.2(RAD51C):c.572-?_*(1_?)del cannot be parsed
+NM_005236.2(ERCC4):c.2371_2398dup28 parsed
+NM_058216.2(RAD51C):c.397C>T parsed
+NM_000059.3(BRCA2):c.5946delT parsed
+FANCL, cannot be parsed
+FANCI, cannot be parsed
+FANCL, cannot be parsed
+NM_001113378.1(FANCI):c.3854G>A parsed
+FANCB, cannot be parsed
+NM_001113378.1(FANCI):c.3853C>T parsed
+NM_022725.3(FANCF):c.690delT parsed
+NM_058216.2(RAD51C):c.706-?_*120+?del cannot be parsed
+NM_001114636.1(FANCL):c.268delC parsed
+NM_000135.2(FANCA):c.1115_1118delTTGG parsed
+FANCE, cannot be parsed
+NM_001114636.1(FANCL):c.430delT parsed
+OMIM:227645.0003 cannot be parsed
+SLX4, cannot be parsed
+NM_000059.3(BRCA2):c.7529T>C parsed
+NM_005236.2(ERCC4):c.1484_1488delCTCAA parsed
+NM_024675.3(PALB2):c.757_758delCT parsed
+NM_000059.3(BRCA2):c.8219T>A parsed
+NM_000059.3(BRCA2):c.4648G>T parsed
+NM_058216.2(RAD51C):c.1027-2A>G parsed
+
+====================================
+Parsed: 91
+Unparseable: 40
+Found PMIDs: 85
+Found NEW PMIDS: 73
+No new PMIDs: 18
+Had zero before T2G: 19
+
+Pct of parseable variants annotated with new evidence: 80
+Pct of parseable variants annotated by Text2Gene: 93
+
+Number variants with zero evidence newly annotated by Text2Gene: 19

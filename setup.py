@@ -39,15 +39,10 @@ setup(
     setup_requires = ['setuptools', 'numpy'],
     package_data={'text2gene': ['config/*.ini']},
     install_requires = [
-        # 'mysqlclient',  # py3k only
-        'pysqlpool',      # py2k only
         'pytz',
         'pyrfc3339',
-        'numpy',
-        'biopython',
-        'uta',
-        'hgvs',
-        'medgen-prime',
+        # 'medgen-prime',  # install manually until medgen-prime is republished.
+        'mysql-connector-python',
         'requests',  # ncbi and google query retrieval
         'flask',  # web api
         'gunicorn',  # web api
