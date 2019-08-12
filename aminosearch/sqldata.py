@@ -1,12 +1,8 @@
-from __future__ import absolute_import, unicode_literals
+import logging
 
 from pyrfc3339 import parse
-
-import MySQLdb as mdb
+import MySQLdb
 import MySQLdb.cursors as cursors
-import PySQLPool
-
-import logging
 
 from .config import DATABASE, SQLDEBUG, get_data_log
 
@@ -23,6 +19,10 @@ DEFAULT_NAME = DATABASE['name']
 
 
 SQLDATE_FMT = '%Y-%m-%d %H:%M:%S'
+
+def EscapeString(value):
+    "Ensures utf-8 encoding of values going into tables."
+    return value.encode("utf-8")
 
 def SQLdatetime(pydatetime_or_string):
     if hasattr(pydatetime_or_string, 'strftime'):
@@ -42,35 +42,63 @@ class SQLData(object):
         self._db_pass = kwargs.get('pass', None) or DEFAULT_PASS
         self._db_name = kwargs.get('name', None) or DEFAULT_NAME
 
+        self.conn = None
+
     def connect(self):
-        return PySQLPool.getNewConnection(username=self._db_user, 
-                                          password=self._db_pass, host=self._db_host, db=self._db_name,
-                                          charset='utf8', use_unicode=True)
+        self.conn = MySQLdb.connect(passwd=self._db_pass,
+                                    user=self._db_user,
+                                    db=self._db_name,
+                                    host=self._db_host,
+                                    cursorclass=cursors.DictCursor,
+                                    charset='utf8',
+                                    use_unicode=True,
+                                   )
+        return self.conn
 
     def cursor(self, execute_sql=None):
-        conn = self.connect()
-        cursor = conn.cursor(cursors.DictCursor)
+        if not self.conn:
+            self.connect()
+        cursor = self.conn.cursor(cursors.DictCursor)
 
         if execute_sql is not None:
             cursor.execute(execute_sql)
 
-        return [conn, cursor]
+        return cursor
 
     def fetchall(self, select_sql, *args):
-        try:
-            return self.execute(select_sql, *args).record
-        #except mdb.Error as err:
-        #    log.warn(err)
-        #    return None
-        except TypeError:
-            # no results
-            return []
+        """ For submitted select_sql with interpolation strings meant to match
+        with supplied *args, build and execute the statement and fetch all results.
+
+        Results will be returned as a list of dictionaries.
+
+        Example:
+            DB.fetchall('select HGVS from clinvar where PMID="%s"', ('21129721',))
+
+        :param select_sql: (str)
+        :returns: results as list of dictionaries
+        :rtype: list
+        """
+        # this line opens a cursor, executes, gets the data, and closes the cursor.
+        if args:
+            results = self.cursor(select_sql % args).fetchall()
+        else:
+            results = self.cursor(select_sql).fetchall()
+            
+        return results
 
     def fetchrow(self, select_sql, *args):
-        results = self.fetchall(select_sql, *args)
-        return results[0] if results else None
+        """
+        If the query was successful:
+            if 1 or more rows was returned, returns the first one
+            else returns None
+        Else:
+            raises Exception
+        """
+        res = self.fetchall(select_sql, *args)
+        return res[0] if len(res) > 0 else Noneo
 
-    def fetchID(self, select_sql, id_colname='ID', *args):
+    def fetchID(self, select_sql, *args, **kwargs):
+        id_colname = kwargs.get('id_colname', 'ID')
         try:
             return self.fetchrow(select_sql, *args)[id_colname]
         except TypeError:
@@ -109,9 +137,9 @@ class SQLData(object):
                     val = '%s' % val.strftime(SQLDATE_FMT)
             elif hasattr(val, 'lower'):
                 if quote_values:
-                    val = '"%s"' % mdb.escape_string(val)
+                    val = '"%s"' % EscapeString(val)
                 else:
-                    val = '%s' % mdb.escape_string(val)
+                    val = '%s' % EscapeString(val)
             elif val is None:
                 val = 'NULL'
             else:
@@ -143,10 +171,9 @@ class SQLData(object):
             all_values.append('(%s)' % ','.join(values))
 
         sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
-
-        queryobj = self.execute(sql)        #, *tuple(all_values))
-        # # retrieve and return the row id of the insert. returns 0 if insert failed.
-        return queryobj.lastInsertID      # unclear what this would do. return a list?
+        cursor = self.cursor(sql)
+        #TODO: anything we can do with the cursor object to report on success?
+        print(cursor)
 
     def insert(self, tablename, field_value_dict, None_as_null=False):
         """ Insert field_value_dict into indicated tablename.
@@ -162,9 +189,11 @@ class SQLData(object):
         fields, values = self._get_fields_and_values(field_value_dict, None_as_null=None_as_null, quote_values=False)
 
         sql = 'insert into %s (%s) values (%s)' % (tablename, ','.join(fields), ','.join(['%s' for _ in values]))
-        queryobj = self.execute(sql, *tuple(values))
-        # retrieve and return the row id of the insert. returns 0 if insert failed.
-        return queryobj.lastInsertID
+
+        #copied in from medgen. 
+        cursor = self.execute(sql, *values)
+        cursor.close()
+        return self.conn.insert_id()
 
     def drop_table(self, tablename):
         return self.execute('drop table if exists ' + tablename)
@@ -173,15 +202,24 @@ class SQLData(object):
         return self.execute('truncate ' + tablename)
 
     def execute(self, sql, *args):
-        queryobj = PySQLPool.getNewQuery(self.connect(), commitOnEnd=True)
-        if args:
+        """
+        Executes arbitrary sql string in current database connection.
+        Use this method's args for positional string interpolation into sql.
+
+        :param sql: (str)
+        :return: MySQLdb cursor object
+        """
+        log.debug('SQL.execute ' + sql, *args)
+
+        try:
+            cursor = self.cursor(sql % args)
             log.debug('SQL.execute ' + sql % args)
-            queryobj.Query(sql, args)
-        else:
-            log.debug('SQL.execute ' + sql)
-            queryobj.Query(sql)
+        except Exception as err:
+            log.info('Medgen SQL ERROR: %r' % err)
+            full_sql = sql % args
+            log.info('Tripped on a piece of SQL: ' + full_sql)
         log.debug('#######')
-        return queryobj
+        return cursor
 
     def ping(self):
         """
@@ -191,7 +229,7 @@ class SQLData(object):
         try:
             return self.schema_info()
 
-        except mdb.Error as err:
+        except Exception as err:
             log.error('DB connection is dead %d: %s', err.args[0], err.args[1])
             return False
 

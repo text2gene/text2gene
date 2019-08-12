@@ -40,7 +40,7 @@ drop table if exists t2g_hgvs_components;
 create table t2g_hgvs_components (
     id int(11) primary key auto_increment,
     VariationID int(11),
-    hgvs_text varchar(255),
+    HGVS varchar(255),
     PMID int(11) default null,
     GeneID int(11) default null,
     Symbol varchar(20) default null,

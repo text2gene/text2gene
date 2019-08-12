@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from text2gene import LVGEnriched
 
 from text2gene.ncbi import NCBIEnrichedLVGCachedQuery

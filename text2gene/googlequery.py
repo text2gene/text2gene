@@ -5,7 +5,6 @@ import os
 import logging
 import urllib
 import hashlib
-from urlparse import urlparse       # !not Py3k safe
 
 import requests
 
@@ -104,7 +103,7 @@ class GoogleCSEResult(object):
         self._fill_variables_from_cse_result(item)
 
         # if this an Excel spreadsheet it can fuck right off. See T2G-73
-        path = urlparse(self.url).path
+        path = urllib.urlparse(self.url).path
         ext = os.path.splitext(path)[1]
         if ext in self.TYPES_WE_DONT_LIKE:
             self.error = 'Ignoring unwanted filetype "{ext}" from result {url}'.format(ext=ext, url=self.url)

@@ -7,8 +7,8 @@ import sys
 
 from metavariant import VariantComponents
 
-from pubtatordb.sqldata import SQLData
-from pubtatordb.config import get_data_log
+from aminosearch.sqldata import SQLData
+from aminosearch.config import get_data_log
 
 log = get_data_log('logs/sqldata.log')
 
