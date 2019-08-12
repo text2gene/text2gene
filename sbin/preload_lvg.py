@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function
-
 import time
 
 from medgen.api import ClinVarDB

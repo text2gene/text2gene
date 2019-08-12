@@ -1,6 +1,6 @@
 import json
 
-from pubtatordb import sqldata
+from aminosearch import sqldata
 
 M2P_JSON_DATA = 'data/m2p.json'
 
@@ -26,7 +26,7 @@ row_tmpl = {'Mentions': '', 'PMID': None, 'Components': '',
 open(M2P_JSON_DATA, 'w').write(json.dumps(table))
 
 for row in table:
-    print('')
+    #print('')
     if row['Components']:
         components = row['Components'].split('|')
     else:
@@ -44,4 +44,7 @@ for row in table:
 
     print(new_row)
     new_rows.append(new_row)
+
+print('Finished dump mutation2pubtator table to data/m2p.json')
+print(len(new_rows), 'represented.')
 

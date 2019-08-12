@@ -1,16 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-
-from MySQLdb import ProgrammingError
+#UNTESTED!
 
 from .sqldata import SQLData
-#from medgen.db.dataset import SQLData
 
 class ClinVarAminoDB(SQLData):
 
     def _fetchall_or_raise_exception(self, sql, comp, *args):
         try:
             return self.fetchall(sql, *args)
-        except ProgrammingError as error:
+        except Exception as error:
             # attempt to lookup an edittype that we don't currently handle (e.g. EXT, INV)
             raise Exception('EditType %s currently not handled. (%r)' % (comp.edittype, error))
 

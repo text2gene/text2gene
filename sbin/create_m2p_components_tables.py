@@ -1,4 +1,7 @@
-from __future__ import print_function, unicode_literals
+# VERIFIED 8/11/2019
+# 
+#   Some data cleaning issues yet unresolved. Probably missing a few thousand entries
+#       due to batch-insert failures on insufficiently cleaned data.
 
 import json
 import math
@@ -246,7 +249,7 @@ def setup_db():
         print('@@@ Created %s table in PubTator database.' % tname)
         print('')
 
-    # m2p_general
+    # Create m2p_general aggregating all tables.
     db.drop_table('m2p_general')
     create_all_edittype_table(db)
     print('@@@ Created m2p_general table in PubTator database.')

@@ -21,8 +21,9 @@ DEFAULT_NAME = DATABASE['name']
 SQLDATE_FMT = '%Y-%m-%d %H:%M:%S'
 
 def EscapeString(value):
-    "Ensures utf-8 encoding of values going into tables."
-    return value.encode("utf-8")
+    "Ensures value doesn't contain SQL-breaking characters."
+    value = value.replace('"', '\"')
+    return value
 
 def SQLdatetime(pydatetime_or_string):
     if hasattr(pydatetime_or_string, 'strftime'):
@@ -56,6 +57,14 @@ class SQLData(object):
         return self.conn
 
     def cursor(self, execute_sql=None):
+        """Returns cursor for MySQL execution, optionally preloaded with execute_sql.
+        
+        Remember: cursor has not yet been committed!
+
+        Also remember: having multiple cursors open can result in unwanted things happening...
+
+        :returns: MySQLdb cursor object (DictCursor)
+        """
         if not self.conn:
             self.connect()
         cursor = self.conn.cursor(cursors.DictCursor)
@@ -171,9 +180,19 @@ class SQLData(object):
             all_values.append('(%s)' % ','.join(values))
 
         sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
-        cursor = self.cursor(sql)
-        #TODO: anything we can do with the cursor object to report on success?
-        print(cursor)
+        try:
+            cursor = self.cursor(sql)
+            cursor.commit()
+        except Exception as error:
+            print(sql)
+            print(error)
+            from IPython import embed; embed()
+            return False
+
+        if cursor.lastrowid:
+            print('Batch Insert Done. Last insert id =', cursor.lastrowid)
+            return True
+
 
     def insert(self, tablename, field_value_dict, None_as_null=False):
         """ Insert field_value_dict into indicated tablename.
@@ -192,8 +211,8 @@ class SQLData(object):
 
         #copied in from medgen. 
         cursor = self.execute(sql, *values)
-        cursor.close()
-        return self.conn.insert_id()
+        cursor.commit()
+        return cursor.lastrowid
 
     def drop_table(self, tablename):
         return self.execute('drop table if exists ' + tablename)

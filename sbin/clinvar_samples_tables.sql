@@ -16,32 +16,32 @@ create table           samples like  clinvar.clinvar_hgvs;
 alter table samples drop column AlleleID;
 alter table samples drop column RCVaccession; 
 
-alter table samples add column Symbol varchar(20) ; 
+alter table samples add column GeneSymbol varchar(20) ; 
 alter table samples add column Consequence varchar(100);
 alter table samples add column SequenceOntologyID varchar(20);
 alter table samples add column num_citations smallint;
 alter table samples add column ClinicalSignificance varchar(200);
 alter table samples add column hgmd_acc_num  varchar(10);
 
-insert into samples (VariationID, hgvs_text)
-select      distinct VariationID, hgvs_text from clinvar_hgvs where hgvs_text like 'NM_%c.%'; 
+insert into samples (VariationID, HGVS)
+select      distinct VariationID, HGVS from clinvar_hgvs where HGVS like 'NM_%c.%'; 
 
 call create_index('samples', 'VariationID');
-call create_index('samples', 'hgvs_text');
+call create_index('samples', 'HGVS');
 
 -- ############################################
 
 update samples CV,
        variant_summary S
 set    CV.ClinicalSignificance = S.ClinicalSignificance,
-       CV.Symbol = S.Symbol
+       CV.GeneSymbol = S.GeneSymbol
 where  CV.VariationID   = S.VariationID;
 
 update samples CV,
        molecular_consequences M 
 set    CV.SequenceOntologyID = M.SequenceOntologyID, 
        CV.Consequence = M.Value
-where  CV.hgvs_text = M.hgvs_text ;
+where  CV.HGVS = M.HGVS;
 
 update samples CV,
        var_citations_count P
@@ -51,10 +51,10 @@ where  CV.VariationID   = P.VariationID;
 -- update samples CV,
 --        hgmd_pro.hgmd_hgvs HGMD
 -- set    CV.hgmd_acc_num = HGMD.acc_num
--- where  CV.hgvs_text = HGMD.hgvs_text ;
+-- where  CV.HGSV = HGMD.HGVS;
 
 call create_index('samples', 'Consequence');
-call create_index('samples', 'Symbol');
+call create_index('samples', 'GeneSymbol');
 call create_index('samples', 'ClinicalSignificance');
 call create_index('samples', 'Consequence, ClinicalSignificance');
 call create_index('samples', 'num_citations');
@@ -123,6 +123,6 @@ insert into            samples_intron_vus select * from  samples_intron where Cl
 
 drop   table if exists samples_gene_dmd;
 create table           samples_gene_dmd like samples;
-insert into            samples_gene_dmd select * from  samples where Symbol = 'DMD'; 
+insert into            samples_gene_dmd select * from  samples where GeneSymbol = 'DMD'; 
 
 call log('samples', 'done'); 

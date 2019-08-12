@@ -4,7 +4,7 @@ drop   table if exists hgvs_citations;
 create table           hgvs_citations
 select  DISTINCT
 	H.VariationID, 
-	H.hgvs_text,
+	H.HGVS,
 	C.citation_id as PMID,
 	S.ClinicalSignificance
 from
@@ -12,12 +12,12 @@ from
 	var_citations C,
 	variant_summary S
 where
-	H.hgvs_text       like 'NM_%'     and 
+	H.HGVS            like 'NM_%'     and 
 	H.VariationID     = C.VariationID and
 	C.VariationID     = S.VariationID and
 	C.citation_source = 'PubMed'; 
 
-call create_index('hgvs_citations', 'hgvs_text');
+call create_index('hgvs_citations', 'HGVS');
 call create_index('hgvs_citations', 'VariationID');
 call create_index('hgvs_citations', 'PMID'); 
 call create_index('hgvs_citations', 'ClinicalSignificance');
