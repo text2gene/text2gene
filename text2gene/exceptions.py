@@ -1,10 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-class Text2GeneError(Exception):
-    pass
+#from metavariant.exceptions import NCBIRemoteError
 
-class NCBIRemoteError(Text2GeneError):
-    """ Raised when NCBI fails to report on a variant for any reason (often mysterious/arbitrary ones). """
+class Text2GeneError(Exception):
     pass
 
 class GoogleQueryMissingGeneName(Text2GeneError):
