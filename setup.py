@@ -49,6 +49,7 @@ setup(
         'fabric',  # web api
         'metavariant',
         'metapub',
+        'simplejson',  #speeds up json load/dump ops compared to std json
         'Flask-BasicAuth',
         ],
     )

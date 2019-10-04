@@ -2,7 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import hashlib
 import pickle
-import json
+#import json
+import simplejson as json
 import logging
 from datetime import datetime
 
@@ -61,8 +62,8 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions
         """
-        sql = 'update {db.tablename} set cache_value="%s" where cache_key="%s"'.format(db=self, **fv_dict)
-        self.execute(sql, *(fv_dict['cache_value'], fv_dict['cache_key']))
+        sql = 'update {db.tablename} set cache_value=%s where cache_key=%s'.format(db=self)
+        self.execute(sql, fv_dict['cache_value'], fv_dict['cache_key'])
         return True
 
     def store(self, querydict, value, **kwargs):
@@ -100,7 +101,7 @@ class SQLCache(SQLData):
 
     def delete(self, querydict):
         sql = 'delete from {db.tablename} where cache_key=%s'.format(db=self)
-        self.execute(sql, (self.get_cache_key(querydict),))
+        self.execute(sql, self.get_cache_key(querydict))
 
     def retrieve(self, querydict, version=0):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.
