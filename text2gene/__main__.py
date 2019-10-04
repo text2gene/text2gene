@@ -1,11 +1,14 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from medgen.api import GeneID
-from hgvs.exceptions import HGVSParseError
-from metapub import FindIt
+from docopt import docopt
 
-from metavariant import VariantComponents
+from metapub import FindIt
+from medgen.api import GeneID
+from metavariant import VariantComponents, Variant
 from metavariant.exceptions import RejectedSeqVar
+from hgvs.exceptions import HGVSParseError
+
+from aminosearch import PubtatorDB
 
 from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from .lvg_cached import LVG
@@ -13,6 +16,27 @@ from .lvg_cached import LVG
 pubtator_db = PubtatorDB()
 
 SQLDEBUG = True
+
+__author__ = 'Naomi Most <naomi@text2gene.com>'
+__version__ = '1.0'     # version of THIS cli app, hgvs2pmid
+__doc__ = """hgvs2pmid
+
+Usage:
+    hgvs2pmid <hgvs>
+    hgvs2pmid --help
+
+Examples of HGVS strings you could try:
+
+    NM_007294.3(BRCA1):c.2706delA
+    NP_009225.1(BRCA1):p.Ser955Ter
+    NP_009225.1:p.Ser955Ter
+
+It will probably help to surround the HGVS string with quotation marks.
+
+Options:
+    -h, --help      Show this page.
+
+"""
 
 
 ### Suppress warnings from biocommons and IPython
@@ -69,7 +93,6 @@ def hgvs_to_pmid_results_dict(hgvs_text):
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmid_results = {}
-    pmid_results['NCBIVariantReporter'] = NCBIHgvs2Pmid(hgvs_text)
     pmid_results['PubTator'] = PubtatorHgvs2Pmid(hgvs_text)
     pmid_results['ClinVar'] = ClinvarHgvs2Pmid(hgvs_text)
     return pmid_results
@@ -115,6 +138,7 @@ def process_hgvs_through_pubtator(hgvs_text):
     return pmids
 
 
+#TODO: convert to docopt
 def cli_pubtator_search_string():
     import sys
     try:
@@ -136,6 +160,7 @@ def cli_pubtator_search_string():
         print('[%s] Cannot parse as HGVS; skipping' % hgvs_text) 
 
 
+#TODO: convert to docopt
 def cli_pubtator_search_file():
     import sys
     try:
@@ -160,14 +185,7 @@ def cli_pubtator_search_file():
                 print('[%s] Cannot parse as HGVS; skipping' % hgvs_text) 
 
 
-def cli_hgvs2pmid():
-    import sys
-    try:
-        hgvs_text = sys.argv[1]
-    except IndexError:
-        print('Supply hgvs text as argument to this script.')
-        sys.exit()
-
+def hgvs2pmid(hgvs_text):
     try:
         results = hgvs_to_pmid_results_dict(hgvs_text)
         for key, pmids in results.items():
@@ -177,6 +195,7 @@ def cli_hgvs2pmid():
         print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
 
 
+#TODO: convert to docopt
 def cli_hgvsfile2pmid():
     import sys
     try:
@@ -197,6 +216,21 @@ def cli_hgvsfile2pmid():
             except HGVSParseError:
                 print('[%s] Cannot parse as HGVS; skipping' % hgvs_text)
 
+
+def hgvs2pmid_cli():
+    args = docopt(__doc__, version=__version__)
+    try:
+        var = Variant(args['<hgvs>'])
+        if var:
+            hgvs2pmid(str(var))
+        else:
+            print('Supplied argument must be a valid HGVS string! See --help for examples.')
+            #end
+
+    except Exception as err:
+        print(err)
+        print('Not sure what to do next; quitting.')
+        #end
 
 if __name__=='__main__':
     cli_hgvs2pmid()

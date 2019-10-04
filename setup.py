@@ -31,7 +31,7 @@ setup(
                             'aminosearch = aminosearch.__main__:main',
                             'hgvs_search_pubtator = text2gene.__main__:cli_pubtator_search_string',
                             'hgvsfile_search_pubtator= text2gene.__main__:cli_pubtator_search_file', 
-                            'hgvs2pmid = text2gene.__main__:cli_hgvs2pmid',
+                            'hgvs2pmid = text2gene.__main__:hgvs2pmid_cli',
                             'hgvsfile2pmid = text2gene.__main__:cli_hgvsfile2pmid',
                             ] 
                    },

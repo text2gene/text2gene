@@ -9,8 +9,9 @@ from datetime import datetime
 import MySQLdb as mdb
 
 from medgen.config import config as medgen_config
+from medgen.db.dataset import SQLData, SQLdatetime
 
-from aminosearch.sqldata import SQLData, SQLdatetime
+#from aminosearch.sqldata import SQLData, SQLdatetime
 
 log = logging.getLogger('text2gene.sqlcache')
 
@@ -18,7 +19,7 @@ log = logging.getLogger('text2gene.sqlcache')
 class SQLCache(SQLData):
     """ Subclass of SQLData that stores simple key-value pairs on a unique-key-indexed
     table within the text2gene database.  (Needs to already exist with same authorization
-    params as medgen.)  The table can be dynamically created
+    params as medgen.)  The table can be dynamically created when needed.
     """
 
     DBNAME = 'text2gene'
@@ -60,7 +61,7 @@ class SQLCache(SQLData):
         :return: True if successful
         :raises: MySQLdb exceptions
         """
-        sql = "update {db.tablename} set cache_value=%s where cache_key=%s".format(db=self, **fv_dict)
+        sql = 'update {db.tablename} set cache_value="%s" where cache_key="%s"'.format(db=self, **fv_dict)
         self.execute(sql, *(fv_dict['cache_value'], fv_dict['cache_key']))
         return True
 
@@ -98,8 +99,8 @@ class SQLCache(SQLData):
         return True
 
     def delete(self, querydict):
-        sql = 'delete from {db.tablename} where cache_key="{key}"'.format(db=self, key=self.get_cache_key(querydict))
-        self.execute(sql)
+        sql = 'delete from {db.tablename} where cache_key=%s'.format(db=self)
+        self.execute(sql, (self.get_cache_key(querydict),))
 
     def retrieve(self, querydict, version=0):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.
