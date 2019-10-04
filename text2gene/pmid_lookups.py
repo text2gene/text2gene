@@ -13,10 +13,11 @@ pubtator_db = PubtatorDB()
 
 
 def clinvar_lex_to_pmid(lex):
-    """ Takes a "lex" object (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each variant found in
-    lex.variants to do a search in Clinvar for associated PMIDs.  Returns a list of PMIDs.
+    """ Takes a "lex" object (metavariant.VariantLVG) and uses each variant found in
+    lex.variants to do a search in Clinvar for associated PMIDs.  
+    Returns a list of PMIDs.
 
-    :param lex: lexical variant object (see above options)
+    :param lex: lexical variant object (metavariant.VariantLVG)
     :return: list of pmids found in Clinvar
     """
     pmids = set()
@@ -35,7 +36,7 @@ def clinvar_lex_to_pmid(lex):
     
 
 def pubtator_lex_to_pmid(lex):
-    """ Takes an LVG object ("lex") (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
+    """ Takes an LVG object ("lex") (metavariant.VariantLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
     Returns a dictionary of results mapping VariantComponents objects to PMIDs found -- i.e.:
@@ -44,7 +45,7 @@ def pubtator_lex_to_pmid(lex):
                       'pmids': [<pmids>]
                      }
 
-    :param lex: lexical variant object (see above options)
+    :param lex: lexical variant object (metavariant.VariantLVG)
     :return: dictionary of results
     """
     try:
@@ -105,7 +106,7 @@ def pubtator_results_for_seqvar(seqvar_or_hgvs_text, gene_id):
 
 
 def pubtator_results_for_lex(lex):
-    """ Takes an LVG object ("lex") (one of VariantLVG, NCBIHgvsLVG, or NCBIEnrichedLVG) and uses each
+    """ Takes an LVG object ("lex") (metavariant.VariantLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
     Returns a dictionary of results mapping hgvs_text to PMIDs found -- i.e.:
@@ -115,7 +116,7 @@ def pubtator_results_for_lex(lex):
                      }
         }
 
-    :param lex: lexical variant object (VariantLVG, NCBIHgvsLVG, NCBIEnrichedLVG)
+    :param lex: lexical variant object (metavariant.VariantLVG)
     :return: dictionary of results
     """
     try:

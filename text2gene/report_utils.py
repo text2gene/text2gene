@@ -13,8 +13,7 @@ from metapub.exceptions import InvalidPMID
 from flask import Markup
 
 from .googlequery import GoogleQuery, GoogleCSEngine
-from .exceptions import NCBIRemoteError, GoogleQueryMissingGeneName, GoogleQueryRemoteError
-from .ncbi import NCBIHgvs2Pmid
+from .exceptions import GoogleQueryMissingGeneName, GoogleQueryRemoteError
 from .cached import ClinvarHgvs2Pmid
 from .pmid_lookups import pubtator_results_for_lex
 
@@ -90,11 +89,6 @@ class CitationTable(object):
         if kwargs.get('pubtator', True):
             self._load_pubtator()
 
-        self.ncbi_results = None
-
-        if kwargs.get('ncbi', True):
-            self._load_ncbi()
-
         self.google_cse = None
         self.google_results = None
 
@@ -141,23 +135,6 @@ class CitationTable(object):
                     self.pmid2citation[pmid] = Citation(pmid, pubtator=True,
                                                     pubtator_mention=row['Mentions'],
                                                     pubtator_components=row['Components'])
-
-    def _load_ncbi(self):
-        # NCBI RESULTS
-        log.info('[%s] Getting NCBI results...', self.lex.hgvs_text)
-        try:
-            self.ncbi_results = NCBIHgvs2Pmid(self.lex.hgvs_text)
-        except NCBIRemoteError as error:
-            self.errors.append('%r' % error)
-            log.warn(error)
-
-        if self.ncbi_results:
-            for pmid in self.ncbi_results:
-                try:
-                    cit = self.pmid2citation[pmid]
-                    cit.in_ncbi = True
-                except KeyError:
-                    self.pmid2citation[pmid] = Citation(pmid, ncbi=True)
 
     def _load_google(self):
         log.info('[%s] Getting Google results...', self.lex.hgvs_text)
@@ -210,7 +187,6 @@ class CitationTable(object):
                 'pubtator_results': self.pubtator_results,
                 'google_results': self.google_results,
                 'clinvar_results': self.clinvar_results,
-                'ncbi_results': self.ncbi_results,
                 'unmapped_citations': self.unmapped_citations,
                 }
         outd['pmid2citation'] = {}
@@ -232,7 +208,6 @@ class Citation(object):
             return None
 
         self.in_pubtator = kwargs.get('pubtator', False)
-        self.in_ncbi = kwargs.get('ncbi', False)
         self.in_clinvar = kwargs.get('clinvar', False)
 
         self.pubtator_mention = kwargs.get('pubtator_mention', None)

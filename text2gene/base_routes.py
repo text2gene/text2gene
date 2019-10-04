@@ -1,21 +1,19 @@
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import, unicode_literals
 
 from flask import Blueprint, render_template, redirect, request, abort
 
 from metapub import PubMedFetcher
 
 from metavariant import VariantLVG, VariantComponents
-from metavariant.exceptions import CriticalHgvsError
+from metavariant.exceptions import CriticalHgvsError, NCBIRemoteError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 
 from .utils import HTTP200, get_hostname, restrict_by_ip
 from .config import ENV, CONFIG, PKGNAME
 
-from .exceptions import NCBIRemoteError
-from .ncbi import LVGEnriched, NCBIHgvsLVG
 #from .report_utils import get_clinvar_tables_containing_variant
-from .report_utils import GeneInfo, CitationTable, ClinVarInfo
 from .lsdb.lovd import get_lovd_url
+from .api import LVG, CitationTable, GeneInfo, ClinVarInfo
 
 fetch = PubMedFetcher()
 
@@ -76,7 +74,7 @@ def query(hgvs_text=''):
         hgvs_text = hgvs_text.strip()
 
     try:
-        lex = LVGEnriched(hgvs_text)
+        lex = LVG(hgvs_text)
     except CriticalHgvsError as error:
         return render_template('demo.html', error_msg='%r' % error)
 
@@ -92,22 +90,12 @@ def query(hgvs_text=''):
     # CITATION TABLE: handles all the heavy lifting of hgvs2pmid lookups and arrange citations by PMID.
     citation_table = CitationTable(lex)
 
-    # NCBI VARIANTS: needed to annotate LVG results, letting to user know which variants were given by NCBI report.
-    ncbi_variants = []
-
-    try:
-        ncbi_lvg = NCBIHgvsLVG(hgvs_text)
-        for seqtype in ncbi_lvg.variants:
-            ncbi_variants = ncbi_variants + ncbi_lvg.variants[seqtype].keys()
-    except NCBIRemoteError:
-        pass
-
     # LOVD URL: link to search in a relevant LOVD instance, if we know of one.
     comp = VariantComponents(lex.seqvar)
     lovd_url = get_lovd_url(lex.gene_name, comp)
 
     return render_template('query.html', lex=lex, lovd_url=lovd_url, citation_table=citation_table,
-                           clinvar = clinvar_info, ncbi_variants=ncbi_variants, gene=gene_info,
+                           clinvar = clinvar_info, gene=gene_info,
                            found_in_clinvar_example_tables=None)
                            # found_in_clinvar_example_tables=get_clinvar_tables_containing_variant(hgvs_text))
 

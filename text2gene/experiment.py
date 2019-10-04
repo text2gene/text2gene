@@ -12,7 +12,6 @@ from metavariant.exceptions import CriticalHgvsError
 from .sqlcache import SQLCache
 from .cached import ClinvarCachedQuery, PubtatorCachedQuery
 from .googlequery import GoogleCachedQuery, googlecse2pmid
-from .ncbi import NCBIVariantPubmedsCachedQuery, NCBIEnrichedLVGCachedQuery
 from .lvg_cached import VariantLVGCached
 from .exceptions import Text2GeneError
 from .report_utils import hgvs_to_clinvar_variationID
@@ -22,13 +21,12 @@ log.setLevel(logging.DEBUG)
 
 search_module_map = {'pubtator': PubtatorCachedQuery,
                      'clinvar': ClinvarCachedQuery,
-                     'ncbi': NCBIVariantPubmedsCachedQuery,
                      'google': GoogleCachedQuery
                     }
 
-lvg_module_map = {'ncbi_enriched': NCBIEnrichedLVGCachedQuery,
+lvg_module_map = {
                   'lvg': VariantLVGCached,
-                 }  # can't support 'ncbi' yet -- its cache class doesn't organically match the others, yet.
+                 } 
 
 
 class Experiment(SQLCache):
@@ -44,7 +42,6 @@ class Experiment(SQLCache):
     In the above example, the Experiment object will set up these tables:
 
         * crazy_harebrained_scheme_42_clinvar_match
-        * crazy_harebrained_scheme_42_ncbi_match
         * crazy_harebrained_scheme_42_pubtator_match
         * crazy_harebrained_scheme_42_google_match
         * crazy_harebrained_scheme_42_lvg_mappings
@@ -54,11 +51,12 @@ class Experiment(SQLCache):
 
     To change the LVG function used, supply the following keyword:
 
-        lvg_mode        # one of ['lvg', 'ncbi_enriched']
+        lvg_mode        # 'lvg'   (this is a vestige of the new-defunct NCBI Variant Reporter)
 
-    Results for the lvg_mappings (or ncbi_enriched_mappings) consist of a breakdown of input hgvs_text -> one of
-    hgvs_c, hgvs_g, hgvs_n, hgvs_p.  So if an input HGVS string had 1 of each different type of variant mappings,
-    the *_mappings table would contain four separate rows with the same hgvs_text (and a different variant result per row).
+    Results for the lvg_mappings consist of a breakdown of input hgvs_text -> one of hgvs_c, hgvs_g, hgvs_n, 
+    hgvs_p.  So if an input HGVS string had 1 of each different type of variant mappings,
+    the *_mappings table would contain four separate rows with the same hgvs_text (and a 
+    different variant result per row).
 
     A list of HGVS strings must be supplied to run an experiment.
 
@@ -89,7 +87,7 @@ class Experiment(SQLCache):
 
         self.skip_cache = kwargs.get('skip_cache', False)
 
-        self.lvg_mode = kwargs.get('lvg_mode', 'ncbi_enriched')      # or 'ncbi' or 'ncbi_enriched'
+        self.lvg_mode = kwargs.get('lvg_mode', 'lvg')
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
         self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi', 'google'])]
@@ -109,16 +107,13 @@ class Experiment(SQLCache):
         # HGVS2PMID cache-backed functions internal to this Experiment
         self.ClinvarHgvs2Pmid = ClinvarCachedQuery(granular=True, granular_table=self.get_table_name('clinvar')).query
         self.PubtatorHgvs2Pmid = PubtatorCachedQuery(granular=True, granular_table=self.get_table_name('pubtator')).query
-        self.NCBIHgvs2Pmid = NCBIVariantPubmedsCachedQuery(granular=True, granular_table=self.get_table_name('ncbi')).query
         self.GoogleQuery = GoogleCachedQuery(granular=True, granular_table=self.get_table_name('google')).query
 
         # set our internal LVG query function based on preference stated in kwargs.
         #self.LVG = lvg_module_map[self.lvg_mode](granular_table=self.get_mapping_table_name(self.lvg_mode)).query
 
-        #if self.lvg_mode=='ncbi_enriched':
-        self.LVG = NCBIEnrichedLVGCachedQuery(granular_table=self.get_mapping_table_name(self.lvg_mode)).query
-        #else:
-        #    self.LVG = VariantLVGCached(granular_table=self.get_mapping_table_name(self.lvg_mode)).query
+        # we may expand to more LVG modes (i.e. generating algorithms) but for now there's just one.
+        self.LVG = VariantLVGCached(granular_table=self.get_mapping_table_name(self.lvg_mode)).query
 
         super(self.__class__, self).__init__('experiment')
 
@@ -305,9 +300,6 @@ class Experiment(SQLCache):
                 try:
                     if mod == 'clinvar':
                         result = self.ClinvarHgvs2Pmid(lex, force_granular=True, skip_cache=self.skip_cache)
-
-                    if mod == 'ncbi':
-                        result = self.NCBIHgvs2Pmid(lex.hgvs_text, force_granular=True)
 
                     if mod == 'pubtator':
                         result = self.PubtatorHgvs2Pmid(lex, force_granular=True, skip_cache=self.skip_cache)

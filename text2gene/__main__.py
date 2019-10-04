@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from medgen.api import GeneID, NCBIVariantPubmeds
+from medgen.api import GeneID
 from hgvs.exceptions import HGVSParseError
 from metapub import FindIt
 
@@ -8,7 +8,6 @@ from metavariant import VariantComponents
 from metavariant.exceptions import RejectedSeqVar
 
 from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
-from .ncbi import NCBIHgvs2Pmid, NCBIEnrichedLVG, NCBIReport
 from .lvg_cached import LVG
 
 pubtator_db = PubtatorDB()
