@@ -1,3 +1,5 @@
+""" Provides Citation and CitationTable objects. """
+
 from __future__ import absolute_import, unicode_literals
 
 import logging
