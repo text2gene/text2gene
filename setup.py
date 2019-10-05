@@ -47,7 +47,7 @@ setup(
         'flask',  # web api
         'gunicorn',  # web api
         'fabric',  # web api
-        'metavariant',
+        'metavariant>=0.3.0b',
         'metapub',
         'simplejson',  #speeds up json load/dump ops compared to std json
         'Flask-BasicAuth',

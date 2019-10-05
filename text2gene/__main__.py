@@ -93,8 +93,8 @@ def hgvs_to_pmid_results_dict(hgvs_text):
     print('[%s]' % hgvs_text, lex.gene_name, '(Gene ID: %s)' % gene_id)
 
     pmid_results = {}
-    pmid_results['PubTator'] = PubtatorHgvs2Pmid(hgvs_text)
-    pmid_results['ClinVar'] = ClinvarHgvs2Pmid(hgvs_text)
+    pmid_results['PubTator'] = PubtatorHgvs2Pmid(lex)
+    pmid_results['ClinVar'] = ClinvarHgvs2Pmid(lex)
     return pmid_results
 
 
@@ -219,18 +219,16 @@ def cli_hgvsfile2pmid():
 
 def hgvs2pmid_cli():
     args = docopt(__doc__, version=__version__)
-    try:
-        var = Variant(args['<hgvs>'])
-        if var:
-            hgvs2pmid(str(var))
-        else:
-            print('Supplied argument must be a valid HGVS string! See --help for examples.')
-            #end
-
-    except Exception as err:
-        print(err)
-        print('Not sure what to do next; quitting.')
+    var = Variant(args['<hgvs>'])
+    if var:
+        hgvs2pmid(str(var))
+    else:
+        print('Supplied argument must be a valid HGVS string! See --help for examples.')
         #end
+
+    #print(err)
+    #print('Not sure what to do next; quitting.')
+    #end
 
 if __name__=='__main__':
     cli_hgvs2pmid()

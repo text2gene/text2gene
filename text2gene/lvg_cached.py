@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import pickle
 import logging
 
 from metavariant import VariantLVG 
@@ -25,8 +24,8 @@ class VariantLVGCached(SQLCache):
         return str(hgvs_text)
 
     def get_cache_value(self, obj):
-        """ Returns pickled object representation of supplied object. """
-        return pickle.dumps(obj) 
+        """ Returns json object representation of supplied object. """
+        return obj.to_json()
 
     def retrieve(self, hgvs_text, version=0):
         """ If cache contains a value for hgvs_text, retrieve it. Otherwise, return None.
@@ -45,7 +44,7 @@ class VariantLVGCached(SQLCache):
         row = self.get_row(hgvs_text)
         if row:
             if row['version'] >= version:
-                return pickle.loads(row['cache_value'].decode('string_escape'))
+                return VariantLVG.from_json(row['cache_value'].decode('string_escape'))
             else:
                 log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(hgvs_text))
                 self.delete(hgvs_text)
