@@ -58,8 +58,6 @@ class SQLData(object):
 
     def cursor(self, execute_sql=None):
         """Returns cursor for MySQL execution, optionally preloaded with execute_sql.
-        
-        Remember: cursor has not yet been committed!
 
         Also remember: having multiple cursors open can result in unwanted things happening...
 
@@ -182,7 +180,6 @@ class SQLData(object):
         sql = 'insert into '+tablename+' (%s) values %s' % (','.join(fields), ','.join(all_values))
         try:
             cursor = self.cursor(sql)
-            cursor.commit()
         except Exception as error:
             print(sql)
             print(error)
