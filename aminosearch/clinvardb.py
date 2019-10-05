@@ -1,6 +1,6 @@
 #UNTESTED!
 
-from .sqldata import SQLData
+from medgen.db.dataset import SQLData
 
 class ClinVarAminoDB(SQLData):
 

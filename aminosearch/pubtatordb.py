@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from MySQLdb import ProgrammingError
 
-from .sqldata import SQLData
+from medgen.db.dataset import SQLData 
 from .exceptions import PubtatorDBError
 
 class PubtatorDB(SQLData):
