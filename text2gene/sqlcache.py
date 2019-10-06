@@ -86,13 +86,14 @@ class SQLCache(SQLData):
            update_if_duplicate: (bool) see note above.
 
         :param querydict: serializable
-        :param value: serializable value
+        :param value: JSON-serializable value
         :return: True if successful
         :raises: MySQLdb exceptions and json serialization errors
         """
-        cvalue = self.get_cache_value(value)
-        fv_dict = {'cache_key': self.get_cache_key(querydict), 'cache_value': cvalue, 'version': self.VERSION}
-
+        fv_dict = {'cache_key': self.get_cache_key(querydict), 
+                   'cache_value': self.get_cache_value(value),
+                   'version': self.VERSION,
+                  }
         try:
             self.insert(self.tablename, fv_dict)
         except mdb.IntegrityError:
@@ -105,8 +106,8 @@ class SQLCache(SQLData):
         return True
 
     def delete(self, querydict):
-        sql = 'delete from {db.tablename} where cache_key=%s'.format(db=self)
-        self.execute(sql, self.get_cache_key(querydict))
+        sql = 'delete from {db.tablename} where cache_key="%s"'.format(db=self)
+        self.execute(sql % self.get_cache_key(querydict))
 
     def retrieve(self, querydict, version=0):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.

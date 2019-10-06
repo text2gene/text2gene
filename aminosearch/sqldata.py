@@ -56,7 +56,7 @@ class SQLData(object):
                                    )
         return self.conn
 
-    def cursor(self, execute_sql=None):
+    def cursor(self, execute_sql=None, *args):
         """Returns cursor for MySQL execution, optionally preloaded with execute_sql.
 
         Also remember: having multiple cursors open can result in unwanted things happening...
@@ -68,7 +68,10 @@ class SQLData(object):
         cursor = self.conn.cursor(cursors.DictCursor)
 
         if execute_sql is not None:
-            cursor.execute(execute_sql)
+            if args:
+                cursor.execute(execute_sql, args)
+            else:
+                cursor.execute(execute_sql)
 
         return cursor
 
@@ -86,12 +89,7 @@ class SQLData(object):
         :rtype: list
         """
         # this line opens a cursor, executes, gets the data, and closes the cursor.
-        if args:
-            results = self.cursor(select_sql % args).fetchall()
-        else:
-            results = self.cursor(select_sql).fetchall()
-            
-        return results
+        return self.cursor(select_sql, *args).fetchall()
 
     def fetchrow(self, select_sql, *args):
         """
@@ -101,8 +99,9 @@ class SQLData(object):
         Else:
             raises Exception
         """
-        res = self.fetchall(select_sql, *args)
-        return res[0] if len(res) > 0 else Noneo
+        print(args)
+        res = self.fetchall(select_sql, args)
+        return res[0] if len(res) > 0 else None
 
     def fetchID(self, select_sql, *args, **kwargs):
         id_colname = kwargs.get('id_colname', 'ID')
@@ -208,7 +207,6 @@ class SQLData(object):
 
         #copied in from medgen. 
         cursor = self.execute(sql, *values)
-        cursor.commit()
         return cursor.lastrowid
 
     def drop_table(self, tablename):
@@ -228,7 +226,8 @@ class SQLData(object):
         log.debug('SQL.execute ' + sql, *args)
 
         #try:
-        cursor = self.cursor(sql % args)
+        cursor = self.cursor(sql, *args)
+        self.conn.commit()
         log.debug('SQL.execute ' + sql % args)
         return cursor
         #except Exception as err:
