@@ -4,10 +4,8 @@ from metavariant import Variant, VariantComponents
 from metavariant.exceptions import RejectedSeqVar, CriticalHgvsError
 from medgen.db.clinvar import ClinVarDB
 
-from text2gene.api import LVGEnriched
-
-from pubtatordb.sqldata import SQLData
-from pubtatordb.config import get_process_log
+from aminosearch.sqldata import SQLData
+from aminosearch.config import get_process_log
 
 import re
 import subprocess
@@ -68,13 +66,13 @@ def seqvar_or_None(entry):
         # empty or broken
         return None
 
-def lvg_enriched_or_None(seqvar):
+def lvg_or_None(seqvar):
     try:
-        return LVGEnriched(seqvar)
+        return LVG(seqvar)
     except Exception as error:
-        write_db_error('Could not create LVGEnriched object for %s' % seqvar, error)
+        write_db_error('Could not create LVG object for %s' % seqvar, error)
         log.debug('ERROR: %r' % error)
-        log.info('Could not create LVGEnriched object for %s' % seqvar)
+        log.info('Could not create LVG object for %s' % seqvar)
         return None
 
 def process_row(db, dbrow):
@@ -84,9 +82,10 @@ def process_row(db, dbrow):
         * HGVS_c
 
     ...do the following actions:
-        * if variant_name or HGVS_c, make an LVGEnriched. If both exist, make an lvg from HGVS_c (preferentially).
+        * if variant_name or HGVS_c, make an LVG. If both exist, make an lvg from HGVS_c (preferentially).
             * for each seqvar, add a row to the database with '%s' % seqvar, PMID, VariantComponents --> Ref,Alt,Pos
-        * if HGVS_p, see if it exists in the LVGEnriched object (in hgvs_p). 
+        * if HGVS_p, see if it exists in the LVG object (in hgvs_p). 
+
             * if not: try to make a VariantComponents object. add new row if comp is not None.
 
     :param dbrow: (dict) one row from t2g_variant_summary table.
@@ -108,7 +107,7 @@ def process_row(db, dbrow):
         if variants[seqtype]:
             seqvar = variants[seqtype][0]
             print('[%s] Using %s to build LVG' % (dbrow['variant_name'], seqvar))
-            lex = lvg_enriched_or_None(seqvar)
+            lex = lvg_or_None(seqvar)
             if lex:
                 break
 

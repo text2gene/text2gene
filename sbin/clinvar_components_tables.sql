@@ -2,10 +2,12 @@ call log('components', 'begin');
 -- ############################################
 
 drop table if exists t2g_variant_summary; 
-create table t2g_variant_summary select VariationID, variant_name, HGVS_p, HGVS_c, GeneID from variant_summary;
+-- create table t2g_variant_summary select VariationID, variant_name, HGVS_p, HGVS_c, GeneID from variant_summary;
+create table t2g_variant_summary select VariationID, variant_name, GeneID, rs_id from variant_summary;
 
 alter table t2g_variant_summary add column Symbol varchar(25) default null;
-alter table t2g_variant_summary add column PMID int(11) default null;
+-- alter table t2g_variant_summary add column PMID int(11) default null;
+alter table t2g_variant_summary add column PMID varchar(25) default null;
 
 -- get the citation number out of the var_citations table
 call log('components', 'enriching PMID column from var_citations table');
@@ -24,9 +26,9 @@ update clinvar.t2g_variant_summary VS, gene.gene_info GDB
     where VS.GeneID = GDB.GeneID;
 
 -- Normalize!
-call log('components', 'normalizing hgvs columns to NULL if set to "-"');
-update clinvar.t2g_variant_summary set HGVS_p = NULL where HGVS_p = '-';
-update clinvar.t2g_variant_summary set HGVS_c = NULL where HGVS_c = '-';
+-- call log('components', 'normalizing hgvs columns to NULL if set to "-"');
+-- update clinvar.t2g_variant_summary set HGVS_p = NULL where HGVS_p = '-';
+-- update clinvar.t2g_variant_summary set HGVS_c = NULL where HGVS_c = '-';
 
 -- index on the fields we'll be searching on to build and check the t2g_hgvs_components table.
 call log('components', 'indexing on VariationID and PMID and Symbol columns');
