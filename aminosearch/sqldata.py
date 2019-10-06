@@ -227,15 +227,15 @@ class SQLData(object):
         """
         log.debug('SQL.execute ' + sql, *args)
 
-        try:
-            cursor = self.cursor(sql % args)
-            log.debug('SQL.execute ' + sql % args)
-        except Exception as err:
-            log.info('Medgen SQL ERROR: %r' % err)
-            full_sql = sql % args
-            log.info('Tripped on a piece of SQL: ' + full_sql)
-        log.debug('#######')
+        #try:
+        cursor = self.cursor(sql % args)
+        log.debug('SQL.execute ' + sql % args)
         return cursor
+        #except Exception as err:
+        #    log.info('Medgen SQL ERROR: %r' % err)
+        #    full_sql = sql % args
+        #    log.info('Tripped on a piece of SQL: ' + full_sql)
+        #log.debug('#######')
 
     def ping(self):
         """
