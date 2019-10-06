@@ -5,12 +5,15 @@ drop table if exists t2g_variant_summary;
 -- create table t2g_variant_summary select VariationID, variant_name, HGVS_p, HGVS_c, GeneID from variant_summary;
 create table t2g_variant_summary select VariationID, variant_name, GeneID, rs_id from variant_summary;
 
+call log('components', 'indexing t2g_variant_summary VariationID column');
+call create_index('t2g_variant_summary', 'VariationID');
+
 alter table t2g_variant_summary add column Symbol varchar(25) default null;
 -- alter table t2g_variant_summary add column PMID int(11) default null;
 alter table t2g_variant_summary add column PMID varchar(25) default null;
 
 -- get the citation number out of the var_citations table
-call log('components', 'enriching PMID column from var_citations table');
+call log('components', 'loading t2g_variant_summary PMID column from var_citations table');
 update t2g_variant_summary t2g_VS, var_citations clinvar_VC
     set t2g_VS.PMID = clinvar_VC.citation_id 
     where t2g_VS.VariationID = clinvar_VC.VariationID;
@@ -31,8 +34,7 @@ update clinvar.t2g_variant_summary VS, gene.gene_info GDB
 -- update clinvar.t2g_variant_summary set HGVS_c = NULL where HGVS_c = '-';
 
 -- index on the fields we'll be searching on to build and check the t2g_hgvs_components table.
-call log('components', 'indexing on VariationID and PMID and Symbol columns');
-call create_index('t2g_variant_summary', 'VariationID');
+call log('components', 'indexing on PMID and gene Symbol columns');
 call create_index('t2g_variant_summary', 'PMID');
 call create_index('t2g_variant_summary', 'Symbol');
 
