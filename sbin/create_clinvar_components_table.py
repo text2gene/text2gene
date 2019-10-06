@@ -96,7 +96,7 @@ def process_row(db, dbrow):
 
     variants = {'c': [], 'g': [], 'n': []}
 
-    for option in ['variant_name', 'HGVS_c']:
+    for option in ['variant_name']:         #, 'HGVS_c']:
         seqvar = seqvar_or_None(dbrow[option])
         if seqvar:
             variants[seqvar.type].append(seqvar)
@@ -113,10 +113,10 @@ def process_row(db, dbrow):
 
     # collect a unique set of protein variants stripped of parentheses.
     hgvs_ps = set()
-    comp = components_or_None(dbrow['HGVS_p'])
-    if comp:
+    #comp = components_or_None(dbrow['HGVS_p'])
+    #if comp:
         # treat "uncertain" protein effects as unneeded duplicates of the "certain" ones.
-        hgvs_ps.add(('%s' % Variant(dbrow['HGVS_p'])).replace(')','').replace('(',''))
+    #    hgvs_ps.add(('%s' % Variant(dbrow['HGVS_p'])).replace(')','').replace('(',''))
 
     # add non-p-vars to the database
     if lex:
@@ -148,14 +148,13 @@ def add_components_to_row(db, dbrow, comp):
     print('ADD:')
     try:
         fvdict = comp.to_mysql_dict()
-        fvdict['hgvs_text'] = '%s' % comp.seqvar
+        fvdict['HGVS'] = '%s' % comp.seqvar
         fvdict['PMID'] = dbrow['PMID']
         fvdict['Symbol'] = dbrow['Symbol']
         fvdict['GeneID'] = dbrow['GeneID']
         fvdict['VariationID'] = dbrow['VariationID']
 
         print(fvdict)
-        #if fvdict['fs_pos']:
 
         db.insert(TARGET_TABLENAME, fvdict)
 
