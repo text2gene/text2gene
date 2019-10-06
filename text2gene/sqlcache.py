@@ -10,9 +10,9 @@ from datetime import datetime
 import MySQLdb as mdb
 
 from medgen.config import config as medgen_config
-from medgen.db.dataset import SQLData, SQLdatetime
+#from medgen.db.dataset import SQLData, SQLdatetime
 
-#from aminosearch.sqldata import SQLData, SQLdatetime
+from aminosearch.sqldata import SQLData, SQLdatetime
 
 log = logging.getLogger('text2gene.sqlcache')
 
@@ -67,15 +67,20 @@ class SQLCache(SQLData):
         return True
 
     def store(self, querydict, value, **kwargs):
-        """ Takes a query dictionary containing "defining arguments" for the resultant value to be cached and the value,
-        stores this as cache_key - cache_value in the cache DB.
+        """ Takes a query dictionary containing "defining arguments" for the resultant value to be 
+        cached and the value, stores this as cache_key - cache_value in the cache DB.
 
-        The value MUST be serializable to a string. (json.dumps will be used)
+        The value MUST be serializable to JSON.  
 
-        If an entry with previously stored querydict exists, entry will be updated with date_created set to datetime.now()
-        This behavior can be changed to ignoring the update by setting update_if_duplicate to False (default: True).
+        json.dumps(value) will be tried by default; override the get_cache_value() method 
+        in your subclass to construct JSON another way if needed.
 
-        Override self.get_cache_key to implement a different approach to turning `querydict` arg into hashable key.
+        If an entry with previously stored querydict exists, entry will be updated with date_created 
+        set to datetime.now().  This behavior can be changed to ignoring the update by setting 
+        update_if_duplicate to False (default: True).
+
+        Override self.get_cache_key to implement a different approach to turning `querydict` arg into 
+        hashable key.
 
         Keywords:
            update_if_duplicate: (bool) see note above.
@@ -106,8 +111,8 @@ class SQLCache(SQLData):
     def retrieve(self, querydict, version=0):
         """ If cache contains a value for this querydict, return it. Otherwise, return None.
 
-        If requested version number is GREATER THAN OR EQUAL TO version number of existing data, older version will be
-        destroyed so that newer version can be created in its place.
+        If requested version number is GREATER THAN OR EQUAL TO version number of existing data, older 
+        version will be destroyed so that newer version can be created in its place.
 
         Thus, supplying version=0 allows returns from cache from *any* version of data that has ever been stored.
 
@@ -148,9 +153,9 @@ class SQLCache(SQLData):
             self.execute("DROP TABLE IF EXISTS {}".format(self.tablename))
 
         sql = """CREATE TABLE {} (
-                cache_key varchar(255) primary key not null,
-                cache_value text default NULL,
-                date_created datetime default NULL,
+                cache_key VARCHAR(255) primary key not null,
+                cache_value JSON default NULL,
+                date_created DATETIME default NULL,
                 version int(11) default 0
               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(self.tablename)
 

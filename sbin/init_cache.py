@@ -22,9 +22,6 @@ GoogleCachedQuery().create_table(reset)
 # HgvsLVGCached().create_granular_table(reset)
 # ClinvarCachedQuery().create_granular_table(reset)
 # PubtatorCachedQuery().create_granular_table(reset)
-# NCBIVariantPubmedsCachedQuery().create_granular_table(reset)
-# NCBIVariantReportCachedQuery().create_granular_table(reset)
-# NCBIEnrichedLVGCachedQuery().create_granular_table(reset)
 
 Experiment('generic', hgvs_examples=['fake']).create_table()
 
