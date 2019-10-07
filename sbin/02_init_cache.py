@@ -19,7 +19,7 @@ ClinvarCachedQuery().create_table(reset)
 PubtatorCachedQuery().create_table(reset)
 GoogleCachedQuery().create_table(reset)
 
-# HgvsLVGCached().create_granular_table(reset)
+# VariantLVGCached().create_granular_table(reset)
 # ClinvarCachedQuery().create_granular_table(reset)
 # PubtatorCachedQuery().create_granular_table(reset)
 

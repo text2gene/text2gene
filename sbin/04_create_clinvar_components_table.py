@@ -238,7 +238,7 @@ if __name__=='__main__':
     print()
     print('Sourcing sbin/clinvar_components_index.sql...')
 
-    cmd = 'mysql -u medgen -pmedgen -D clinvar < sbin/clinvar_components_index.sql'
+    cmd = 'mysql -u medgen -pmedgen -D clinvar < sbin/05_clinvar_components_index.sql'
 
     print(subprocess.call(cmd, shell=True))
 
