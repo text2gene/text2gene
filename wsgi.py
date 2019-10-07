@@ -6,8 +6,8 @@ CWD = os.path.dirname(os.path.realpath(__file__))
 
 # Activate working environment upon startup. See:
 # http://flask.pocoo.org/docs/0.11/deploying/mod_wsgi/#working-with-virtual-environments
-activate_this = os.path.join(CWD, './ve/bin/activate_this.py')
-execfile(activate_this, dict(__file__=activate_this))
+#activate_this = os.path.join(CWD, './ve/bin/activate_this.py')
+#execfile(activate_this, dict(__file__=activate_this))
 
 
 from werkzeug.contrib.fixers import ProxyFix

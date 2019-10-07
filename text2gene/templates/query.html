@@ -51,7 +51,6 @@
                 <td class="pmid"><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>
                 <td class="citation">{{ citation.citation }}</td>
                 <td class="green_dot">{% if citation.in_clinvar %}<a target="_blank" href="{{ citation.clinvar_url }}"><img src="/greenlight.png" /></a>{% endif %}</td>
-                <td class="green_dot">{% if citation.in_ncbi %}<img src="/greenlight.png" />{% endif %}</td>
                 <td class="pubtator">{% if citation.in_pubtator %}<span class="mention"><a target="_blank" href="{{ citation.pubtator_url }}">{{ citation.pubtator_mention }}</a></span>{% endif %}</td>
                 <td class="google">{% if citation.in_google %}<span class="snippet"><a target="_blank" href="{{ citation.google_url }}">{{ citation.htmlSnippet }}</a></span>{% endif %}</td>
                 <td class="publink">{% if citation.dxdoi_url %}<a href="{{ citation.dxdoi_url }}">{{  citation.pma.doi }}</a>{% endif %}</td>
@@ -89,7 +88,7 @@
 <div class="left">
     <h3>Lexical Synonyms for {{ lex.hgvs_text|e }}</h3>
     <ul>
-    {% for seqtype, hgvs_list in lex.variants.iteritems() %}
+    {% for seqtype, hgvs_list in lex.variants.items() %}
     {% if hgvs_list %}{% for hgvs_text in hgvs_list %}
         {% if hgvs_text.startswith('NM_') or hgvs_text.startswith('NC_') or hgvs_text.startswith('NP_') %}
         <li><a href="/query/{{ hgvs_text }}">{{ hgvs_text }}</a>  {% if hgvs_text in ncbi_variants %}<span class="ncbi_tag">[NCBI]</span>{% endif %}</li>
