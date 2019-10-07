@@ -124,7 +124,7 @@ class SQLCache(SQLData):
         row = self.get_row(querydict)
         if row:
             if row['version'] >= version:
-                return json.loads(row['cache_value'].decode('string_escape'))
+                return json.loads(row['cache_value'])            #.decode('string_escape'))
             else:
                 log.debug('Expiring obsolete entry at cache_key location %s.', self.get_cache_key(querydict))
                 self.delete(querydict)
