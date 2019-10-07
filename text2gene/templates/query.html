@@ -45,7 +45,7 @@
     {% if citation_table.citations %}
 
         <table id="pubmed_sources">
-            <tr><th>PMID</th><th>Citation</th><th>ClinVar</th><th>NCBI</th><th>Abstract Mentions</th><th>Google</th><th>Publisher Link</th></tr>
+            <tr><th>PMID</th><th>Citation</th><th>ClinVar</th><th>Abstract Mentions</th><th>Google</th><th>Publisher Link</th></tr>
             {% for citation in citation_table.citations %}
             <tr class="{{ loop.cycle('positive', 'negative') }}">
                 <td class="pmid"><a target="_blank" href="{{ citation.pubmed_url }}">{{ citation.pmid }}</a></td>

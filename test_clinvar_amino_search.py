@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-from pubtatordb.clinvardb import *
-from text2gene.api import LVGEnriched
+from aminosearch.clinvardb import *
+from text2gene.api import LVG
 
 from metavariant import VariantComponents, Variant
 
@@ -46,7 +46,6 @@ def do_queries_for_lvg(lvg, strict=False):
 
     for pmid in pmids:
         print('\t* %s' % pmid)
-
 
     print()
 

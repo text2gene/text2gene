@@ -10,8 +10,9 @@ from metavariant.exceptions import CriticalHgvsError
 from metavariant.utils import strip_gene_name_from_hgvs_text
 from metavariant.lovd import LOVDVariantsForGene
 
-from ..googlequery import GoogleQuery, GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES, get_posedits_for_seqvar
+from ..googlequery import GoogleCSEngine, googlecse2pmid, ALL_SEQTYPES, get_posedits_for_seqvar
 from ..report_utils import CitationTable
+from ..api import LVG, GoogleQuery
 from ..sqlcache import SQLCache
 from ..cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
 from ..config import PKGNAME
@@ -38,17 +39,13 @@ def hgvs2pmid(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
-            lex = LVGEnriched(hgvs_text)
+            lex = LVG(hgvs_text)
         except CriticalHgvsError as error:
             return HTTP400(error, 'Cannot parse input string %s as hgvs text' % hgvs_text)
 
         outd['lvg'] = lex.to_dict()
 
         outd['response'] = {}
-
-        ncbi_pmids = NCBIHgvs2Pmid(lex.hgvs_text)
-        if ncbi_pmids:
-            outd['response']['ncbi'] = ncbi_pmids
 
         clinvar_pmids = ClinvarHgvs2Pmid(lex)
         if clinvar_pmids:
@@ -72,9 +69,9 @@ def lvg(hgvs_text):
     if 'hgvs_text' not in hgvs_text:
         hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
-            lex = LVGEnriched(hgvs_text)
+            lex = LVG(hgvs_text)
         except Exception as error:
-            return HTTP400(error, 'Error using LVGEnriched to find lexical variants for %s' % hgvs_text)
+            return HTTP400(error, 'Error using LVG to find lexical variants for %s' % hgvs_text)
 
         outd['response'] = lex.to_dict()
         outd['response']['synonyms'] = {}
@@ -120,7 +117,7 @@ def google_query(hgvs_text='<hgvs_text>', **kwargs):
     if 'hgvs_text' not in hgvs_text:
         hgvs_text = strip_gene_name_from_hgvs_text(hgvs_text)
         try:
-            lex = LVGEnriched(hgvs_text)
+            lex = LVG(hgvs_text)
         except Exception as error:
             return HTTP400(error, 'Error before building query: could not build LVG object for %s.' % hgvs_text)
 
@@ -145,7 +142,7 @@ def citation_table(hgvs_text):
 
     if 'hgvs_text' not in hgvs_text:
         try:
-            lex = LVGEnriched(hgvs_text)
+            lex = LVG(hgvs_text)
             ctable = CitationTable(lex)
             outd['response'] = ctable.to_dict()
         except Exception as error:
@@ -158,12 +155,10 @@ def citation_table(hgvs_text):
 def cache_stats():
     """ Returns JSON containing statistics for the latest cache contents in MySQL. """
     db = SQLCache('clinvar')
-    cache_report = {'ncbi_enriched_lvg_cache': None,
+    cache_report = {
                     'google_query_cache': None,
-                    'ncbi_report_cache': None,
                     'pubtator_hgvs2pmid_cache': None,
                     'clinvar_hgvs2pmid_cache': None,
-                    'ncbi_hgvs2pmid_cache': None,
                     }
     for tablename in list(cache_report.keys()):
         result = db.fetchrow('select count(cache_key) as cnt from ' + tablename)

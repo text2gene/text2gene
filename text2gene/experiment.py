@@ -90,7 +90,7 @@ class Experiment(SQLCache):
         self.lvg_mode = kwargs.get('lvg_mode', 'lvg')
 
         # normalize module names to lowercase to save on the aggravation of case-matching.
-        self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'ncbi', 'google'])]
+        self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'google'])]
 
         self.hgvs_examples_table = kwargs.get('hgvs_examples_table', None)
         self.hgvs_examples_db = kwargs.get('hgvs_examples_db', None)
@@ -189,7 +189,7 @@ class Experiment(SQLCache):
         self.execute('drop table if exists %s' % self.results_table_name)
         sql = '''create table {} (
                   id int(11) primary key auto_increment,
-                  hgvs_text varchar(255) unique,
+                  HGVS varchar(255) unique,
                   gene_name varchar(255) default NULL,
                   num_pmids INT default NULL,
                   errors text default NULL
@@ -207,12 +207,11 @@ class Experiment(SQLCache):
         log.debug('EXPERIMENT %s: creating Experiment summary table %s', self.experiment_name, tablename)
         self.execute('drop table if exists %s' % self.summary_table_name)
         sql = '''create table {} (
-                  hgvs_text       varchar(255) not null,
+                  HGVS varchar(255) not null,
                   VariationID     int default null,
                   gene_name       varchar(50) default null,
                   PMID            int default null,
                   match_clinvar   boolean default 0,
-                  match_ncbi      boolean default 0,
                   match_pubtator  boolean default 0,
                   match_google    boolean default 0
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci'''.format(tablename)
@@ -240,13 +239,13 @@ class Experiment(SQLCache):
         self.drop_table(self.summary_table_name)
 
     def _load_examples(self):
-        sql = 'select distinct(hgvs_text) from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
+        sql = 'select distinct(HGVS) from {dbname}.{tname}'.format(dbname=self.hgvs_examples_db, tname=self.hgvs_examples_table)
         if self.hgvs_examples_limit:
             sql += ' limit %i' % self.hgvs_examples_limit
         return self.fetchall(sql)
 
     def store_result(self, hgvs_text, pmids, gene_name=None, errors=None):
-        row = {'hgvs_text': hgvs_text,
+        row = {'HGVS': hgvs_text,
                'num_pmids': len(pmids),
                'gene_name': gene_name,
                'errors': None if errors is None else json.dumps(errors)
@@ -332,19 +331,18 @@ class Experiment(SQLCache):
 
     def get_results_for_search_module(self, hgvs_text, mod):
         tablename = self.get_table_name(mod)
-        return self.fetchall('select * from {} where hgvs_text="{}"'.format(tablename, hgvs_text))
+        return self.fetchall('select * from {} where HGVS="{}"'.format(tablename, hgvs_text))
 
     def store_summary(self, hgvs_text, summary_table, pmids, gene_name=None):
         # Summary Table: { mod_name: [list of pmids] }
         #
         varID = hgvs_to_clinvar_variationID(hgvs_text)
 
-        row_tmpl = {'hgvs_text': hgvs_text,
+        row_tmpl = {'HGVS': hgvs_text,
                     'PMID': None,
                     'VariationID': varID,
                     'gene_name': gene_name,
                     'match_pubtator': 0,
-                    'match_ncbi': 0,
                     'match_clinvar': 0,
                     'match_google': 0
                     }

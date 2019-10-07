@@ -19,7 +19,7 @@ class build_ext(_build_ext):
 
 setup(
     name = 'text2gene',
-    version = '0.1.0',
+    version = '0.1.1',
     description = 'genetic variant lvg and medical genetics search for relevant literature',
     author = 'Naomi Most',
     maintainer = 'Naomi Most',
@@ -33,6 +33,7 @@ setup(
                             'hgvsfile_search_pubtator= text2gene.__main__:cli_pubtator_search_file', 
                             'hgvs2pmid = text2gene.__main__:hgvs2pmid_cli',
                             'hgvsfile2pmid = text2gene.__main__:cli_hgvsfile2pmid',
+                            'googlequery = text2gene.__main__:googlequery_cli',
                             ] 
                    },
     cmdclass = {'build_ext': build_ext},
@@ -47,7 +48,7 @@ setup(
         'flask',  # web api
         'gunicorn',  # web api
         'fabric',  # web api
-        'metavariant>=0.3.0b',
+        'metavariant',
         'metapub',
         'simplejson',  #speeds up json load/dump ops compared to std json
         'Flask-BasicAuth',

@@ -114,6 +114,7 @@ class CitationTable(object):
         self.clinvar_results = ClinvarHgvs2Pmid(self.lex)
 
         for pmid in self.clinvar_results:
+            pmid = str(pmid)
             try:
                 cit = self.pmid2citation[pmid]
                 cit.in_clinvar = True
@@ -127,7 +128,7 @@ class CitationTable(object):
 
         for hgvs_text in self.pubtator_results:
             for row in self.pubtator_results[hgvs_text]:
-                pmid = int(row['PMID'])
+                pmid = str(row['PMID'])
                 try:
                     cit = self.pmid2citation[pmid]
                     cit.in_pubtator = True
@@ -162,12 +163,13 @@ class CitationTable(object):
 
             for cseresult in self.google_results:
                 if cseresult.pmid:
+                    pmid = str(cseresult.pmid)
                     try:
-                        cit = self.pmid2citation[cseresult.pmid]
+                        cit = self.pmid2citation[pmid]
                         cit.in_google = True
                         cit.google_result = cseresult
                     except KeyError:
-                        self.pmid2citation[cseresult.pmid] = Citation(cseresult.pmid, google=True, google_result=cseresult)
+                        self.pmid2citation[pmid] = Citation(pmid, google=True, google_result=cseresult)
                 else:
                     #TODO: RawCitation object?
                     rawcit = cseresult.to_dict()

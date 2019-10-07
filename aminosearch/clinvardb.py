@@ -5,6 +5,10 @@ from .sqldata import SQLData
 
 class ClinVarAminoDB(SQLData):
 
+    def __init__(self, *args, **kwargs):
+        kwargs['name'] = 'clinvar'
+        super().__init__(*args, **kwargs)
+
     def _fetchall_or_raise_exception(self, sql, comp, *args):
         try:
             return self.fetchall(sql, *args)

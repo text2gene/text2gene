@@ -88,8 +88,10 @@ class SQLData(object):
         :returns: results as list of dictionaries
         :rtype: list
         """
-        # this line opens a cursor, executes, gets the data, and closes the cursor.
-        return self.cursor(select_sql, *args).fetchall()
+        cursor = self.cursor(select_sql, *args)
+        stuff = cursor.fetchall()
+        cursor.close() 
+        return stuff
 
     def fetchrow(self, select_sql, *args):
         """
@@ -226,8 +228,9 @@ class SQLData(object):
 
         #try:
         cursor = self.cursor(sql, *args)
-        self.conn.commit()
         log.debug('SQL.execute ' + sql % args)
+        cursor.close()
+        self.conn.commit()
         return cursor
         #except Exception as err:
         #    log.info('Medgen SQL ERROR: %r' % err)

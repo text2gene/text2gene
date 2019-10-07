@@ -11,7 +11,8 @@ from hgvs.exceptions import HGVSParseError
 from aminosearch import PubtatorDB
 
 from .cached import PubtatorHgvs2Pmid, ClinvarHgvs2Pmid
-from .lvg_cached import LVG
+from .api import LVG, GoogleQuery
+
 
 pubtator_db = PubtatorDB()
 
@@ -230,8 +231,27 @@ def hgvs2pmid_cli():
     #print('Not sure what to do next; quitting.')
     #end
 
-if __name__=='__main__':
-    cli_hgvs2pmid()
+
+GOOGLEQUERY_CLI_DOC = """googlequery
+
+Usage:
+    googlequery <hgvs>
+    googlequery --help
+
+Options:
+    -h, --help  Show this screen.
+"""
+
+def googlequery(hgvs_text):
+    lex = LVG(hgvs_text)
+    gq = GoogleQuery(lex)
+    return gq
+
+def googlequery_cli():
+    args = docopt(GOOGLEQUERY_CLI_DOC)
+    print('Using Google to find sources for ', args['<hgvs>'])
+    gq = googlequery(args['<hgvs>'])
+    print(gq)
 
 
 """

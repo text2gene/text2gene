@@ -4,7 +4,7 @@ from medgen.api import ClinVarDB
 from text2gene import LVG
 
 
-hgvs_examples = ClinVarDB().fetchall('select * from hgvs_examples')
+hgvs_examples = ClinVarDB().fetchall('select * from hgvs_citations')
 
 print()
 print('%i HGVS examples found' % len(hgvs_examples))
@@ -14,7 +14,7 @@ def dmesg(hgvs_text, msg):
     print('[%s] <%i> %s' % (hgvs_text, time.time(), msg))
 
 for entry in hgvs_examples:
-    hgvs_text = entry['hgvs_text']
+    hgvs_text = entry['HGVS']
     dmesg(hgvs_text, 'collecting')
     try:
         lex = LVG(hgvs_text)
