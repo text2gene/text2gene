@@ -77,7 +77,7 @@ class GoogleCSEResult(object):
         self.url = item.get('link', None)
 
         if self.url:
-            self.url = urllib.unquote_plus(self.url)
+            self.url = urllib.parse.unquote_plus(self.url)
 
         self.mime = item.get('mime', None)
         self.snippet = item.get('snippet', None)
@@ -103,7 +103,7 @@ class GoogleCSEResult(object):
         self._fill_variables_from_cse_result(item)
 
         # if this an Excel spreadsheet it can fuck right off. See T2G-73
-        path = urllib.urlparse(self.url).path
+        path = urllib.parse.urlparse(self.url).path
         ext = os.path.splitext(path)[1]
         if ext in self.TYPES_WE_DONT_LIKE:
             self.error = 'Ignoring unwanted filetype "{ext}" from result {url}'.format(ext=ext, url=self.url)
@@ -451,7 +451,7 @@ class GoogleCachedQuery(SQLCache):
         :param qstring: (str) Google query string
         :return: md5 hash of query string
         """
-        return hashlib.md5(qstring).hexdigest()
+        return hashlib.md5(qstring.encode('utf-8')).hexdigest()
 
     def store_granular(self, hgvs_text, cse_results):
         pmids = googlecse2pmid(cse_results)
