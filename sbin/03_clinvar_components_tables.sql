@@ -3,7 +3,7 @@ call log('components', 'begin');
 
 drop table if exists t2g_variant_summary; 
 -- create table t2g_variant_summary select VariationID, variant_name, HGVS_p, HGVS_c, GeneID from variant_summary;
-create table t2g_variant_summary select VariationID, variant_name, GeneID, rs_id from variant_summary;
+create table t2g_variant_summary select VariationID, variant_name, GeneID, rs_id, ClinicalSignificance, ClinSignSimple from variant_summary;
 
 call log('components', 'indexing t2g_variant_summary VariationID column');
 call create_index('t2g_variant_summary', 'VariationID');
