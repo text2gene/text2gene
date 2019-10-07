@@ -99,7 +99,6 @@ class SQLData(object):
         Else:
             raises Exception
         """
-        print(args)
         res = self.fetchall(select_sql, args)
         return res[0] if len(res) > 0 else None
 
