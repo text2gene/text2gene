@@ -44,9 +44,15 @@ CSE_QUERY_TEMPLATES = {'whitelist': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_C
                         'schema': CSE_URL + '?key=' + API_KEY + '&cx=' + CSE_CX_SCHEMA + '&q={}',
                        }
 
+# BLACKLISTED Gene Synonyms: these never help, always screw up results from Google.
+GENE_SYNONYM_BLACKLIST = ['DEC']
+
 # define "all" seqtypes for search purposes as using the following set (notably absent the g.DNA seqtype,
 #       which we have proven experimentally to not help much (or at all) in finding pubmed evidence).
 ALL_SEQTYPES = ['c', 'p', 'n']
+
+def filter_gene_synonyms(synlist):
+    return [item for item in synlist if item not in GENE_SYNONYM_BLACKLIST]
 
 def query_cse_return_response(qstring, cse='whitelist', start_index=None):
     """ Query the Google Custom Search Engine for provided query string.
@@ -306,7 +312,7 @@ class GoogleCSEngine(object):
             raise GoogleQueryMissingGeneName('Information supplied with variant %s is missing gene name.' % self.seqvar)
 
         # self.synonyms = {'c': [], 'g': [], 'p': [], 'n': []}
-        self.gene_synonyms = GeneSynonyms(self.gene_name)
+        self.gene_synonyms = filter_gene_synonyms(GeneSynonyms(self.gene_name))
 
         # choice of Google CSE ("cx") -- "whitelist" or "schema" [default: whitelist]
         self.cse = kwargs.get('cse', 'whitelist')

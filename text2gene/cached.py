@@ -95,8 +95,16 @@ class PubtatorCachedQuery(SQLCache):
         entry_pairs = [{'hgvs_text': lex.hgvs_text, 'PMID': pmid, 'version': self.VERSION} for pmid in result]
         self.batch_insert(self.granular_table, entry_pairs)
 
-    def query(self, lex, skip_cache=False, force_granular=False):
+    def query(self, lex, skip_cache=False, force_granular=False, **kwargs):
         """
+        PubTator queries allow the supplying of a gene_name via keyword args.
+
+        This can help in situations where the gene_name for some reason doesn't load 
+        from the variant in via the hgvs library.
+
+        Keywords:
+            gene_name  HGNC gene symbol (e.g. "SMAD3")
+
         :param lex: any lexical variant object (VariantLVG, NCBIEnrichedLVG, NCBIHgvsLVG)
         :param skip_cache: whether to force reloading the data by skipping the cache
         :return: list of PMIDs if found (result of Clinvar query)
@@ -108,7 +116,7 @@ class PubtatorCachedQuery(SQLCache):
                     self.store_granular(lex, result)
                 return result
 
-        result = pubtator_lex_to_pmid(lex)
+        result = pubtator_lex_to_pmid(lex, kwargs.get('gene_name', None))
         self.store(lex, result)
         if (force_granular or self.granular) and result:
             self.store_granular(lex, result)

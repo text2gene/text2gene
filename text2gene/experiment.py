@@ -89,6 +89,9 @@ class Experiment(SQLCache):
 
         self.lvg_mode = kwargs.get('lvg_mode', 'lvg')
 
+        # you can set this if you're doing all one Gene. Speeds up Experiment considerably!
+        self.gene_name = kwargs.get('gene_name', None)
+
         # normalize module names to lowercase to save on the aggravation of case-matching.
         self.search_modules = [item.lower() for item in kwargs.get('search_modules', ['pubtator', 'clinvar', 'google'])]
 
@@ -293,6 +296,10 @@ class Experiment(SQLCache):
                 log.info('EXPERIMENT [%s.%i]: [%s] Error creating LVG; skipping. (Error: %r',
                                 self.experiment_name, self.iteration, hgvs_text, error)
                 continue
+
+            # If possible, force-set the gene name so that we don't have to load it from eutils!
+            if self.gene_name:
+                lex._gene_name = self.gene_name
 
             pmids = set()
             errors = []

@@ -47,11 +47,33 @@ if reply.strip() == '':
     print('Not in the mood? OK! Catch you later.')
     sys.exit()
 
+clinsig = ''
+print()
+print('Great. Let\'s talk Clinical Significance. Do you prefer variants (1) Pathogenic (2) Benign (3) VUS or (blank) all?')
+reply = input(PROMPT_STRING)
+if reply.strip() == '':
+    print()
+    print('OK, all of em!')
+elif reply.strip() == '1':
+    print()
+    print('Pathogenic it is.')
+    clinsig = 'pathogenic'
+elif reply.strip() == '2':
+    print()
+    print('Benign is fine.')
+    clinsig = 'benign'
+elif reply.strip() == '3':
+    print()
+    print('VUS, ooh, mysterious.')
+    clinsig = 'vus'
 
 db = ClinVarDB()
 
+if clinsig:
+    nickname = nickname + '_' + clinsig
 # Actually make the table, finally.
 create_table_sql = 'create table samples_{} like samples'.format(nickname)
+
 try:
     db.execute(create_table_sql)
 except OperationalError as err:
@@ -59,16 +81,19 @@ except OperationalError as err:
     db.execute('drop table samples_{}'.format(nickname))
     db.execute(create_table_sql)
     
-
 # Collect the list of genes
 genes = reply.strip().split(' ')
 
-gene_str = ','.join(['"%s"' % gene for gene in genes])
+#gene_str = ','.join(['"%s"' % gene for gene in genes])
 
-get_variants_sql = 'insert into samples_'+nickname+' select * from samples where GeneSymbol in (%s)' % gene_str
+get_variants_sql = 'insert into samples_'+nickname+' select * from samples'
+if clinsig:
+    get_variants_sql += '_'+clinsig
+get_variants_sql += ' where GeneSymbol = "%s"'
 
+print(get_variants_sql)
 for gene in genes:
-    db.execute(get_variants_sql)
+    db.execute(get_variants_sql % gene)
 
 rows = db.fetchall('select * from samples_'+nickname)
 

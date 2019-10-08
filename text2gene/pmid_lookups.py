@@ -35,7 +35,7 @@ def clinvar_lex_to_pmid(lex):
     return list(pmids)
     
 
-def pubtator_lex_to_pmid(lex):
+def pubtator_lex_to_pmid(lex, gene_name=None):
     """ Takes an LVG object ("lex") (metavariant.VariantLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
@@ -48,13 +48,18 @@ def pubtator_lex_to_pmid(lex):
     :param lex: lexical variant object (metavariant.VariantLVG)
     :return: dictionary of results
     """
-    try:
-        gene_id = GeneID(lex.gene_name)
-    except TypeError:
-        # no gene_name? it happens -- but our results will be basically bunk without it.
-        return []
+    gene_id = None
+    if gene_name:
+        gene_id = GeneID(gene_name)
+    else:
+        try:
+            gene_name = lex.gene_name
+            gene_id = GeneID(lex.gene_name)
+        except TypeError:
+            # no gene_name? it happens -- but our results will be basically bunk without it.
+            return []
 
-    log.info('[%s] %s (Gene ID: %s)', lex.seqvar, lex.gene_name, gene_id)
+    log.info('[%s] %s (Gene ID: %s)', lex.seqvar, gene_name, gene_id)
 
     pmids = set()
     for seqtype in lex.variants:
@@ -105,7 +110,7 @@ def pubtator_results_for_seqvar(seqvar_or_hgvs_text, gene_id):
     return result
 
 
-def pubtator_results_for_lex(lex):
+def pubtator_results_for_lex(lex, gene_name=None):
     """ Takes an LVG object ("lex") (metavariant.VariantLVG) and uses each
     variant found in lex.variants to do a search in PubTator for associated PMIDs.
 
@@ -119,13 +124,18 @@ def pubtator_results_for_lex(lex):
     :param lex: lexical variant object (metavariant.VariantLVG)
     :return: dictionary of results
     """
-    try:
-        gene_id = GeneID(lex.gene_name)
-    except TypeError:
-        # no gene_name? it happens -- but our results will be basically bunk without it.
-        return {}
+    gene_id = None
+    if gene_name:
+        gene_id = GeneID(gene_name)
+    else:
+        try:
+            gene_name = lex.gene_name
+            gene_id = GeneID(lex.gene_name)
+        except TypeError:
+            # no gene_name? it happens -- but our results will be basically bunk without it.
+            return []
 
-    log.info('[%s] %s (Gene ID: %s)', lex.seqvar, lex.gene_name, gene_id)
+    log.info('[%s] %s (Gene ID: %s)', lex.seqvar, gene_name, gene_id)
 
     results = {}
     for seqtype in lex.variants:

@@ -32,7 +32,7 @@ CONFIG.read(configs)
 
 private_conf = os.path.join(CFGDIR, 'private.ini')
 if os.path.exists(private_conf):
-    #print('Found text2gene/config/private.ini')
+    print('Found text2gene/config/private.ini')
     CONFIG.read(private_conf)
 
 # if training is "active", enable GRANULAR_CACHE for all cacheing engines.
