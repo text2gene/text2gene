@@ -101,7 +101,7 @@ class SQLData(object):
         Else:
             raises Exception
         """
-        res = self.fetchall(select_sql, args)
+        res = self.fetchall(select_sql, *args)
         return res[0] if len(res) > 0 else None
 
     def fetchID(self, select_sql, *args, **kwargs):

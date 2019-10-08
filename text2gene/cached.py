@@ -63,7 +63,7 @@ class ClinvarCachedQuery(SQLCache):
 
         sql = """create table {} (
                   hgvs_text varchar(255) not null,
-                  PMID int(11) default NULL,
+                  PMID varchar(25) default NULL,
                   version int(11) default 0)
                   ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci""".format(tname)
         self.execute(sql)

@@ -156,12 +156,13 @@ def cache_stats():
     """ Returns JSON containing statistics for the latest cache contents in MySQL. """
     db = SQLCache('clinvar')
     cache_report = {
+                    'hgvslvg_cache': None,
                     'google_query_cache': None,
                     'pubtator_hgvs2pmid_cache': None,
                     'clinvar_hgvs2pmid_cache': None,
                     }
     for tablename in list(cache_report.keys()):
-        result = db.fetchrow('select count(cache_key) as cnt from ' + tablename)
+        result = db.fetchrow('select count(cache_key) as cnt from %s' % tablename)
         cache_report[tablename] = result['cnt']
 
     return HTTP200(cache_report)

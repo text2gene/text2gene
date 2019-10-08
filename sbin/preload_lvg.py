@@ -4,7 +4,7 @@ from medgen.api import ClinVarDB
 from text2gene import LVG
 
 
-hgvs_examples = ClinVarDB().fetchall('select * from hgvs_citations')
+hgvs_examples = ClinVarDB().fetchall('select * from samples_vus')
 
 print()
 print('%i HGVS examples found' % len(hgvs_examples))

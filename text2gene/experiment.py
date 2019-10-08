@@ -210,7 +210,7 @@ class Experiment(SQLCache):
                   HGVS varchar(255) not null,
                   VariationID     int default null,
                   gene_name       varchar(50) default null,
-                  PMID            int default null,
+                  PMID            varchar(25) default null,
                   match_clinvar   boolean default 0,
                   match_pubtator  boolean default 0,
                   match_google    boolean default 0
@@ -250,7 +250,11 @@ class Experiment(SQLCache):
                'gene_name': gene_name,
                'errors': None if errors is None else json.dumps(errors)
                }
-        self.insert(self.results_table_name, row)
+        try:
+            self.insert(self.results_table_name, row)
+        except mdb.IntegrityError:
+            #duplicate; assume no change.
+            pass
 
     def run(self):
         # setup each search_module's granular result table
@@ -353,7 +357,11 @@ class Experiment(SQLCache):
             for mod in self.search_modules:
                 if pmid in summary_table[mod]:
                     row['match_%s' % mod] = 1
-            self.insert(self.summary_table_name, row)
+            try:
+                self.insert(self.summary_table_name, row)
+            except mdb.IntegrityError:
+                #duplicate on HGVS; assume no change
+                pass
 
     def hgvs_list(self):
         """ Returns full list of variants processed in this experiment. Can only be used AFTER 
