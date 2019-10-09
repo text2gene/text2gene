@@ -193,9 +193,30 @@ export _NCBI_URL_KEY={your_key_here}
 
 You absolutely need a Google Cloud Services API Key to run the GoogleQuery portion of Text2Gene.
 
-To do this, you have to create a Google Cloud Account and then turn on Google Search API as a service.
+To do this, you have to create a Google Cloud Account and then turn on Google Search API as a service.  (TODO: instructions and screenshots to aid this process.)
 
-(TODO)
+Once you have your API key in hand, the place to configure it is within the text2gene config files -- just replace the one that's already there (any keys you find in the repo are out of date).  In the future this configuration will instead be done via environment variables, much like NCBI_API_KEY.
+
+Look in `/path/to/repo/text2gene/config/*.ini` for the place to set the key.
+
+NOTE: It is *highly* recommended to set up your API key to restrict based on IP address.
+
+=============
+Configuration
+=============
+
+The GoogleQuery api key and other configuration variables specific to Text2Gene are configured in 
+`/path/to/repo/text2gene/config/*.ini`.  This structure allows you to create arbitrary environment
+names and associate clumps of information with them in INI files. 
+
+The default text2gene_ENV is 'DEV', so by default, the dev.ini file will be sourced.
+
+To change the Text2Gene environment to PRD, you would do:
+
+```
+export text2gene_ENV='PRD'
+```
+
 
 
 ==========
