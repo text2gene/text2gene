@@ -103,19 +103,19 @@ First, follow the instructions in https://github.com/text2gene/medgen-mysql
 If you installed UTA locally, set the UTA_HOST variable to where you put the database.
 For example:
 
-```
+``
 export UTA_HOST=localhost
-```
+``
 
 Now install all relevant databases:
 
-```
+``
 make gene
 make hugo
 make medgen
 make PubTator
 make clinvar
-```
+``
 
 In aggregate, these steps could take anywhere between 15 minutes to 3 hours, depending on 
 whether you installed MySQL on an SSD, whether you set up UTA locally, and how quickly
@@ -129,27 +129,27 @@ Summary: Clone this repo, then create a Python3 virtualenv and activate it.  The
 
 Example that works:
 
-```
+``
 cd /path/to/this/repo
 python3.7 -m venv ve
 source ve/bin/activate
 pip install -U pip
 python setup.py
-```
+``
 
 If you find that running `setup.py` breaks, PLEASE file an issue.  Chances are its an OS environment 
 dependency that can be fixed with some quick installs.  Many issues on Ubuntu systems can be fixed with the 
 following line:
 
-```
+``
 sudo apt-get install python3-dev libbz2-dev libcurl4-openssl-dev liblzma-dev 
-```
+``
 
 If you installed UTA yourself, set the UTA_HOST environment variable accordingly. For example
 
-```
+``
 export UTA_HOST=localhost
-```
+``
 
 
 5. Initialize Text2Gene database
@@ -162,14 +162,14 @@ be immediately obvious to any sysadmin or devops people in the audience.
 
 Do the following in order:
 
-```
+``
 mysql -uroot -p < sbin/01_create_t2g_database.sql
 python sbin/02_init_cache.py
 mysql -umedgen -pmedgen < sbin/03_clinvar_components_tables.sql
 python sbin/04_create_clinvar_components_table.py
 python sbin/06_dump_m2p_to_json.py
 python sbin/07_create_m2p_components_tables.py
-```
+``
 
 (You may ask, "what happened to number 05, why don't I run that?"  The answer is that 04_ runs 05_ automatically. I know, this is confusing.  Improvements will happen here.  Pull requests welcome...!)
 
@@ -189,10 +189,10 @@ Aquire an NCBI key here: https://www.ncbi.nlm.nih.gov/account/settings/
 
 Two environment variables must be used to ensure distribution of your API keys amongst the libraries that use it:
 
-```
+``
 export NCBI_API_KEY={your_key_here}
 export _NCBI_URL_KEY={your_key_here}
-```
+``
 
 You absolutely need a Google Cloud Services API Key to run the GoogleQuery portion of Text2Gene.
 
@@ -214,9 +214,9 @@ The default text2gene_ENV is 'DEV', so by default, the dev.ini file will be sour
 
 To change the Text2Gene environment to PRD, you would do:
 
-```
+``
 export text2gene_ENV='PRD'
-```
+``
 
 
 # Validation
