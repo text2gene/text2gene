@@ -73,7 +73,6 @@ The NCBI databases used by Text2Gene alone take up roughly 300 GB.  A good deal 
 relevant columns helps keep complicated queries running optimally; the tradeoff is that the 
 database footprints swell in size accordingly.
 
-
 2. Install UTA Locally (optional but recommended)
 -------------------------------------------------
 
@@ -152,8 +151,7 @@ export UTA_HOST=localhost
 ```
 
 
-5. Initialize Text2Gene database
---------------------------------
+5. Text2Gene database setup.
 
 The numbered scripts ("n_*") contain the basic setup requirements to get Text2Gene running.
 
@@ -180,8 +178,7 @@ Try it out by running the command-line script `hgvs2pmid`:
 hgvs2pmid "NM_004448.2:c.2326_2327insTCT"
 
 
-6. Get and set external API Keys
----------------------------------
+6. Get and set external API Keys.
 
 NCBI Eutils API keys should be used to ensure fewer limits on usage of NCBI resources.  The `hgvs`, `metavariant` and `metapub` libraries all depend on Eutils API calls, and not using an API key means a limit of 3 queries per second.
 
@@ -204,7 +201,9 @@ Look in `/path/to/repo/text2gene/config/*.ini` for the place to set the key.
 
 NOTE: It is *highly* recommended to set up your API key to restrict based on IP address.
 
-# Configuration
+=============
+Configuration
+=============
 
 The GoogleQuery api key and other configuration variables specific to Text2Gene are configured in 
 `/path/to/repo/text2gene/config/*.ini`.  This structure allows you to create arbitrary environment
@@ -219,7 +218,10 @@ export text2gene_ENV='PRD'
 ```
 
 
-# Validation
+
+==========
+Validation
+==========
 
 The Text2Gene system has been validated in usage with the Monarch Initiative in a project 
 with Associate Director Julie McMurry.
