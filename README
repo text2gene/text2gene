@@ -1,8 +1,12 @@
 Text2Gene
 =========
 
+Try the Live Demo here:  http://text2gene.com
+
 Text2Gene was created to assist genetic curators and clinical scientists in gathering
-relevant research for clinically-relevant human genetic variants.
+relevant research for clinically-relevant human genetic variants.  The system was built 
+at Text2Gene, LLC starting in March 2016 under the advisorship of Dr. Andrew McMurry 
+(*Medal, formerly Invitae and Harvard Medical School*).
 
 Text2Gene allows you to input a DNA mutation string in HGVS format and find as many relevant
 matches for the described variant as possible.  Text2Gene constructs powerful searches in a 
@@ -103,19 +107,15 @@ First, follow the instructions in https://github.com/text2gene/medgen-mysql
 If you installed UTA locally, set the UTA_HOST variable to where you put the database.
 For example:
 
-``
-export UTA_HOST=localhost
-``
+    export UTA_HOST=localhost
 
 Now install all relevant databases:
 
-``
-make gene
-make hugo
-make medgen
-make PubTator
-make clinvar
-``
+    make gene
+    make hugo
+    make medgen
+    make PubTator
+    make clinvar
 
 In aggregate, these steps could take anywhere between 15 minutes to 3 hours, depending on 
 whether you installed MySQL on an SSD, whether you set up UTA locally, and how quickly
@@ -129,27 +129,22 @@ Summary: Clone this repo, then create a Python3 virtualenv and activate it.  The
 
 Example that works:
 
-``
-cd /path/to/this/repo
-python3.7 -m venv ve
-source ve/bin/activate
-pip install -U pip
-python setup.py
-``
+
+    cd /path/to/this/repo
+    python3.7 -m venv ve
+    source ve/bin/activate
+    pip install -U pip
+    python setup.py
 
 If you find that running `setup.py` breaks, PLEASE file an issue.  Chances are its an OS environment 
 dependency that can be fixed with some quick installs.  Many issues on Ubuntu systems can be fixed with the 
 following line:
 
-``
-sudo apt-get install python3-dev libbz2-dev libcurl4-openssl-dev liblzma-dev 
-``
+    sudo apt-get install python3-dev libbz2-dev libcurl4-openssl-dev liblzma-dev 
 
 If you installed UTA yourself, set the UTA_HOST environment variable accordingly. For example
 
-``
-export UTA_HOST=localhost
-``
+    export UTA_HOST=localhost
 
 
 5. Initialize Text2Gene database
@@ -162,14 +157,12 @@ be immediately obvious to any sysadmin or devops people in the audience.
 
 Do the following in order:
 
-``
-mysql -uroot -p < sbin/01_create_t2g_database.sql
-python sbin/02_init_cache.py
-mysql -umedgen -pmedgen < sbin/03_clinvar_components_tables.sql
-python sbin/04_create_clinvar_components_table.py
-python sbin/06_dump_m2p_to_json.py
-python sbin/07_create_m2p_components_tables.py
-``
+    mysql -uroot -p < sbin/01_create_t2g_database.sql
+    python sbin/02_init_cache.py
+    mysql -umedgen -pmedgen < sbin/03_clinvar_components_tables.sql
+    python sbin/04_create_clinvar_components_table.py
+    python sbin/06_dump_m2p_to_json.py
+    python sbin/07_create_m2p_components_tables.py
 
 (You may ask, "what happened to number 05, why don't I run that?"  The answer is that 04_ runs 05_ automatically. I know, this is confusing.  Improvements will happen here.  Pull requests welcome...!)
 
@@ -189,10 +182,8 @@ Aquire an NCBI key here: https://www.ncbi.nlm.nih.gov/account/settings/
 
 Two environment variables must be used to ensure distribution of your API keys amongst the libraries that use it:
 
-``
-export NCBI_API_KEY={your_key_here}
-export _NCBI_URL_KEY={your_key_here}
-``
+    export NCBI_API_KEY={your_key_here}
+    export _NCBI_URL_KEY={your_key_here}
 
 You absolutely need a Google Cloud Services API Key to run the GoogleQuery portion of Text2Gene.
 
@@ -204,7 +195,7 @@ Look in `/path/to/repo/text2gene/config/*.ini` for the place to set the key.
 
 NOTE: It is *highly* recommended to set up your API key to restrict based on IP address.
 
-# Configuration
+## Configuration
 
 The GoogleQuery api key and other configuration variables specific to Text2Gene are configured in 
 `/path/to/repo/text2gene/config/*.ini`.  This structure allows you to create arbitrary environment
@@ -214,14 +205,13 @@ The default text2gene_ENV is 'DEV', so by default, the dev.ini file will be sour
 
 To change the Text2Gene environment to PRD, you would do:
 
-``
-export text2gene_ENV='PRD'
-``
+    export text2gene_ENV='PRD'
 
+-----------------------------------------
 
-# Validation
+## Validation
 
-The Text2Gene system has been validated in usage with the Monarch Initiative in a project 
+The Text2Gene system has been validated in usage with the Monarch Initiative in a project
 with Associate Director Julie McMurry.
 
 * https://medium.com/@MonarchInit/video-interview-with-monarchs-julie-mcmurry-f327afaab284
@@ -230,5 +220,13 @@ with Associate Director Julie McMurry.
 * Human expert review of each new variant added to the gene region, and each new PMID found for all variants in FA regions.
 * Results: 15% increase in clinically relevant research for FANCA regions, NOT including 12% of PMIDs found which came from survey or methods papers (irrelevant for clinical significance).
 
+------------------------------------------
 
+## License
+
+Text2Gene is a fully Free and Open Source system licensed under the Apache 2 License, included within this repo.
+
+## Contact
+
+All inquiries should be directed to naomi@text2gene.com
 
