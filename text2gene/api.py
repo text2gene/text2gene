@@ -4,7 +4,6 @@ from metavariant import VariantLVG
 
 from .lvg_cached import LVG
 from .cached import ClinvarHgvs2Pmid, PubtatorHgvs2Pmid
-from .experiment import Experiment
 from .googlequery import GoogleQuery
 from .report_utils import CitationTable, ClinVarInfo, GeneInfo
 
