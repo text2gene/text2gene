@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+### IMPORTANT: this file doesn't work with modern Fabfile.  See Issue #4.
+### https://github.com/text2gene/text2gene/issues/4
 
 import os
 import logging
@@ -7,6 +8,8 @@ from configparser import ConfigParser
 from fabric.operations import put, local
 from fabric.decorators import task
 from fabric.api import cd, run, env, sudo, local
+
+# TODO: solution for including API keys (NCBI, Google, etc)
 
 os.environ.setdefault('UTA_HOST', 'localhost')
 os.environ.setdefault('UTA_USER', 'uta_admin')
