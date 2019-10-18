@@ -2,7 +2,6 @@ import sys
 
 from text2gene.cached import ClinvarCachedQuery, PubtatorCachedQuery 
 from text2gene.lvg_cached import VariantLVGCached 
-from text2gene.experiment import Experiment
 from text2gene.googlequery import GoogleCachedQuery
 
 try:
@@ -22,6 +21,4 @@ GoogleCachedQuery().create_table(reset)
 # VariantLVGCached().create_granular_table(reset)
 # ClinvarCachedQuery().create_granular_table(reset)
 # PubtatorCachedQuery().create_granular_table(reset)
-
-Experiment('generic', hgvs_examples=['fake']).create_table()
 
